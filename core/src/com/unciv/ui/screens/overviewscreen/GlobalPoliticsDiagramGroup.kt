@@ -15,7 +15,7 @@ import com.unciv.logic.civilization.diplomacy.DiplomacyManager
 import com.unciv.logic.civilization.diplomacy.DiplomaticModifiers
 import com.unciv.logic.civilization.diplomacy.DiplomaticStatus
 import com.unciv.logic.civilization.diplomacy.RelationshipLevel
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridMath
 import com.unciv.ui.components.UncivTooltip.Companion.addTooltip
 import com.unciv.ui.components.extensions.center
 import com.unciv.ui.components.extensions.getContrastRatio
@@ -194,7 +194,7 @@ class GlobalPoliticsDiagramGroup(
             val civGroup = ImageGetter.getNationPortrait(civ.nation, iconSize)
                 .surroundWithCircle(iconCircleSize, false, Color.CLEAR_WHITE) // Not CLEAR, we simply control alpha later for some gray.
 
-            val vector = HexMath.getVectorForAngle(2 * Math.PI.toFloat() * index / civCount)
+            val vector = GridMath.getVectorForAngle(2 * Math.PI.toFloat() * index / civCount)
             civGroup.setPosition(freeSize / 2, freeSize / 2, Align.center)
             civGroup.moveBy(vector.x * freeSize / 2.25f, vector.y * freeSize / 2.25f)
             civGroup.touchable = Touchable.enabled

@@ -2,7 +2,7 @@ package com.unciv.logic.city.managers
 
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -26,7 +26,7 @@ class CityExpansionManagerTest {
     fun setUp() {
         testGame.makeHexagonalMap(6)
         civ = testGame.addCiv()
-        city = testGame.addCity(civ, testGame.getTile(HexCoord.Zero), initialPopulation = 1)
+        city = testGame.addCity(civ, testGame.getTile(GridCoord.Zero), initialPopulation = 1)
         cityExpansionManager.city = city
     }
 
@@ -151,14 +151,14 @@ class CityExpansionManagerTest {
         // given
         val tileToBuy = testGame.getTile(2,0)
         civ.addGold(500)
-        assertFalse(city.tiles.contains(HexCoord(2,0)))
+        assertFalse(city.tiles.contains(GridCoord(2,0)))
 
         // when
         cityExpansionManager.buyTile(tileToBuy)
 
         // then
         assertEquals(8, city.tiles.size)
-        assertTrue(city.tiles.contains(HexCoord(2,0)))
+        assertTrue(city.tiles.contains(GridCoord(2,0)))
     }
 
     @Test

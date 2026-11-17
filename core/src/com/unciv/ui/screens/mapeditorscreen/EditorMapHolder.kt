@@ -4,13 +4,13 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.actions.Actions
 import com.badlogic.gdx.scenes.scene2d.utils.ActorGestureListener
-import com.unciv.logic.map.HexCoord
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.tile.Tile
 import com.unciv.view.TileMapView
 import com.unciv.view.TileView
 import com.unciv.logic.map.TileMap
-import com.unciv.logic.map.toHexCoord
+import com.unciv.logic.map.toGridCoord
 import com.unciv.models.UncivSound
 import com.unciv.ui.audio.SoundPlayer
 import com.unciv.ui.components.tilegroups.TileGroupMap
@@ -146,7 +146,7 @@ class EditorMapHolder(
      * Copy-pasted from [com.unciv.ui.screens.worldscreen.WorldMapHolder.setCenterPosition]
      * TODO remove code duplication
      */
-    fun setCenterPosition(vector: HexCoord, blink: Boolean = false) {
+    fun setCenterPosition(vector: GridCoord, blink: Boolean = false) {
         val tileGroup = allTileGroups.firstOrNull { it.tileView.position() == vector } ?: return
 
         // The Y axis of [scrollY] is inverted - when at 0 we're at the top, not bottom - so we invert it back.
@@ -236,13 +236,12 @@ class EditorMapHolder(
 
     fun getClosestTileTo(stageCoords: Vector2): Tile? {
         val positionalCoords = tileGroupMap.getPositionalVector(stageCoords)
-        val hexPosition = HexMath.world2HexCoords(positionalCoords)
-        val rounded = HexMath.roundHexCoords(hexPosition)
+        val gridPosition = GridMath.world2GridCoords(positionalCoords)
+        val rounded = GridMath.roundGridCoords(gridPosition)
 
         if (!tileMap.mapParameters.worldWrap)
             return tileMap.getOrNull(rounded)
-        val wrapped = HexMath.getUnwrappedNearestTo(rounded.toHexCoord(), HexCoord.Zero, tileMap.maxLongitude)
-        //todo this works, but means getUnwrappedNearestTo fails - on the x-y == maxLongitude vertical
+        val wrapped = GridMath.getUnwrappedNearestTo(rounded.toGridCoord(), GridCoord.Zero, tileMap.width)
         return tileMap.getOrNull(wrapped) ?: tileMap.getOrNull(rounded)
     }
 }

@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.utils.Align
 import com.unciv.Constants
 import com.unciv.logic.automation.unit.UnitAutomation
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.models.UncivSound
 import com.unciv.models.translations.tr
@@ -139,7 +139,7 @@ class ConnectRoadOverlayButtonData(val unitView: MapUnitView, val tileView: Tile
         return connectRoadButton
     }
 
-    private fun connectRoadToTargetTile(worldMapHolder: WorldMapHolder, selectedUnit: MapUnit, targetTilePosition: HexCoord) {
+    private fun connectRoadToTargetTile(worldMapHolder: WorldMapHolder, selectedUnit: MapUnit, targetTilePosition: GridCoord) {
         selectedUnit.automatedRoadConnectionDestination = targetTilePosition
         selectedUnit.action = Constants.connectRoadAction
         selectedUnit.automated = true

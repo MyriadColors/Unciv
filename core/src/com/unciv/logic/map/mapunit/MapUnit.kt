@@ -12,7 +12,7 @@ import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.NotificationCategory
 import com.unciv.logic.civilization.NotificationIcon
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.movement.UnitMovement
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.Counter
@@ -73,7 +73,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
     // We can infer who we are escorting based on our tile
     @Cache private var escorting: Boolean = false
 
-    var automatedRoadConnectionDestination: HexCoord? = null
+    var automatedRoadConnectionDestination: GridCoord? = null
 
     var attacksThisTurn = 0
     var promotions = UnitPromotions()
@@ -97,7 +97,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
     var mostRecentMoveType = UnitMovementMemoryType.UnitMoved
 
     /** Array list of all the tiles that this unit has attacked since the start of its most recent turn. Used in movement arrow overlay. */
-    var attacksSinceTurnStart = ArrayList<HexCoord>()
+    var attacksSinceTurnStart = ArrayList<GridCoord>()
 
     class UnitStatus(
         val name: String,
@@ -174,9 +174,9 @@ class MapUnit : IsPartOfGameInfoSerialization {
      * @property type Category of the last change in position that brought the unit to this position.
      * @see [movementMemories]
      * */
-    class UnitMovementMemory(val position: HexCoord, val type: UnitMovementMemoryType) : IsPartOfGameInfoSerialization {
+    class UnitMovementMemory(val position: GridCoord, val type: UnitMovementMemoryType) : IsPartOfGameInfoSerialization {
         @Suppress("unused") // needed because this is part of a save and gets deserialized
-        constructor() : this(HexCoord.Zero, UnitMovementMemoryType.UnitMoved)
+        constructor() : this(GridCoord.Zero, UnitMovementMemoryType.UnitMoved)
 
         @Readonly fun clone() = UnitMovementMemory(position, type)
         override fun toString() = "${this::class.simpleName}($position, $type)"
@@ -289,7 +289,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
     @Readonly
     fun getMovementDestination(): Tile {
         val destination = action!!.replace("moveTo ", "").split(",").dropLastWhile { it.isEmpty() }
-        val destinationVector = HexCoord(destination[0].toFloat().toInt(), destination[1].toFloat().toInt())
+        val destinationVector = GridCoord(destination[0].toFloat().toInt(), destination[1].toFloat().toInt())
         return currentTile.tileMap[destinationVector]
     }
 
@@ -845,7 +845,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
     /**
      * Update this unit's cache of viewable tiles and its civ's as well.
      */
-    fun updateVisibleTiles(updateCivViewableTiles: Boolean = true, explorerPosition: HexCoord? = null):Unit = timeThis("MapUnit.updateVisibleTiles") {
+    fun updateVisibleTiles(updateCivViewableTiles: Boolean = true, explorerPosition: GridCoord? = null):Unit = timeThis("MapUnit.updateVisibleTiles") {
         val oldViewableTiles = viewableTiles
 
         viewableTiles = when {
@@ -967,7 +967,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
         civ.units.removeUnit(this)
         if (::currentTile.isInitialized) {
             val currentPosition = getTile().position
-            civ.attacksSinceTurnStart.addAll(attacksSinceTurnStart.asSequence().map { Civilization.HistoricalAttackMemory(this.name, currentPosition, it.toHexCoord()) })
+            civ.attacksSinceTurnStart.addAll(attacksSinceTurnStart.asSequence().map { Civilization.HistoricalAttackMemory(this.name, currentPosition, it.toGridCoord()) })
             removeFromTile()
             civ.cache.updateViewableTiles()
             if (destroyTransportedUnit) {

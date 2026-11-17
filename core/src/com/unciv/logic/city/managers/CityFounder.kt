@@ -6,7 +6,7 @@ import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.Proximity
 import com.unciv.logic.civilization.diplomacy.DiplomacyFlags
 import com.unciv.logic.civilization.managers.ReligionState
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.models.ruleset.nation.Nation
 import com.unciv.models.ruleset.unique.GameContext
@@ -16,7 +16,7 @@ import com.unciv.utils.withItem
 import yairm210.purity.annotations.Readonly
 
 class CityFounder {
-    fun foundCity(civInfo: Civilization, cityLocation: HexCoord, unit: MapUnit? = null): City {
+    fun foundCity(civInfo: Civilization, cityLocation: GridCoord, unit: MapUnit? = null): City {
         val city = City()
 
         city.foundingCivObject = civInfo

@@ -427,7 +427,7 @@ class TileImprovementFunctions(val tile: Tile) {
         if (tile.owningCity == null || tile.owningCity!!.civ != civ) stats *= 2 / 3f
         for ((stat, value) in stats) {
             closestCity.addStat(stat, value.toInt())
-            val locations = LocationAction(tile.position, closestCity.location.toHexCoord())
+            val locations = LocationAction(tile.position, closestCity.location.toGridCoord())
             civ.addNotification(
                 "Clearing a [$removedTerrainFeature] has created [${stats.toStringForNotifications()}] for [${closestCity.name}]",
                 locations, NotificationCategory.Production, NotificationIcon.Construction

@@ -4,7 +4,7 @@ import com.unciv.view.isCivilian
 import com.unciv.view.isPreparingAirSweep
 import com.unciv.view.isPreparingParadrop
 import com.badlogic.gdx.utils.Align
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.unique.UniqueType
 import com.unciv.models.translations.tr
 import com.unciv.ui.components.extensions.surroundWithCircle
@@ -34,7 +34,7 @@ class UnitPresenter(private val unitTable: UnitTable, private val worldScreen: W
     // Whether the (first) selected unit is in road-connecting mode
     var selectedUnitIsConnectingRoad = false
 
-    override val position: HexCoord?
+    override val position: GridCoord?
         get() = selectedUnit?.getTile()?.position()
 
     fun selectUnit(unitView: MapUnitView? = null, append: Boolean = false) {

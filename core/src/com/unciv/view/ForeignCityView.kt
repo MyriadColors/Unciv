@@ -5,7 +5,7 @@ import com.unciv.logic.battle.TargetHelper
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.diplomacy.DiplomacyManager
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ImmutableColor
 import com.unciv.models.Religion
 import com.unciv.ui.screens.civilopediascreen.FormattedLine
@@ -94,7 +94,7 @@ open class ForeignCityView(protected open val city: City,
 }
 
 // Helpers built on top of the view API, rather than being part of it
-val ForeignCityView.location: HexCoord get() = getCenterTile().position()
+val ForeignCityView.location: GridCoord get() = getCenterTile().position()
 @Readonly fun ForeignCityView.isCityState(): Boolean = owningCiv().isCityState
 @Readonly fun ForeignCityView.getNationOuterColor(): ImmutableColor = owningCiv().getOuterColor()
 @Readonly fun ForeignCityView.getCivInnerColor(): ImmutableColor = owningCiv().getInnerColor()

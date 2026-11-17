@@ -4,7 +4,7 @@ import com.unciv.logic.GameInfo
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.diplomacy.DiplomacyManager
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.MapVisualization
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
@@ -42,7 +42,7 @@ class GameView(gameInfo: GameInfo, override val viewer: Civilization, spectatorM
             .map { getForeignMapUnitView(it) }
 
     /** Visible attacks, including records retained after the attacking unit has disappeared. */
-    @Readonly fun getVisibleAttacks(): Sequence<Pair<HexCoord, HexCoord>> {
+    @Readonly fun getVisibleAttacks(): Sequence<Pair<GridCoord, GridCoord>> {
         val unitAttacks = wrapped.civilizations.asSequence().flatMap { civ ->
             civ.units.getCivUnits().flatMap { unit ->
                 unit.attacksSinceTurnStart.asSequence()

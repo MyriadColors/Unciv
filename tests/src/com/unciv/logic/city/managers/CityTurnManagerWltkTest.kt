@@ -3,7 +3,7 @@ package com.unciv.logic.city.managers
 import com.unciv.logic.city.City
 import com.unciv.logic.city.CityFlags
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -23,7 +23,7 @@ class CityTurnManagerWltkTest {
     fun setUp() {
         testGame.makeHexagonalMap(3)
         civ = testGame.addCiv()
-        city = testGame.addCity(civ, testGame.getTile(HexCoord.Zero))
+        city = testGame.addCity(civ, testGame.getTile(GridCoord.Zero))
     }
 
     @Test

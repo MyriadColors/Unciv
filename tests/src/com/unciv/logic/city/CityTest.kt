@@ -2,7 +2,7 @@ package com.unciv.logic.city
 
 import com.unciv.Constants
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.*
@@ -21,7 +21,7 @@ class CityTest {
     fun setUp() {
         testGame.makeHexagonalMap(4)
         testCiv = testGame.addCiv()
-        capitalCity = testGame.addCity(testCiv, testGame.getTile(HexCoord.Zero))
+        capitalCity = testGame.addCity(testCiv, testGame.getTile(GridCoord.Zero))
     }
 
     @Test
@@ -67,7 +67,7 @@ class CityTest {
         capitalCity.destroyCity(overrideSafeties = true)
 
         // then
-        assertEquals("City ruins", testGame.getTile(HexCoord.Zero).improvement)
+        assertEquals("City ruins", testGame.getTile(GridCoord.Zero).improvement)
     }
 
     @Test
@@ -100,7 +100,7 @@ class CityTest {
         val farm = testGame.ruleset.tileImprovements["Farm"]!!
         testCiv.tech.techsResearched.add(farm.techRequired!!)
         val building = createFarmPlacingBuilding()
-        val targetTile = testGame.setTileTerrain(HexCoord(1, 0), Constants.grassland)
+        val targetTile = testGame.setTileTerrain(GridCoord(1, 0), Constants.grassland)
 
         capitalCity.cityConstructions.addToQueue(building, tile = targetTile)
 
@@ -125,7 +125,7 @@ class CityTest {
     @Test
     fun `should fail loudly when marking CreatesOneImprovement tile owned by another city`() {
         val secondCity = testGame.addCity(testCiv, testGame.getTile(0, 2))
-        val targetTile = testGame.setTileTerrain(HexCoord(0, 1), Constants.grassland)
+        val targetTile = testGame.setTileTerrain(GridCoord(0, 1), Constants.grassland)
         val farm = testGame.ruleset.tileImprovements["Farm"]!!
 
         assertEquals(capitalCity, targetTile.getCity())
@@ -147,7 +147,7 @@ class CityTest {
         val farm = testGame.ruleset.tileImprovements["Farm"]!!
         testCiv.tech.techsResearched.add(farm.techRequired!!)
         val building = createFarmPlacingBuilding()
-        val targetTile = testGame.setTileTerrain(HexCoord(1, 0), Constants.grassland)
+        val targetTile = testGame.setTileTerrain(GridCoord(1, 0), Constants.grassland)
         capitalCity.cityConstructions.addToQueue(building, tile = targetTile)
 
         capitalCity.cityConstructions.removeFromQueue(0, false)
@@ -159,7 +159,7 @@ class CityTest {
     @Test
     fun `should not mark CreatesOneImprovement tile outside city range`() {
         val secondCity = testGame.addCity(testCiv, testGame.getTile(0, 2))
-        val targetTile = testGame.setTileTerrain(HexCoord(0, -4), Constants.grassland)
+        val targetTile = testGame.setTileTerrain(GridCoord(0, -4), Constants.grassland)
         val farm = testGame.ruleset.tileImprovements["Farm"]!!
         secondCity.expansion.takeOwnership(targetTile)
 
@@ -174,7 +174,7 @@ class CityTest {
     fun `should complete CreatesOneImprovement purchase on owned tile`() {
         testGame.gameInfo.gameParameters.godMode = true
         val secondCity = testGame.addCity(testCiv, testGame.getTile(0, 2))
-        val targetTile = testGame.setTileTerrain(HexCoord(0, 3), Constants.grassland)
+        val targetTile = testGame.setTileTerrain(GridCoord(0, 3), Constants.grassland)
         val building = createFarmPlacingBuilding()
 
         val purchased = secondCity.cityConstructions.purchaseConstruction(

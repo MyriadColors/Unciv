@@ -1,7 +1,7 @@
 package com.unciv.logic.city
 
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.Building
 import com.unciv.models.ruleset.RejectionReasonType
 import com.unciv.models.ruleset.unit.BaseUnit
@@ -31,7 +31,7 @@ class ConstructionQueueLimitTests {
     fun setUp() {
         testGame.makeHexagonalMap(8)
         civ = testGame.addCiv()
-        cityA = testGame.addCity(civ, testGame.getTile(HexCoord.Zero))
+        cityA = testGame.addCity(civ, testGame.getTile(GridCoord.Zero))
         cityB = testGame.addCity(civ, testGame.getTile(4, 0))
         cityC = testGame.addCity(civ, testGame.getTile(0, 4))
         limited = testGame.createBaseUnit(testGame.createUnitType().name, "Limited to [3] per Civilization")

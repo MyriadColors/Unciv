@@ -64,16 +64,12 @@ class MapLandmassGenerator(
             MapType.smallContinents -> createSmallContinents()
             MapType.spiral -> createSpiral()
         }
-
-        if (tileMap.mapParameters.shape == MapShape.flatEarth) {
-            generateFlatEarthExtraWater()
-        }
     }
 
     private fun generateFlatEarthExtraWater() {
         for (tile in tileMap.values) {
             val isCenterTile = tile.latitude == 0 && tile.longitude == 0
-            val isEdgeTile = tile.neighbors.count() < 6
+            val isEdgeTile = tile.neighbors.count() < 8
 
             if (!isCenterTile && !isEdgeTile) continue
 
@@ -133,10 +129,7 @@ class MapLandmassGenerator(
             val elevationSeed = randomness.RNG.nextInt().toDouble()
             for (tile in tileMap.values) {
                 val maxdim = max(tileMap.maxLatitude, tileMap.maxLongitude)
-                var ratio = maxdim / 32.0 // change scale depending on map size so that average number of continents stay the same
-                if (tileMap.mapParameters.shape == MapShape.hexagonal || tileMap.mapParameters.shape == MapShape.flatEarth) {
-                    ratio *= 0.5 // In hexagonal type map for some reason it tends to make a single continent like pangaea if we don't diminish the scale
-                }
+                val ratio = maxdim / 32.0 // change scale depending on map size so that average number of continents stay the same
 
                 var elevation = randomness.getPerlinNoise(tile, elevationSeed, persistence=0.8, lacunarity=1.5, scale=ratio*30.0)
 
@@ -171,12 +164,7 @@ class MapLandmassGenerator(
         
         for (tile in tileMap.values) {
             // In range -1.0 to +1.0
-            val latitude =
-                if (tileMap.mapParameters.shape == MapShape.flatEarth)
-                    // North is at the edges instead of at the top
-                    2 * MapGenerator.getTileRadius(tile, tileMap) - 1 
-                else
-                    tile.latitude.toDouble() / tileMap.maxLatitude
+            val latitude = tile.latitude.toDouble() / tileMap.maxLatitude
             // Elevation declines faster and faster towards the north
             val southElevation = 0.15
             val northElevation = -0.4
@@ -207,7 +195,7 @@ class MapLandmassGenerator(
         val noiseScale = 0.5 * sqrt(radius) // lower means more grainy noise
         
         for (tile in tileMap.values) {
-            val coordinate = HexMath.hex2WorldCoords(tile.position)
+            val coordinate = GridMath.grid2WorldCoords(tile.position)
             val x = coordinate.x / coordinateDivisor * flipX
             val y = coordinate.y / coordinateDivisor * flipY
             
@@ -285,8 +273,7 @@ class MapLandmassGenerator(
     private fun createContinentAndIslands() {
         val isNorth = randomness.RNG.nextDouble() < 0.5
         val isLatitude =
-                if (tileMap.mapParameters.shape == MapShape.hexagonal || tileMap.mapParameters.shape == MapShape.flatEarth) randomness.RNG.nextDouble() > 0.5f
-                else if (tileMap.mapParameters.mapSize.height > tileMap.mapParameters.mapSize.width) true
+                if (tileMap.mapParameters.mapSize.height > tileMap.mapParameters.mapSize.width) true
                 else if (tileMap.mapParameters.mapSize.width > tileMap.mapParameters.mapSize.height) false
                 else randomness.RNG.nextDouble() > 0.5f
 
@@ -300,8 +287,7 @@ class MapLandmassGenerator(
 
     private fun createTwoContinents() {
         val isLatitude =
-                if (tileMap.mapParameters.shape == MapShape.hexagonal || tileMap.mapParameters.shape == MapShape.flatEarth) randomness.RNG.nextDouble() > 0.5f
-                else if (tileMap.mapParameters.mapSize.height > tileMap.mapParameters.mapSize.width) true
+                if (tileMap.mapParameters.mapSize.height > tileMap.mapParameters.mapSize.width) true
                 else if (tileMap.mapParameters.mapSize.width > tileMap.mapParameters.mapSize.height) false
                 else randomness.RNG.nextDouble() > 0.5f
 
@@ -315,8 +301,7 @@ class MapLandmassGenerator(
 
     private fun createThreeContinents() {
         val isNorth = randomness.RNG.nextDouble() < 0.5
-        // On flat earth maps we can randomly do East or West instead of North or South
-        val isEastWest = tileMap.mapParameters.shape == MapShape.flatEarth && randomness.RNG.nextDouble() > 0.5
+        val isEastWest = false
 
         val elevationSeed = randomness.RNG.nextInt().toDouble()
         for (tile in tileMap.values) {
@@ -409,7 +394,7 @@ class MapLandmassGenerator(
         var (longitudeFactor, latitudeFactor) = getLonLatFactors(tile)
 
         // 3rd continent should use only half the map width, or if flat earth, only a third
-        val sizeReductionFactor = if (tileMap.mapParameters.shape == MapShape.flatEarth) 3f else 2f
+        val sizeReductionFactor = 2f
 
         // We then pick one side to be merged into one centered continent instead of two cornered.
         if (isEastWest) {
@@ -473,47 +458,27 @@ class MapLandmassGenerator(
         val xdistanceratio = abs(x).toDouble() / maxX
         val ydistanceratio = abs(y).toDouble() / maxY
 
-        if (tileMap.mapParameters.shape == MapShape.hexagonal || tileMap.mapParameters.shape == MapShape.flatEarth) {
-            val startdropoffratio = 0.8 // distance from center at which we start decreasing elevation linearly
+        var xoffset = 0.0
 
-            // On wrapping maps, we must NOT reduce elevation at the East/West edges, otherwise
-            // land will never span across the map seam. 
-            // We ignore the horizontal (X) ratio and only apply the ocean drop-off to the
-            // North/South (Y) poles.
-            val distancefromcenter = if (tileMap.mapParameters.worldWrap && tileMap.mapParameters.shape == MapShape.hexagonal) ydistanceratio
-            else sqrt(xdistanceratio * xdistanceratio + ydistanceratio * ydistanceratio)
-
-            var distanceoffset = 0.0
-            if (distancefromcenter > startdropoffratio) {
-                val dropoffdistance = distancefromcenter - startdropoffratio
-                val normalizationDivisor = 1.0 - startdropoffratio // for normalizing to [0;1] range
-                distanceoffset = dropoffdistance / normalizationDivisor
-            }
-            elevationOffset -= distanceoffset * 0.35
-        } else {
-
-            var xoffset = 0.0
-
-            val xstartdropoffratio = 0.8
-            // Only force oceans on the left/right edges of rectangular maps if the world is NOT wrapping.
-            if (!tileMap.mapParameters.worldWrap && xdistanceratio > xstartdropoffratio) {
-                val xdropoffdistance = xdistanceratio - xstartdropoffratio
-                val xnormalizationdivisor = 1.0 - xstartdropoffratio // for normalizing to [0;1] range
-                xoffset = xdropoffdistance / xnormalizationdivisor
-            }
-
-            var yoffset = 0.0
-
-            val ystartdropoffratio = 0.76 // we want to have enough space at the north and south for circumnavigation
-            if (ydistanceratio > ystartdropoffratio) {
-                val ydropoffdistance = ydistanceratio - ystartdropoffratio
-                val ynormalizationdivisor = 1.0 - ystartdropoffratio // for normalizing to [0;1] range
-                yoffset = ydropoffdistance / ynormalizationdivisor
-            }
-            // these factors were just found by trial and error to be adequate for having enough space while not reducing land too much.
-            elevationOffset -= xoffset * 0.33
-            elevationOffset -= yoffset * 0.35
+        val xstartdropoffratio = 0.8
+        // Only force oceans on the left/right edges of rectangular maps if the world is NOT wrapping.
+        if (!tileMap.mapParameters.worldWrap && xdistanceratio > xstartdropoffratio) {
+            val xdropoffdistance = xdistanceratio - xstartdropoffratio
+            val xnormalizationdivisor = 1.0 - xstartdropoffratio // for normalizing to [0;1] range
+            xoffset = xdropoffdistance / xnormalizationdivisor
         }
+
+        var yoffset = 0.0
+
+        val ystartdropoffratio = 0.76 // we want to have enough space at the north and south for circumnavigation
+        if (ydistanceratio > ystartdropoffratio) {
+            val ydropoffdistance = ydistanceratio - ystartdropoffratio
+            val ynormalizationdivisor = 1.0 - ystartdropoffratio // for normalizing to [0;1] range
+            yoffset = ydropoffdistance / ynormalizationdivisor
+        }
+        // these factors were just found by trial and error to be adequate for having enough space while not reducing land too much.
+        elevationOffset -= xoffset * 0.33
+        elevationOffset -= yoffset * 0.35
 
         return max(elevationOffset, -0.35)
     }

@@ -10,7 +10,7 @@ import com.unciv.logic.civilization.diplomacy.DiplomacyFlags
 import com.unciv.logic.civilization.diplomacy.DiplomaticModifiers
 import com.unciv.logic.civilization.managers.PolicyManager
 import com.unciv.logic.civilization.managers.ReligionState
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapgenerator.NaturalWonderGenerator
 import com.unciv.logic.map.mapgenerator.RiverGenerator
 import com.unciv.logic.map.mapunit.MapUnit
@@ -543,7 +543,7 @@ object UniqueTriggerActivation {
                     if (notification != null)
                         civInfo.addNotification(
                             notification,
-                            LocationAction(applicableCities.map { it.location.toHexCoord() }),
+                            LocationAction(applicableCities.map { it.location.toGridCoord() }),
                             NotificationCategory.Cities,
                             NotificationIcon.Population
                         )
@@ -562,7 +562,7 @@ object UniqueTriggerActivation {
                             else notification
                         civInfo.addNotification(
                             notificationText,
-                            LocationAction(randomCity.location.toHexCoord(), tile?.position),
+                            LocationAction(randomCity.location.toGridCoord(), tile?.position),
                             NotificationCategory.Cities,
                             NotificationIcon.Population
                         )
@@ -971,7 +971,7 @@ object UniqueTriggerActivation {
                 val radius = unique.params[2].toInt()
 
                 val isAll = amount in Constants.all
-                val positions = ArrayList<HexCoord>()
+                val positions = ArrayList<GridCoord>()
 
                 var explorableTiles = tile.getTilesInDistance(radius)
                     .filter { !it.isExplored(civInfo) && it.matchesFilter(filter) }
@@ -1102,7 +1102,7 @@ object UniqueTriggerActivation {
                         }
                     }
                     if (notification != null)
-                        civInfo.addNotification(notification, LocationAction(applicableCities.map { it.location.toHexCoord() }), NotificationCategory.Cities, NotificationIcon.City)
+                        civInfo.addNotification(notification, LocationAction(applicableCities.map { it.location.toGridCoord() }), NotificationCategory.Cities, NotificationIcon.City)
                     true
                 }
             }
@@ -1151,7 +1151,7 @@ object UniqueTriggerActivation {
                     if (notification != null)
                         civInfo.addNotification(
                             notification,
-                            LocationAction(applicableCities.map { it.location.toHexCoord() }),
+                            LocationAction(applicableCities.map { it.location.toGridCoord() }),
                             NotificationCategory.Cities,
                             NotificationIcon.Construction
                         )
@@ -1174,7 +1174,7 @@ object UniqueTriggerActivation {
                     if (notification != null)
                         civInfo.addNotification(
                             notification,
-                            LocationAction(applicableCities.map { it.location.toHexCoord() }),
+                            LocationAction(applicableCities.map { it.location.toGridCoord() }),
                             NotificationCategory.Cities,
                             NotificationIcon.Gold
                         )

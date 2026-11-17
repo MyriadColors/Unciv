@@ -2,7 +2,7 @@ package com.unciv.logic.map.pathingmap
 
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.diplomacy.RelationshipLevel
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.RoadStatus
 import com.unciv.logic.map.tile.Tile
@@ -27,7 +27,7 @@ class RouteNodeTest {
         val moveThisTurn =
             FixedPointMovement.fpmFromFixedPointBits((1 shl 8) or 1) //9 bits. value is 257 aka 13.00
         val turns = (1 shl 5) or 1 // 6 bits. value is 33
-        val parentTile = testGame.tileMap.getClockPositionNeighborTile(tile, 12)!!
+        val parentTile = testGame.tileMap.getNeighborTile(tile, com.unciv.logic.map.NeighborDirection.North)!!
         val damagingTiles = 3
         val underestimatedTotal =
             FixedPointMovement.fpmFromFixedPointBits((1 shl 13) or 1) //15 bits. value is 8193 aka 409.65move
@@ -45,7 +45,7 @@ class RouteNodeTest {
 
         Assert.assertEquals(tile.zeroBasedIndex, node.tileIdx)
         Assert.assertEquals(tile, node.tile(testGame.tileMap))
-        Assert.assertEquals(12, node.parentClockDir)
+        Assert.assertEquals(1, node.parentDirOrdinal)
         Assert.assertEquals(parentTile, node.parentTile(testGame.tileMap))
         Assert.assertEquals(false, node.canStopOn)
         Assert.assertEquals(moveThisTurn, node.moveUsedThisTurn)

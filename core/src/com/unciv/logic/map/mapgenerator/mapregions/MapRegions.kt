@@ -97,10 +97,7 @@ class MapRegions (val ruleset: Ruleset) {
         if (numRegions <= 0) return // Don't bother about regions, probably map editor
         if (tileMap.continentSizes.isEmpty()) throw Exception("No Continents on this map!")
 
-        val radius = if (tileMap.mapParameters.shape == MapShape.hexagonal || tileMap.mapParameters.shape == MapShape.flatEarth)
-            tileMap.mapParameters.mapSize.radius.toFloat()
-        else
-            (max(tileMap.mapParameters.mapSize.width / 2, tileMap.mapParameters.mapSize.height / 2)).toFloat()
+        val radius = (max(tileMap.mapParameters.mapSize.width / 2, tileMap.mapParameters.mapSize.height / 2)).toFloat()
         // A huge box including the entire map.
         val mapRect = Rectangle(-radius, -radius, radius * 2 + 1, radius * 2 + 1)
 

@@ -1,5 +1,6 @@
 
 import com.google.common.io.Files
+import com.unciv.build.AndroidImagePacker
 import com.unciv.build.BuildConfig
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -59,8 +60,14 @@ val assetsDir = file("../android/assets")
 val discordDir = file("discord_rpc")
 val deployFolder = file("../deploy")
 
+tasks.register("texturePacker") {
+    doFirst {
+        AndroidImagePacker.packImages(rootProject.file("android").path)
+    }
+}
+
 private fun JavaExec.configureCommon() {
-    dependsOn(tasks.getByName("classes"))
+    dependsOn(tasks.getByName("classes"), tasks.getByName("texturePacker"))
     mainClass.set(mainClassName)
     classpath = sourceSets.main.get().runtimeClasspath
     standardInput = System.`in`
@@ -82,7 +89,7 @@ tasks.register<JavaExec>("debug") {
 
 tasks.register<Jar>("dist") {
     description = "Compiles the jar file"
-    dependsOn(tasks.getByName("classes"))
+    dependsOn(tasks.getByName("classes"), tasks.getByName("texturePacker"))
 
     // META-INF/INDEX.LIST and META-INF/io.netty.versions.properties are duplicated, but I don't know why
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
@@ -133,7 +140,9 @@ private fun runCommand(workingDir: File, vararg args: String) {
             .redirectOutput(outputFile)
             .start()
 
-        val finished = process.waitFor(30, TimeUnit.SECONDS)
+        // Packr copies the ~55 MB jar and unpacks a ~49 MB JRE (200+ MB of output), which routinely
+        // takes longer than 30 s on Windows with real-time AV scanning. Give it a generous window.
+        val finished = process.waitFor(10, TimeUnit.MINUTES)
         if (!finished) {
             process.destroyForcibly()
             process.waitFor(5, TimeUnit.SECONDS)

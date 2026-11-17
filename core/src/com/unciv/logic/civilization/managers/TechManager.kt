@@ -419,7 +419,7 @@ class TechManager : IsPartOfGameInfoSerialization {
             for(city in cities)
                 city.cityConstructions.validateInProgressConstructions()
 
-            val locationAction = LocationAction(cities.asSequence().map { it.location.toHexCoord() })
+            val locationAction = LocationAction(cities.asSequence().map { it.location.toGridCoord() })
             val cityText = if (cities.size == 1) "[${cities.first().name}]"
                 else "[${cities.size}] cities"
             val newUnit = obsoleteUnits[unit]?.name

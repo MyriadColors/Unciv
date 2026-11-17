@@ -2,7 +2,7 @@ package com.unciv.ui.screens.worldscreen.worldmap
 
 import com.unciv.Constants
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
@@ -33,7 +33,7 @@ class WorldMapMovementOverlayTest {
     private lateinit var restrictedView: GameView
     private lateinit var spectatorView: GameView
 
-    private data class Arrow(val from: HexCoord, val to: HexCoord, val type: MapArrowType)
+    private data class Arrow(val from: GridCoord, val to: GridCoord, val type: MapArrowType)
 
     @Before
     fun setUp() {
@@ -49,8 +49,8 @@ class WorldMapMovementOverlayTest {
 
     @Test
     fun foreignHistoryIsHiddenOnExploredTilesOutsideCurrentVision() {
-        val unit = unitWithHistory(enemy, HexCoord(-1, 0), HexCoord.Zero)
-        unit.attacksSinceTurnStart.add(HexCoord(1, 0))
+        val unit = unitWithHistory(enemy, GridCoord(-1, 0), GridCoord.Zero)
+        unit.attacksSinceTurnStart.add(GridCoord(1, 0))
         for (tile in game.tileMap.values) tile.setExplored(selectedCiv, true)
         selectedCiv.viewableTiles = emptySet()
 
@@ -58,38 +58,38 @@ class WorldMapMovementOverlayTest {
 
         selectedCiv.viewableTiles = game.tileMap.values.toSet()
         assertEquals(setOf(
-            Arrow(HexCoord(-1, 0), HexCoord.Zero, UnitMovementMemoryType.UnitMoved),
-            Arrow(HexCoord.Zero, HexCoord(1, 0), MiscArrowTypes.UnitHasAttacked)
+            Arrow(GridCoord(-1, 0), GridCoord.Zero, UnitMovementMemoryType.UnitMoved),
+            Arrow(GridCoord.Zero, GridCoord(1, 0), MiscArrowTypes.UnitHasAttacked)
         ), drawOverlay(restrictedView).toSet())
     }
 
     @Test
     fun spectatorArrowsIncludeEndpointsUnexploredBySelectedCivilization() {
-        val unit = unitWithHistory(enemy, HexCoord(-1, 0), HexCoord.Zero)
-        unit.attacksSinceTurnStart.add(HexCoord(1, 0))
-        enemy.attacksSinceTurnStart.add(Civilization.HistoricalAttackMemory(null, HexCoord(2, 0), HexCoord(2, 1)))
-        assertFalse(game.getTile(HexCoord.Zero).isExplored(selectedCiv))
+        val unit = unitWithHistory(enemy, GridCoord(-1, 0), GridCoord.Zero)
+        unit.attacksSinceTurnStart.add(GridCoord(1, 0))
+        enemy.attacksSinceTurnStart.add(Civilization.HistoricalAttackMemory(null, GridCoord(2, 0), GridCoord(2, 1)))
+        assertFalse(game.getTile(GridCoord.Zero).isExplored(selectedCiv))
         assertTrue(drawOverlay(restrictedView).isEmpty())
 
         assertEquals(setOf(
-            Arrow(HexCoord(-1, 0), HexCoord.Zero, UnitMovementMemoryType.UnitMoved),
-            Arrow(HexCoord.Zero, HexCoord(1, 0), MiscArrowTypes.UnitHasAttacked),
-            Arrow(HexCoord(2, 0), HexCoord(2, 1), MiscArrowTypes.UnitHasAttacked)
+            Arrow(GridCoord(-1, 0), GridCoord.Zero, UnitMovementMemoryType.UnitMoved),
+            Arrow(GridCoord.Zero, GridCoord(1, 0), MiscArrowTypes.UnitHasAttacked),
+            Arrow(GridCoord(2, 0), GridCoord(2, 1), MiscArrowTypes.UnitHasAttacked)
         ), drawOverlay(spectatorView).toSet())
     }
 
     @Test
     fun selectedUnitStillFiltersHistoryWhenMapPerspectiveChanges() {
-        val selectedUnit = unitWithHistory(selectedCiv, HexCoord(-1, 0), HexCoord.Zero)
-        selectedUnit.attacksSinceTurnStart.add(HexCoord(0, 1))
-        val otherUnit = unitWithHistory(enemy, HexCoord(2, 0), HexCoord(3, 0))
-        otherUnit.attacksSinceTurnStart.add(HexCoord(3, 1))
-        otherUnit.attacksSinceTurnStart.add(HexCoord.Zero)
+        val selectedUnit = unitWithHistory(selectedCiv, GridCoord(-1, 0), GridCoord.Zero)
+        selectedUnit.attacksSinceTurnStart.add(GridCoord(0, 1))
+        val otherUnit = unitWithHistory(enemy, GridCoord(2, 0), GridCoord(3, 0))
+        otherUnit.attacksSinceTurnStart.add(GridCoord(3, 1))
+        otherUnit.attacksSinceTurnStart.add(GridCoord.Zero)
 
         assertEquals(setOf(
-            Arrow(HexCoord(-1, 0), HexCoord.Zero, UnitMovementMemoryType.UnitMoved),
-            Arrow(HexCoord.Zero, HexCoord(0, 1), MiscArrowTypes.UnitHasAttacked),
-            Arrow(HexCoord(3, 0), HexCoord.Zero, MiscArrowTypes.UnitHasAttacked)
+            Arrow(GridCoord(-1, 0), GridCoord.Zero, UnitMovementMemoryType.UnitMoved),
+            Arrow(GridCoord.Zero, GridCoord(0, 1), MiscArrowTypes.UnitHasAttacked),
+            Arrow(GridCoord(3, 0), GridCoord.Zero, MiscArrowTypes.UnitHasAttacked)
         ), drawOverlay(spectatorView, restrictedView.getMapUnitView(selectedUnit)).toSet())
     }
 
@@ -103,12 +103,12 @@ class WorldMapMovementOverlayTest {
         enemyUnit.action = "moveTo 3,1"
 
         assertEquals(setOf(
-            Arrow(HexCoord.Zero, HexCoord(1, 0), MiscArrowTypes.UnitMoving),
-            Arrow(HexCoord(-3, 0), HexCoord(-2, 0), MiscArrowTypes.UnitMoving)
+            Arrow(GridCoord.Zero, GridCoord(1, 0), MiscArrowTypes.UnitMoving),
+            Arrow(GridCoord(-3, 0), GridCoord(-2, 0), MiscArrowTypes.UnitMoving)
         ), drawOverlay(spectatorView, restrictedView.getMapUnitView(selectedUnit)).toSet())
     }
 
-    private fun unitWithHistory(civ: Civilization, from: HexCoord, to: HexCoord): MapUnit {
+    private fun unitWithHistory(civ: Civilization, from: GridCoord, to: GridCoord): MapUnit {
         val unit = game.addUnit("Warrior", civ, game.getTile(to))
         unit.movementMemories = arrayListOf(MapUnit.UnitMovementMemory(from, UnitMovementMemoryType.UnitMoved))
         return unit

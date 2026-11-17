@@ -19,7 +19,6 @@ import com.unciv.ui.screens.worldscreen.worldmap.WorldMapHolder
 import yairm210.purity.annotations.Readonly
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.sqrt
 
 class TileLayerGroup: NonTransformGroup() {
     override fun draw(batch: Batch?, parentAlpha: Float) = super.draw(batch, parentAlpha)
@@ -107,8 +106,8 @@ class Minimap(val mapHolder: WorldMapHolder, minimapSize: Int, private val civIn
 
         val result =
                 min(
-                    minimapSize.y / (height + 1.5f) / sqrt(3f) * 4f, // 1.5 - padding, hex height = sqrt(3) / 2 * d / 2 -> d = height / sqrt(3) * 2 * 2
-                    minimapSize.x / (width + 0.5f) / 0.75f // 0.5 - padding, hex width = 0.75 * d -> d = width / 0.75
+                    minimapSize.y / (height + 0.5f),
+                    minimapSize.x / (width + 0.5f)
                 )
 
         return result
@@ -164,11 +163,8 @@ class Minimap(val mapHolder: WorldMapHolder, minimapSize: Int, private val civIn
             width = mapParameters.mapSize.width.toFloat()
         }
 
-        // hex height = sqrt(3) / 2 * d / 2, number of rows = mapDiameter * 2
-        height *= minimapTileSize * sqrt(3f) * 0.5f
-        // hex width = 0.75 * d
-        width = if (mapParameters.worldWrap)    (width - 1f) * minimapTileSize * 0.75f
-                else                            width * minimapTileSize * 0.75f
+        height *= minimapTileSize
+        width *= minimapTileSize
 
         return Vector2(width, height)
     }
@@ -188,9 +184,9 @@ class Minimap(val mapHolder: WorldMapHolder, minimapSize: Int, private val civIn
     private fun createMinimapTiles(tileSize: Float): List<MinimapTile> {
         val tiles = ArrayList<MinimapTile>(mapHolder.tileMap.tileList.size / 5) // at most 4 resizes
         val pad = if (mapHolder.tileMap.mapParameters.shape != MapShape.rectangular)
-            mapHolder.tileMap.mapParameters.mapSize.radius * tileSize * 1.5f
+            (mapHolder.tileMap.mapParameters.mapSize.radius * 2 + 1) * tileSize
         else
-            (mapHolder.tileMap.mapParameters.mapSize.width - 1f) * tileSize * 0.75f
+            mapHolder.tileMap.mapParameters.mapSize.width * tileSize
         val leftSide =
             exploredRegion?.getMinimapLeft(tileSize) ?: -Float.MAX_VALUE
         for (tileInfo in mapHolder.tileMap.values) {

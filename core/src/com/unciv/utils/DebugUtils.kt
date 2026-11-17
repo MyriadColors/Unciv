@@ -1,6 +1,6 @@
 package com.unciv.utils
 
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 
 object DebugUtils {
 
@@ -20,7 +20,7 @@ object DebugUtils {
     var SHOW_SETTLER_SCORES: Boolean = false
 
     /** Last settler tile ranking computed by CityLocationTileRanker, for [SHOW_SETTLER_SCORES]. */
-    var SETTLER_SCORES: Map<HexCoord, Float> = emptyMap()
+    var SETTLER_SCORES: Map<GridCoord, Float> = emptyMap()
 
     /** For when you need to test something in an advanced game and don't have time to faff around */
     var SUPERCHARGED: Boolean = false

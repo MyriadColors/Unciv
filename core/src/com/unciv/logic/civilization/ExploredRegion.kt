@@ -3,17 +3,16 @@ package com.unciv.logic.civilization
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.unciv.logic.IsPartOfGameInfoSerialization
-import com.unciv.logic.map.HexCoord
-import com.unciv.logic.map.HexMath.getLatitude
-import com.unciv.logic.map.HexMath.getLongitude
-import com.unciv.logic.map.HexMath.worldFromLatLong
+import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.GridMath.getLatitude
+import com.unciv.logic.map.GridMath.getLongitude
+import com.unciv.logic.map.GridMath.worldFromLatLong
 import com.unciv.logic.map.MapParameters
 import com.unciv.logic.map.MapShape
 import com.unciv.logic.map.TileMap
 import com.unciv.ui.components.tilegroups.TileGroupMap
 import yairm210.purity.annotations.Readonly
 import kotlin.math.abs
-import kotlin.math.sqrt
 
 class ExploredRegion : IsPartOfGameInfoSerialization {
 
@@ -24,13 +23,13 @@ class ExploredRegion : IsPartOfGameInfoSerialization {
     private var evenMapWidth = false
 
     @Transient
-    private var rectangularMap = false
+    private var evenMapHeight = false
 
     @Transient
     private var mapRadius = 0f
 
     @Transient
-    private val tileRadius = TileGroupMap.groupSize * 0.8f
+    private val tileSize = TileGroupMap.groupSize
 
     @Transient
     private var shouldRecalculateCoords = true
@@ -83,17 +82,19 @@ class ExploredRegion : IsPartOfGameInfoSerialization {
         if (mapParameters.shape == MapShape.rectangular) {
             mapRadius = (mapParameters.mapSize.width / 2).toFloat()
             evenMapWidth = mapParameters.mapSize.width % 2 == 0 || evenMapWidth
-            rectangularMap = true
+            evenMapHeight = mapParameters.mapSize.height % 2 == 0
         }
-        else
+        else {
             mapRadius = mapParameters.mapSize.radius.toFloat()
+            evenMapHeight = false
+        }
     }
 
     @Readonly
     fun isEmpty() = topLeft == Vector2.Zero && bottomRight == Vector2.Zero
 
     /** Check if tilePosition is beyond explored region and expand region if not */ 
-    fun expandToInclude(tilePosition: HexCoord, explorerPosition: HexCoord?) {
+    fun expandToInclude(tilePosition: GridCoord, explorerPosition: GridCoord?) {
         var mapExplored = false
         var longitude = getLongitude(tilePosition).toFloat()
         val latitude = getLatitude(tilePosition).toFloat()
@@ -181,36 +182,35 @@ class ExploredRegion : IsPartOfGameInfoSerialization {
         shouldRestrictX = bottomRight.x - topLeft.x != 1f
 
         // Get world (x;y)
-        val topLeftWorld = worldFromLatLong(topLeft, tileRadius)
-        val bottomRightWorld = worldFromLatLong(bottomRight, tileRadius)
+        val topLeftWorld = worldFromLatLong(topLeft, tileSize)
+        val bottomRightWorld = worldFromLatLong(bottomRight, tileSize)
 
-        // Convert X to the stage coords
-        val mapCenterX = if (evenMapWidth) (mapMaxX + TileGroupMap.groupSize + 4f) * 0.5f else mapMaxX * 0.5f
-        var left = mapCenterX + topLeftWorld.x
-        var right = mapCenterX + bottomRightWorld.x
+        // Convert X to the stage coords (bottomRight.x is min col, topLeft.x is max col)
+        val mapOriginX = if (evenMapWidth) mapMaxX * 0.5f else (mapMaxX - tileSize) * 0.5f
+        var left = mapOriginX + bottomRightWorld.x + tileSize * 0.5f
+        var right = mapOriginX + topLeftWorld.x + tileSize * 0.5f
 
         // World wrap over edge check
         if (left > mapMaxX) left = 10f
         if (right < 0f) right = mapMaxX - 10f
 
-        // Convert Y to the stage coords
-        val mapCenterY = if (rectangularMap) mapMaxY * 0.5f + TileGroupMap.groupSize * 0.25f else mapMaxY * 0.5f
-        val top = mapCenterY-topLeftWorld.y
-        val bottom = mapCenterY-bottomRightWorld.y
+        // Convert Y to the stage coords (ScrollPane Y=0 is top of map)
+        val mapOriginY = if (evenMapHeight) mapMaxY * 0.5f else (mapMaxY - tileSize) * 0.5f
+        val top = mapMaxY - (mapOriginY + topLeftWorld.y + tileSize * 0.5f)
+        val bottom = mapMaxY - (mapOriginY + bottomRightWorld.y + tileSize * 0.5f)
 
         topLeftStage.set(left, top)
         bottomRightStage.set(right, bottom)
 
         // Calculate rectangle for positioning the camera viewport on the minimap
-        val yOffset = tileRadius * sqrt(3f) * 0.5f
-        exploredRectangle.x = left - tileRadius
-        exploredRectangle.y = mapMaxY - bottom - yOffset * 0.5f
-        exploredRectangle.width = getWidth() * tileRadius * 1.5f
-        exploredRectangle.height = getHeight() * yOffset
+        exploredRectangle.x = mapOriginX + bottomRightWorld.x
+        exploredRectangle.y = mapOriginY + bottomRightWorld.y
+        exploredRectangle.width = getWidth() * tileSize
+        exploredRectangle.height = getHeight() * tileSize
     }
 
     @Readonly
-    fun isPositionInRegion(position: HexCoord): Boolean {
+    fun isPositionInRegion(position: GridCoord): Boolean {
         if (isEmpty()) return false
         val long = getLongitude(position)
         val lat = getLatitude(position)
@@ -231,7 +231,9 @@ class ExploredRegion : IsPartOfGameInfoSerialization {
 
     @Readonly fun getHeight(): Int = (topLeft.y - bottomRight.y).toInt() + 1
 
-    @Readonly fun getMinimapLeft(tileSize: Float) = (topLeft.x + 1f) * tileSize * -0.75f
+    @Readonly
+    fun getMinimapLeft(tileSize: Float): Float =
+        if (topLeft.x < bottomRight.x) (topLeft.x + 1f) * tileSize else -Float.MAX_VALUE
 
     /** Helper to determine `MiniMap` staleness, together with [shouldUpdateMinimap].
      *  As [ExploredRegion] exists per Civilization, this requires there to be no more than one
@@ -249,7 +251,7 @@ class ExploredRegion : IsPartOfGameInfoSerialization {
     }
 
     /** Reset and rebuild with [mapParameters] for all [exploredPositions] */
-    fun rebuildFrom(mapParameters: MapParameters, exploredPositions: Sequence<HexCoord>) {
+    fun rebuildFrom(mapParameters: MapParameters, exploredPositions: Sequence<GridCoord>) {
         setMapParameters(mapParameters)
         topLeft.set(0f, 0f)
         bottomRight.set(0f, 0f)   // back to the "empty" sentinel

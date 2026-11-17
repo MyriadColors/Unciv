@@ -62,7 +62,7 @@ class TileLayerUnitSprite(tileGroup: TileGroup, size: Float) : TileLayer(tileGro
             slot.spriteGroup.addActor(pixelUnitImage)
             // tileLocal=true: spriteGroup is already at (tileX,tileY) so children only need
             // the hex-local offset (hexagonImagePosition), not the full absolute position.
-            pixelUnitImage.setHexagonSize(tileLocal = true)
+            pixelUnitImage.setTileSize(tileLocal = true)
         }
         return slot
     }

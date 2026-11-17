@@ -119,7 +119,12 @@ class MinimapHolder(val mapHolder: WorldMapHolder) : Table() {
         val toggle = fun() {
             maximized = !maximized
             minimapSize = if (maximized && stage!=null) {
-                minimap.getClosestMinimapSize(Vector2(stage.width, stage.height), touchInside = true)
+                val toggleWidth = buttons.maxOfOrNull { it.width } ?: 0f
+                val targetSize = Vector2(
+                    (stage.width - toggleWidth - 15f).coerceAtLeast(1f),
+                    (stage.height - 10f).coerceAtLeast(1f)
+                )
+                minimap.getClosestMinimapSize(targetSize, touchInside = true)
             } else {
                 worldScreen.game.settings.minimapSize
             }

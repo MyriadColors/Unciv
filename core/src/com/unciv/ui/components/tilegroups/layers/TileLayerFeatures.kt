@@ -57,18 +57,16 @@ class TileLayerFeatures(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup
             roadImage.image = image
 
             val relativeWorldPosition = tileMapView.getNeighborTilePositionAsWorldCoords(tileView, neighbor)
+            val distanceToEdge = kotlin.math.sqrt(
+                relativeWorldPosition.x * relativeWorldPosition.x +
+                relativeWorldPosition.y * relativeWorldPosition.y
+            ) * (size / 2f)
 
-            // This is some crazy voodoo magic so I'll explain.
-            // Roads start at the tile origin; we offset them to the tile centre then toward the neighbor.
-            image.setPosition(
-                tileX + 25f - relativeWorldPosition.x * 0.8f * 25f,
-                tileY + 25f - relativeWorldPosition.y * 0.8f * 25f
-            )
+            image.setPosition(tileX + size / 2f, tileY + size / 2f - 3f)
+            image.setSize(distanceToEdge, 6f)
+            image.setOrigin(0f, 3f) // Rotate around the tile center
 
-            image.setSize(10f, 6f)
-            image.setOrigin(0f, 3f) // This is so that the rotation is calculated from the middle of the road and not the edge
-
-            image.rotation = (180 / Math.PI * atan2(relativeWorldPosition.y.toDouble(),relativeWorldPosition.x.toDouble())).toFloat()
+            image.rotation = (180 / Math.PI * atan2(relativeWorldPosition.y.toDouble(), relativeWorldPosition.x.toDouble())).toFloat()
 
             addOwnedActor(image)
         }

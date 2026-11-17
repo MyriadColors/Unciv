@@ -138,7 +138,7 @@ object OdMapImport {
                 }
             }
 
-            val position = HexMath.getTileCoordsFromColumnRow(ci + colMin, ri + rowMin)
+            val position = GridMath.getTileCoordsFromColumnRow(ci + colMin, ri + rowMin)
             if (!map.contains(position)) continue
             map[position].baseTerrain = base
             map[position].setTerrainFeatures(if (feature == null) emptyList() else listOf(feature))

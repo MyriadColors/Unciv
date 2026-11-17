@@ -18,9 +18,8 @@ class TileLayerTerrain(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
 
     val tileBaseImages: ArrayList<Image> = ArrayList()
     private var tileImageIdentifiers = listOf<String>()
-    private var bottomRightRiverImage: Image? = null
+    private var rightRiverImage: Image? = null
     private var bottomRiverImage: Image? = null
-    private var bottomLeftRiverImage: Image? = null
 
     private fun getTerrainImageLocations(terrainSequence: Sequence<String>): List<String> {
         val allTerrains = terrainSequence.joinToString("+")
@@ -118,41 +117,55 @@ class TileLayerTerrain(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
     private class NeighborEdgeData(val neighbor: TileView, val direction: NeighborDirection?) {
         var ourTerrains: Set<String> = emptySet()
         var neighborTerrains: Set<String> = emptySet()
-        var edgeFileNames: List<String> = emptyList()
+        var edgeImages: List<EdgeTileImage> = emptyList()
     }
 
     // Only explored neighbors can have edge images computed - unexplored neighbors' terrain is unknown.
     // As more neighbors become explored, entries are added here rather than fixed once at construction.
     private val neighborEdgeDataByNeighbor = HashMap<TileView, NeighborEdgeData>()
 
-    private fun getEdgeTileLocations(): Sequence<String> =
-        tileGroup.neighbors.asSequence().flatMap { neighbor ->
+    @Readonly
+    private fun matchesFilterMinimal(originTileView: TileView, filter: String): Boolean {
+        if (originTileView.getCachedTerrainNameSet().contains(filter)) return true
+        if (originTileView.getBaseTerrain().type.name == filter) return true
+        return false
+    }
+
+    private fun getEdgeTileLocations(): Sequence<String> {
+        val cardinalNeighborsByDir = HashMap<NeighborDirection, TileView>(4)
+        for (neighbor in tileGroup.neighbors) {
+            val dir = tileGroup.tileView.getNeighborDirection(neighbor)
+            if (dir != null && dir.isCardinal) cardinalNeighborsByDir[dir] = neighbor
+        }
+        return tileGroup.neighbors.asSequence().flatMap { neighbor ->
             val neighborEdgeData = neighborEdgeDataByNeighbor.getOrPut(neighbor) {
-                val clockPosition = tileGroup.tileView.getNeighborClockPosition(neighbor)
-                val direction = NeighborDirection.byClockPosition[clockPosition]
+                val direction = tileGroup.tileView.getNeighborDirection(neighbor)
                 NeighborEdgeData(neighbor, direction)
             }
-            getMatchingEdges(neighborEdgeData)
+            val dir = neighborEdgeData.direction
+            val matches = getMatchingEdges(neighborEdgeData)
+            if (dir == null || dir.isCardinal) matches.map { it.fileName }
+            else {
+                val adj1 = NeighborDirection.fromDelta(dir.dx, 0)?.let { cardinalNeighborsByDir[it] }
+                val adj2 = NeighborDirection.fromDelta(0, dir.dy)?.let { cardinalNeighborsByDir[it] }
+                matches.filter { edge ->
+                    (adj1 == null || !matchesFilterMinimal(adj1, edge.destinationTileFilter)) &&
+                    (adj2 == null || !matchesFilterMinimal(adj2, edge.destinationTileFilter))
+                }.map { it.fileName }
+            }
         }
+    }
 
     /** See https://yairm210.github.io/Unciv/Modders/Creating-a-custom-tileset/#edge-images */
-    private fun getMatchingEdges(neighborEdgeData: NeighborEdgeData): List<String>{
+    private fun getMatchingEdges(neighborEdgeData: NeighborEdgeData): List<EdgeTileImage>{
         val tileView = tileGroup.tileView
         // If the terrain data is still up to date, used the cached filenames
         if (neighborEdgeData.ourTerrains == tileView.getCachedTerrainNameSet()
             && neighborEdgeData.neighborTerrains == neighborEdgeData.neighbor.getCachedTerrainNameSet())
-                return neighborEdgeData.edgeFileNames
+                return neighborEdgeData.edgeImages
 
         if (neighborEdgeData.direction == null) return emptyList()
         val possibleEdgeImages = strings.edgeImagesByPosition[neighborEdgeData.direction] ?: return emptyList()
-
-        // Required for performance - full matchesFilter is too expensive for something that needs to run every update()
-        @Readonly
-        fun matchesFilterMinimal(originTileView: TileView, filter: String): Boolean {
-            if (originTileView.getCachedTerrainNameSet().contains(filter)) return true
-            if (originTileView.getBaseTerrain().type.name == filter) return true
-            return false
-        }
 
         // Chain the filter{} and map{} with sequences to avoid creating intermediate list,
         //  but then resolve it to a proper list.
@@ -160,11 +173,11 @@ class TileLayerTerrain(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
             if (!matchesFilterMinimal(tileView, it.originTileFilter)) return@filter false
             if (!matchesFilterMinimal(neighborEdgeData.neighbor, it.destinationTileFilter)) return@filter false
             return@filter true
-        }.map { it.fileName }.toList()
+        }.toList()
 
         neighborEdgeData.ourTerrains = tileView.getCachedTerrainNameSet()
         neighborEdgeData.neighborTerrains = neighborEdgeData.neighbor.getCachedTerrainNameSet()
-        neighborEdgeData.edgeFileNames = cachedSequence
+        neighborEdgeData.edgeImages = cachedSequence
 
         return cachedSequence
     }
@@ -227,9 +240,9 @@ class TileLayerTerrain(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
 
             if (strings.tileSetConfig.tileScales.isNotEmpty()) {
                 val scale = strings.tileSetConfig.tileScales[baseLocation.takeLastWhile { it != '/' }]
-                image.setHexagonSize(scale)
+                image.setTileSize(scale)
             } else {
-                image.setHexagonSize()
+                image.setTileSize()
             }
         }
     }
@@ -262,10 +275,9 @@ class TileLayerTerrain(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
             image.color = if (index == 0) baseTerrainColor else color
     }
 
-    private fun updateRivers(displayBottomRight: Boolean, displayBottom: Boolean, displayBottomLeft: Boolean) {
-        bottomRightRiverImage = updateRiver(bottomRightRiverImage,displayBottomRight, strings.bottomRightRiver)
+    private fun updateRivers(displayRight: Boolean, displayBottom: Boolean) {
+        rightRiverImage = updateRiver(rightRiverImage, displayRight, strings.rightRiver)
         bottomRiverImage = updateRiver(bottomRiverImage, displayBottom, strings.bottomRiver)
-        bottomLeftRiverImage = updateRiver(bottomLeftRiverImage, displayBottomLeft, strings.bottomLeftRiver)
     }
 
     private fun updateRiver(currentImage: Image?, shouldDisplay: Boolean, imageName: String): Image? {
@@ -276,7 +288,7 @@ class TileLayerTerrain(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
             if (currentImage != null) return currentImage // already in place, no movement needed
             if (!ImageGetter.imageExists(imageName)) return null // Old "Default" tileset gets no rivers.
             val newImage = ImageGetter.getImage(imageName)
-            newImage.setHexagonSize()
+            newImage.setTileSize()
             addOwnedActor(newImage) // rivers always append after terrain images
             return newImage
         }
@@ -315,20 +327,20 @@ class TileLayerTerrain(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
             .mix(tileView.roadIsPillaged)
             .mix(tileView.getOwner()?.civName)
             .mix(tileView.owningCity() != null)
-            .mix(tileView.hasBottomRightRiver).mix(tileView.hasBottomRiver).mix(tileView.hasBottomLeftRiver)
+            .mix(tileView.hasRightRiver).mix(tileView.hasBottomRiver)
         for (neighbor in tileGroup.neighbors) key = key.mix(neighbor.getCachedTerrainNameSet().hashCode())
         return key
     }
 
     override fun doUpdate(viewingCiv: CivView?) {
         updateTileImage(viewingCiv)
-        updateRivers(tileGroup.tileView.hasBottomRightRiver, tileGroup.tileView.hasBottomRiver, tileGroup.tileView.hasBottomLeftRiver)
+        updateRivers(tileGroup.tileView.hasRightRiver, tileGroup.tileView.hasBottomRiver)
         updateTileColor(viewingCiv)
     }
 
     fun reset() {
         isVisible = false
-        updateRivers(displayBottomRight = false, displayBottom = false, displayBottomLeft = false)
+        updateRivers(displayRight = false, displayBottom = false)
     }
 
     private fun getNaturalWonderBackupImage(baseHexagon: ArrayList<String>): ArrayList<String> =

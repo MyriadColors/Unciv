@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.utils.Align
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.tile.Tile
 import com.unciv.logic.map.tile.TileHistory.TileHistoryState.CityCenterType
 import com.unciv.ui.components.extensions.surroundWithCircle
@@ -17,20 +17,20 @@ import kotlin.math.PI
 import kotlin.math.atan
 
 class MinimapTile(val tile: Tile, tileSize: Float) {
-    val image: Image = ImageGetter.getImage("OtherIcons/Hexagon")
+    val image: Image = ImageGetter.getWhiteDot()
     private var cityCircleImage: IconCircleGroup<Image>? = null
     var owningCiv: Civilization? = null
     private var neighborToBorderImage = HashMap<Tile, Image>()
     val isUnrevealed get() = !image.isVisible
 
     init {
-        val positionalVector = HexMath.hex2WorldCoords(tile.position)
+        val positionalVector = GridMath.grid2WorldCoords(tile.position)
 
         image.isVisible = false
         image.setSize(tileSize, tileSize)
         image.setPosition(
-            positionalVector.x * 0.5f * tileSize,
-            positionalVector.y * 0.5f * tileSize
+            positionalVector.x * tileSize,
+            positionalVector.y * tileSize
         )
     }
 
@@ -58,6 +58,9 @@ class MinimapTile(val tile: Tile, tileSize: Float) {
         val owningCiv = if (turn == null) tile.getOwner() else getOwningCivFromHistory(tile, turn)
         val imagesBefore = neighborToBorderImage.values.toSet()
         for (neighbor in tile.neighbors) {
+            val relativeWorldPosition = tile.tileMap.getNeighborTilePositionAsWorldCoords(tile, neighbor)
+            if (relativeWorldPosition.x != 0f && relativeWorldPosition.y != 0f) continue
+
             val neighborOwningCiv =
                     if (turn == null) neighbor.getOwner() else getOwningCivFromHistory(
                         neighbor,
@@ -78,23 +81,25 @@ class MinimapTile(val tile: Tile, tileSize: Float) {
 
             // copied from tilegroup border logic
 
-            val hexagonEdgeLength = image.width / 2
+            val edgeLength = image.width
 
-            borderImage.setSize(hexagonEdgeLength, hexagonEdgeLength / 4)
+            borderImage.setSize(edgeLength, edgeLength / 5f)
             borderImage.setOrigin(Align.center)
-            val hexagonCenterX = image.x + image.width / 2
-            borderImage.x = hexagonCenterX - borderImage.width / 2
-            val hexagonCenterY = image.y + image.height / 2
-            borderImage.y = hexagonCenterY - borderImage.height / 2
-            // Until this point, the border image is now CENTERED on the tile it's a border for
+            val centerX = image.x + image.width / 2
+            borderImage.x = centerX - borderImage.width / 2
+            val centerY = image.y + image.height / 2
+            borderImage.y = centerY - borderImage.height / 2
 
-            val relativeWorldPosition = tile.tileMap.getNeighborTilePositionAsWorldCoords(tile, neighbor)
-            val sign = if (relativeWorldPosition.x < 0) -1 else 1
-            val angle = sign * (atan(sign * relativeWorldPosition.y / relativeWorldPosition.x) * 180 / PI - 90.0).toFloat()
+            val angle = when {
+                relativeWorldPosition.y > 0f -> 0f
+                relativeWorldPosition.x > 0f -> -90f
+                relativeWorldPosition.y < 0f -> 180f
+                else -> 90f
+            }
 
             borderImage.moveBy(
-                -relativeWorldPosition.x * hexagonEdgeLength / 2,
-                -relativeWorldPosition.y * hexagonEdgeLength / 2
+                relativeWorldPosition.x * edgeLength / 2f,
+                relativeWorldPosition.y * edgeLength / 2f
             )
             borderImage.rotateBy(angle)
             borderImage.color = owningCiv!!.nation.getInnerColor()

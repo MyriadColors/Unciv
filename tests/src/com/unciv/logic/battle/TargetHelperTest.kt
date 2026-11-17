@@ -3,7 +3,7 @@ package com.unciv.logic.battle
 import com.unciv.Constants
 import com.unciv.UncivGame
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -36,15 +36,15 @@ class TargetHelperTest {
     @Test
     fun `should retrieve city bombardable tiles`() {
         // given
-        val attackerCity = testGame.addCity(attackerCiv, testGame.getTile(HexCoord.Zero))
+        val attackerCity = testGame.addCity(attackerCiv, testGame.getTile(GridCoord.Zero))
 
-        testGame.addUnit("Warrior", attackerCiv, testGame.getTile(HexCoord.Zero)) // own unit in own city, not bombardable
+        testGame.addUnit("Warrior", attackerCiv, testGame.getTile(GridCoord.Zero)) // own unit in own city, not bombardable
         testGame.addUnit("Warrior", attackerCiv, testGame.getTile(1,0)) // own unit in own city range, not bombardable
         testGame.addUnit("Warrior", attackerCiv, testGame.getTile(3,3)) // own unit outside city range, not bombardable
         testGame.addUnit("Warrior", defenderCiv, testGame.getTile(1,1)) // enemy unit inside city range, bombardable
         testGame.addUnit("Warrior", defenderCiv, testGame.getTile(-3,-3)) // enemy unit outside city range, not bombardable
 
-        val tile = testGame.setTileTerrain(HexCoord(-2, -1), Constants.coast)
+        val tile = testGame.setTileTerrain(GridCoord(-2, -1), Constants.coast)
         testGame.addTileToCity(attackerCity, tile)
         testGame.addUnit("Submarine", defenderCiv, tile) // enemy unit inside city range, invisible, not bombardable
 
@@ -59,7 +59,7 @@ class TargetHelperTest {
     @Test
     fun `should get attackable tile when melee next to enemy unit`() {
         // given
-        val attackFromTile = testGame.getTile(HexCoord.Zero)
+        val attackFromTile = testGame.getTile(GridCoord.Zero)
         val attackedTile = testGame.getTile(1,0)
         val attackerUnit = testGame.addUnit("Warrior", attackerCiv, attackFromTile)
         attackerUnit.currentMovement = defaultWarriorMovePoints
@@ -79,7 +79,7 @@ class TargetHelperTest {
     @Test
     fun `should get no attackable tiles when unit next to allied unit`() {
         // given
-        val attackFromTile = testGame.getTile(HexCoord.Zero)
+        val attackFromTile = testGame.getTile(GridCoord.Zero)
         val attackedTile = testGame.getTile(1,0)
         val attackerUnit = testGame.addUnit("Warrior", attackerCiv, attackFromTile)
         attackerUnit.currentMovement = defaultWarriorMovePoints
@@ -95,7 +95,7 @@ class TargetHelperTest {
     @Test
     fun `should get attackable tile when melee enemy reachable`() {
         // given
-        val attackFromTile = testGame.getTile(HexCoord.Zero)
+        val attackFromTile = testGame.getTile(GridCoord.Zero)
         val attackedTile = testGame.getTile(2,0)  // move one tile -> melee next to each other -> attack
         val attackerUnit = testGame.addUnit("Warrior", attackerCiv, attackFromTile)
         attackerUnit.currentMovement = defaultWarriorMovePoints
@@ -115,7 +115,7 @@ class TargetHelperTest {
     @Test
     fun `should get no attackable tiles when melee enemy out of reach`() {
         // given
-        val attackFromTile = testGame.getTile(HexCoord.Zero)
+        val attackFromTile = testGame.getTile(GridCoord.Zero)
         val attackedTile = testGame.getTile(3,0)  // out of reach
         val attackerUnit = testGame.addUnit("Warrior", attackerCiv, attackFromTile)
         attackerUnit.currentMovement = defaultWarriorMovePoints
@@ -131,7 +131,7 @@ class TargetHelperTest {
     @Test
     fun `should get attackable tiles when ranged next to melee enemy unit with ZOC`() {
         // given
-        val attackerTile = testGame.getTile(HexCoord.Zero)
+        val attackerTile = testGame.getTile(GridCoord.Zero)
         val attackedTile = testGame.getTile(1,0)
         val attackerUnit = testGame.addUnit("Archer", attackerCiv, attackerTile)
         attackerUnit.currentMovement = movementLeftAfterMovingToAttackTile
@@ -213,7 +213,7 @@ class TargetHelperTest {
         assertEquals(AttackableTile(tileToAttackFrom, tileToAttack, movementLeftAfterMovingToAttackTile, combatant), attackableEnemies[0])
         assertTrue(attackableEnemies.contains(AttackableTile(testGame.getTile(0,1), tileToAttack, movementLeftAfterMovingToAttackTile-1, combatant)))
         assertTrue(attackableEnemies.contains(AttackableTile(testGame.getTile(-1,-1), tileToAttack, movementLeftAfterMovingToAttackTile-1, combatant)))
-        assertTrue(attackableEnemies.contains(AttackableTile(testGame.getTile(HexCoord.Zero), tileToAttack, movementLeftAfterMovingToAttackTile-1, combatant)))
+        assertTrue(attackableEnemies.contains(AttackableTile(testGame.getTile(GridCoord.Zero), tileToAttack, movementLeftAfterMovingToAttackTile-1, combatant)))
     }
 
     @Test
@@ -292,9 +292,9 @@ class TargetHelperTest {
     @Test
     fun `should get no attackable tiles when terrain obstacle`() {
         // given
-        testGame.setTileFeatures(HexCoord.Zero, Constants.hill)
-        testGame.setTileFeatures(HexCoord(1, 1), Constants.hill)
-        testGame.setTileFeatures(HexCoord(0, -1), Constants.hill)
+        testGame.setTileFeatures(GridCoord.Zero, Constants.hill)
+        testGame.setTileFeatures(GridCoord(1, 1), Constants.hill)
+        testGame.setTileFeatures(GridCoord(0, -1), Constants.hill)
 
         val attackerTile = testGame.getTile(-1,0)
         val attackedTile = testGame.getTile(1,0)
@@ -330,7 +330,7 @@ class TargetHelperTest {
     @Test
     fun `should get no attackable tiles when has cannot attack unique`() {
         // given
-        val attackerUnit = testGame.addDefaultMeleeUnitWithUniques(attackerCiv, testGame.getTile(HexCoord.Zero), "Cannot attack")
+        val attackerUnit = testGame.addDefaultMeleeUnitWithUniques(attackerCiv, testGame.getTile(GridCoord.Zero), "Cannot attack")
         attackerUnit.currentMovement = 2f
         testGame.addUnit("Warrior", defenderCiv, testGame.getTile(1,0))
 

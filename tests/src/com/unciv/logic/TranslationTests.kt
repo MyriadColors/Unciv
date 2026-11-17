@@ -652,7 +652,7 @@ class TranslationTests {
         loadTranslations()
         val languages = translations.getLanguages()
         setupRuleset()
-        val ruleset = RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!
+        val ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!
         val parcours = listOf(
             "leader names" to ruleset.nations.values.asSequence().map { it.leaderName },
             "city names" to ruleset.nations.values.asSequence().flatMap { it.cities },
@@ -938,7 +938,7 @@ class TranslationTests {
         loadTranslations()
         copyTranslationsToUncivGame()
         setupRuleset()
-        return RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!
+        return RulesetCache[BaseRuleset.BasicSquare.fullName]!!
     }
 
     @Suppress("ConstPropertyName")

@@ -19,7 +19,7 @@ enum class RankingType(
     Growth("Growth", { ImageGetter.getStatIcon("Food") }, 'C'),
     Production('P'),
     Gold('G'),
-    Territory({ ImageGetter.getImage("OtherIcons/Hexagon") }, 'T'),
+    Territory({ ImageGetter.getImage("OtherIcons/Square") }, 'T'),
     Force({ ImageGetter.getImage("OtherIcons/Shield") }, 'F'),
     Happiness('H'),
     Technologies({ ImageGetter.getStatIcon("Science") }, 'W'),

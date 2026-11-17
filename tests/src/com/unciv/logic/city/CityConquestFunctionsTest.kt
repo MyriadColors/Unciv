@@ -2,8 +2,8 @@ package com.unciv.logic.city
 
 import com.unciv.logic.city.managers.CityConquestFunctions
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.NeighborDirection
 import com.unciv.models.ruleset.unique.UniqueType
 import com.unciv.models.translations.fillPlaceholders
 import com.unciv.testing.BaseTestRunner
@@ -32,7 +32,7 @@ class CityConquestFunctionsTest {
         attackerCiv = testGame.addCiv()
         defenderCiv = testGame.addCiv()
 
-        defenderCity = testGame.addCity(defenderCiv, testGame.getTile(HexCoord.Zero), initialPopulation = 10)
+        defenderCity = testGame.addCity(defenderCiv, testGame.getTile(GridCoord.Zero), initialPopulation = 10)
         cityConquestFunctions = CityConquestFunctions(defenderCity)
 
         // otherwise test crashes when puppetying city
@@ -130,8 +130,8 @@ class CityConquestFunctionsTest {
         val building = testGame.createBuilding(uniqueTemplate.fillPlaceholders("+100"))
 
         // add six cities, each with that building (but we'll conquer only the last of them)
-        for (clockDirection in 2..12 step 2) {
-            val pos = HexMath.getClockPositionToHexcoord(clockDirection).times(3)
+        for (dir in NeighborDirection.entries.take(6)) {
+            val pos = dir.offset.times(3)
             defenderCity = testGame.addCity(defenderCiv, testGame.getTile(pos), initialPopulation = 4)
             defenderCity.cityConstructions.addBuilding(building.name)
         }

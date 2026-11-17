@@ -6,7 +6,7 @@ import com.unciv.UncivGame
 import com.unciv.json.json
 import com.unciv.logic.UncivShowableException
 import com.unciv.logic.files.FileChooser
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.MapShape
 import com.unciv.logic.map.MapSize
 import com.unciv.logic.map.MapType
@@ -36,7 +36,7 @@ class MapEditorWesnothImporter(private val editorScreen: MapEditorScreen) : Disp
         var lastFileFolder: FileHandle? = null
     }
 
-    private val ruleset by lazy { RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!! }
+    private val ruleset by lazy { RulesetCache[BaseRuleset.BasicSquare.fullName]!! }
 
     private var importJob: Job? = null
 
@@ -126,7 +126,7 @@ class MapEditorWesnothImporter(private val editorScreen: MapEditorScreen) : Disp
         for ((row, line) in lines.withIndex()) {
             for ((column, cellCode) in line.split(',').withIndex()) {
                 val effectiveRow = rowOffset - row + column % 2 // see comment block at the top of the file
-                val pos = HexMath.getTileCoordsFromColumnRow(column - colOffset, effectiveRow)
+                val pos = GridMath.getTileCoordsFromColumnRow(column - colOffset, effectiveRow)
                 if (!map.contains(pos)) continue
                 map[pos].paintFromWesnothCode(cellCode.trim(), map)
             }

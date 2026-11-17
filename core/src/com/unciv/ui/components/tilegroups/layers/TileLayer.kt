@@ -4,7 +4,6 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.unciv.view.CivView
 import com.unciv.logic.map.tile.Tile
-import com.unciv.models.tilesets.TileSetCache
 import com.unciv.ui.components.tilegroups.TileGroup
 import com.unciv.ui.components.tilegroups.TileSetStrings
 
@@ -60,21 +59,22 @@ abstract class TileLayer(val tileGroup: TileGroup, val size: Float) {
     // ── positioning helpers ──────────────────────────────────────────────────
 
     /**
-     * Sets hexagon image size/origin/position/scale.
+     * Sets square tile image size/origin/position/scale.
      *
-     * By default the position is **absolute** (tileX + local offset) so the image can sit
-     * directly in a TileMapLayer.  Pass `tileLocal = true` when the image lives inside a
-     * sub-Group that is already positioned at the tile origin — in that case the image only
-     * needs the local hex offset (no tileX/tileY addition).
+     * By default the position is **absolute** (tileX, tileY) so the image can sit
+     * directly in a TileMapLayer. Pass `tileLocal = true` when the image lives inside a
+     * sub-Group that is already positioned at the tile origin.
      */
-    fun Image.setHexagonSize(scale: Float? = null, tileLocal: Boolean = false): Image {
-        this.setSize(tileGroup.hexagonImageWidth, this.height * tileGroup.hexagonImageWidth / this.width)
-        this.setOrigin(tileGroup.hexagonImageOriginX, tileGroup.hexagonImageOriginY)
+    fun Image.setTileSize(scale: Float? = null, tileLocal: Boolean = false): Image {
+        val targetWidth = tileGroup.tileImageSize
+        val aspectHeight = if (this.width > 0f) this.height * targetWidth / this.width else targetWidth
+        this.setSize(targetWidth, aspectHeight)
+        this.setOrigin(targetWidth / 2f, aspectHeight / 2f)
         val baseX = if (tileLocal) 0f else tileX
         val baseY = if (tileLocal) 0f else tileY
-        this.x = baseX + tileGroup.hexagonImagePosition.first
-        this.y = baseY + tileGroup.hexagonImagePosition.second
-        this.setScale(scale ?: TileSetCache.getCurrent().config.tileScale)
+        this.x = baseX
+        this.y = baseY + (targetWidth - aspectHeight) / 2f
+        this.setScale(scale ?: strings.tileSetConfig.tileScale)
         return this
     }
 

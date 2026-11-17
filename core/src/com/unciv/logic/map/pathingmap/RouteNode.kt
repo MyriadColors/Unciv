@@ -1,6 +1,7 @@
 package com.unciv.logic.map.pathingmap
 
 import com.unciv.logic.civilization.diplomacy.RelationshipLevel
+import com.unciv.logic.map.NeighborDirection
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.tile.Tile
 import org.jetbrains.annotations.VisibleForTesting
@@ -133,7 +134,7 @@ value class RouteNode(val bits: Long=0L) {
         require(moveThisTurn <= MAX_MOVE_THIS_TURN) { "moveThisTurn $moveThisTurn exceeds max $MAX_MOVE_THIS_TURN" }
         require(turns >= 0) { "turns $turns must be positive" }
         require(turns <= MAX_TURNS) { "turns $turns exceeds max $MAX_TURNS" }
-        require(toParentClockDirBits(tile, parentTile) > 0) {"parentClockDir $parentClockDir must be positive"}
+        require(toParentClockDirBits(tile, parentTile) > 0) {"parentDirOrdinal $parentDirOrdinal must be positive"}
         require(damagingTiles >= 0) { "damagingTiles $damagingTiles must be positive" }
         require(damagingTiles <= DAMAGE_TILES_LO_MASK) { "damagingTiles $moveThisTurn exceeds max $DAMAGE_TILES_LO_MASK" }
     }
@@ -159,12 +160,12 @@ value class RouteNode(val bits: Long=0L) {
 
     val turns: Int get() { require(initialized); return ((bits shr TURNS_OFFSET) and TURNS_LO_MASK).toInt() }
 
-    val parentClockDir: Int get() { require(initialized); return (((bits shr PARENT_TILE_OFFSET) and PARENT_TILE_LO_MASK)*2).toInt() }
+    val parentDirOrdinal: Int get() { require(initialized); return ((bits shr PARENT_TILE_OFFSET) and PARENT_TILE_LO_MASK).toInt() }
     @Readonly
     fun parentTile(tileMap: TileMap): Tile {
-        val idx = parentClockDir
-        if (idx == NO_PARENT_TILE_VALUE) return tile(tileMap)
-        return tileMap.getClockPositionNeighborTile(tile(tileMap), idx)!!
+        val idx = parentDirOrdinal
+        if (idx == NO_PARENT_TILE_VALUE || idx == 0) return tile(tileMap)
+        return tileMap.getNeighborTile(tile(tileMap), NeighborDirection.entries[idx - 1])!!
     }
 
     // See moveSinceStoppable's docs above: it resets to zero exactly when a tile is itself
@@ -220,15 +221,15 @@ value class RouteNode(val bits: Long=0L) {
         internal const val UNDERESTIMATED_TOTAL_LO_MASK = (0x1L shl  UNDERESTIMATED_TOTAL_BIT_COUNT) - 1L
         internal const val UNDERESTIMATED_TOTAL_HI_MASK = UNDERESTIMATED_TOTAL_LO_MASK shl UNDERESTIMATED_TOTAL_OFFSET
         internal val MAX_UNDERESTIMATED_TOTAL = FixedPointMovement.fpmFromFixedPointBits(UNDERESTIMATED_TOTAL_LO_MASK.toInt())
-        // [RouteNode] bits 47-49 (3b = 8values > 6neighbors +1self) are the parent tile clock direction/2+1.  no-Parent is "7", and "0" is never valid
+        // [RouteNode] bits 47-50 (4b = 16 values: 1..8 for NeighborDirection.ordinal+1, 9 for self/no-parent)
         private const val PARENT_TILE_OFFSET = UNDERESTIMATED_TOTAL_OFFSET
-        private const val PARENT_TILE_BIT_COUNT = 3
+        private const val PARENT_TILE_BIT_COUNT = 4
         private const val PARENT_TILE_LO_MASK = (0x1L shl PARENT_TILE_BIT_COUNT) - 1L
-        private const val NO_PARENT_TILE_BITS = 7L
-        private const val NO_PARENT_TILE_VALUE = 14
-        // [RouteNode] bit 50 tracks whether THIS tile itself is damaging, unconditionally.
+        private const val NO_PARENT_TILE_BITS = 9L
+        private const val NO_PARENT_TILE_VALUE = 9
+        // [RouteNode] bit 51 tracks whether THIS tile itself is damaging, unconditionally.
         private const val DAMAGING_OFFSET = PARENT_TILE_OFFSET + PARENT_TILE_BIT_COUNT
-        // [RouteNode] bits 51-60 (10b) are also padding, only used by PrioritizedNode's
+        // [RouteNode] bits 52-60 (9b) are also padding, only used by PrioritizedNode's
         // underestimatedTotal field.
         // bits 61-62 (2b = 4turns) are the number of turns ended in damaging tiles.
         private const val DAMAGE_TILES_OFFSET = UNDERESTIMATED_TOTAL_OFFSET + UNDERESTIMATED_TOTAL_BIT_COUNT
@@ -237,8 +238,11 @@ value class RouteNode(val bits: Long=0L) {
         internal const val MAX_DAMAGING_TILES = DAMAGE_TILES_LO_MASK.toInt()
 
         @Readonly
-        private fun toParentClockDirBits(tile: Tile, parentTile: Tile): Long
-            = (if (tile == parentTile) NO_PARENT_TILE_BITS else tile.tileMap.getNeighborTileClockPosition(tile, parentTile)/2L) shl PARENT_TILE_OFFSET
+        private fun toParentClockDirBits(tile: Tile, parentTile: Tile): Long {
+            val dirBits = if (tile == parentTile) NO_PARENT_TILE_BITS
+                else (tile.tileMap.getNeighborDirection(tile, parentTile)!!.ordinal + 1).toLong()
+            return dirBits shl PARENT_TILE_OFFSET
+        }
         @Pure
         private fun toMoveThisTurnBits(moveThisTurn: FixedPointMovement): Long
             = moveThisTurn.bits.toLong() shl MOVE_THIS_TURN_OFFSET

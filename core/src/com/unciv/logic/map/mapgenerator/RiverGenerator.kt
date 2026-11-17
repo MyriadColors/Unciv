@@ -1,6 +1,7 @@
 package com.unciv.logic.map.mapgenerator
 
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.NeighborDirection
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.ruleset.Ruleset
@@ -71,20 +72,19 @@ class RiverGenerator(
     fun spawnRiver(initialPosition: Tile, endPosition: Tile, resultingTiles: MutableSet<Tile>?) {
         // Recommendation: Draw a bunch of hexagons on paper before trying to understand this, it's super helpful!
 
-        var riverCoordinate = RiverCoordinate(tileMap, initialPosition.position,
-                RiverCoordinate.BottomRightOrLeft.entries.random(randomness.RNG))
+        var riverCoordinate = RiverCoordinate(tileMap, initialPosition.position)
 
         repeat(maxRiverLength) {     // Arbitrary max on river length, otherwise this will go in circles - rarely
             if (riverCoordinate.getAdjacentTiles().any { it.isWater }) return
-            val possibleCoordinates = riverCoordinate.getAdjacentPositions()
-            if (possibleCoordinates.none()) return // end of the line
+            val possibleCoordinates = riverCoordinate.getAdjacentPositions().toList()
+            if (possibleCoordinates.isEmpty()) return // end of the line
             val newCoordinate = possibleCoordinates
                 .groupBy { newCoordinate ->
                     newCoordinate.getAdjacentTiles().map { it.aerialDistanceTo(endPosition) }
-                        .minOrNull()!!
+                        .minOrNull() ?: Int.MAX_VALUE
                 }
                 .minByOrNull { it.key }!!
-                    .component2().random(randomness.RNG)
+                .value.random(randomness.RNG)
 
             // set one new river edge in place
             riverCoordinate.paintTo(newCoordinate, resultingTiles)
@@ -94,195 +94,136 @@ class RiverGenerator(
         debug("River reached max length!")
     }
 
-    /** Describes a _Vertex_ on our hexagonal grid via a neighboring hex and clock direction, normalized
-     * such that always the north-most hex and one of the two clock directions 5 / 7 o'clock are used. */
+    /** Describes a _Vertex_ on our square grid: the bottom-right corner of tile [position]. */
     class RiverCoordinate(
         private val tileMap: TileMap,
-        private val position: HexCoord,
-        private val bottomRightOrLeft: BottomRightOrLeft
+        private val position: GridCoord
     ) {
-        enum class BottomRightOrLeft {
-            /** 7 O'Clock of the tile */
-            BottomLeft,
-
-            /** 5 O'Clock of the tile */
-            BottomRight
-        }
-
         private val x = position.x
         private val y = position.y
-        // Depending on the tile instance, some of the following will never be used. Tested with lazies: ~2% slower
-        private val myTile = tileMap[position]
-        private val myTopLeft = tileMap.getIfTileExistsOrNull(x + 1, y)
-        private val myBottomLeft = tileMap.getIfTileExistsOrNull(x, y - 1)
-        private val myTopRight = tileMap.getIfTileExistsOrNull(x, y + 1)
-        private val myBottomRight = tileMap.getIfTileExistsOrNull(x - 1, y)
-        private val myBottomCenter = tileMap.getIfTileExistsOrNull(x - 1, y - 1)
+        private val topLeft = tileMap.getIfTileExistsOrNull(x, y)
+        private val topRight = tileMap.getIfTileExistsOrNull(x + 1, y)
+        private val bottomLeft = tileMap.getIfTileExistsOrNull(x, y - 1)
+        private val bottomRight = tileMap.getIfTileExistsOrNull(x + 1, y - 1)
 
-        /** Lists the three neighboring vertices which have their anchor hex on the map
-         * (yes some positions on the map's outer border will be included, some not) */
+        /** Lists the four neighboring vertices (N, S, E, W) that remain within map bounds */
         fun getAdjacentPositions(): Sequence<RiverCoordinate> = sequence {
-            // What's nice is that adjacents are always the OPPOSITE in terms of right-left - rights are adjacent to only lefts, and vice-versa
-            // This means that a lot of obviously-wrong assignments are simple to spot
-            if (bottomRightOrLeft == BottomRightOrLeft.BottomLeft) {
-                yield(RiverCoordinate(tileMap, position, BottomRightOrLeft.BottomRight)) // same tile, other side
-                if (myTopLeft != null)
-                    yield(RiverCoordinate(tileMap, myTopLeft.position, BottomRightOrLeft.BottomRight)) // tile to MY top-left, take its bottom right corner
-                if (myBottomLeft != null)
-                    yield(RiverCoordinate(tileMap, myBottomLeft.position, BottomRightOrLeft.BottomRight)) // Tile to MY bottom-left, take its bottom right
-            } else {
-                yield(RiverCoordinate(tileMap, position, BottomRightOrLeft.BottomLeft)) // same tile, other side
-                if (myTopRight != null)
-                    yield(RiverCoordinate(tileMap, myTopRight.position, BottomRightOrLeft.BottomLeft)) // tile to MY top-right, take its bottom left
-                if (myBottomRight != null)
-                    yield(RiverCoordinate(tileMap, myBottomRight.position, BottomRightOrLeft.BottomLeft))  // tile to MY bottom-right, take its bottom left
-            }
+            tileMap.getIfTileExistsOrNull(x, y + 1)?.let { yield(RiverCoordinate(tileMap, it.position)) }
+            tileMap.getIfTileExistsOrNull(x, y - 1)?.let { yield(RiverCoordinate(tileMap, it.position)) }
+            tileMap.getIfTileExistsOrNull(x - 1, y)?.let { yield(RiverCoordinate(tileMap, it.position)) }
+            tileMap.getIfTileExistsOrNull(x + 1, y)?.let { yield(RiverCoordinate(tileMap, it.position)) }
         }
 
-        /** Lists the three neighboring hexes to this vertex which are on the map */
+        /** Lists up to four tiles touching this vertex */
         fun getAdjacentTiles(): Sequence<Tile> = sequence {
-            yield(myTile)
-            myBottomCenter?.let { yield(it) }  // tile directly below us,
-            if (bottomRightOrLeft == BottomRightOrLeft.BottomLeft)
-                myBottomLeft?.let { yield(it) }  // tile to our bottom-left
-            else
-                myBottomRight?.let { yield(it) }  // tile to our bottom-right
+            topLeft?.let { yield(it) }
+            topRight?.let { yield(it) }
+            bottomLeft?.let { yield(it) }
+            bottomRight?.let { yield(it) }
         }
 
         fun paintTo(newCoordinate: RiverCoordinate, resultingTiles: MutableSet<Tile>?) {
-            if (newCoordinate.position == position) // same tile, switched right-to-left
-                paintBottom(resultingTiles)
-            else if (bottomRightOrLeft == BottomRightOrLeft.BottomRight) {
-                if (newCoordinate.getAdjacentTiles().contains(myTile)) // moved from our 5 O'Clock to our 3 O'Clock
-                    paintBottomRight(resultingTiles)
-                else // moved from our 5 O'Clock down in the 5 O'Clock direction - this is the 8 O'Clock river of the tile to our 4 O'Clock!
-                    newCoordinate.paintBottomLeft(resultingTiles)
-            } else { // bottomRightOrLeft == BottomRightOrLeft.BottomLeft
-                if (newCoordinate.getAdjacentTiles().contains(myTile)) // moved from our 7 O'Clock to our 9 O'Clock
-                    paintBottomLeft(resultingTiles)
-                else // moved from our 7 O'Clock down in the 7 O'Clock direction
-                    newCoordinate.paintBottomRight(resultingTiles)
+            val dx = newCoordinate.x - x
+            val dy = newCoordinate.y - y
+            when {
+                dy == 1 && dx == 0 -> { // Moved North: right edge of topLeft
+                    topLeft?.hasRightRiver = true
+                    if (resultingTiles != null) {
+                        topLeft?.let { resultingTiles.add(it) }
+                        topRight?.let { resultingTiles.add(it) }
+                    }
+                }
+                dy == -1 && dx == 0 -> { // Moved South: right edge of bottomLeft
+                    bottomLeft?.hasRightRiver = true
+                    if (resultingTiles != null) {
+                        bottomLeft?.let { resultingTiles.add(it) }
+                        bottomRight?.let { resultingTiles.add(it) }
+                    }
+                }
+                dx == -1 && dy == 0 -> { // Moved West: bottom edge of topLeft
+                    topLeft?.hasBottomRiver = true
+                    if (resultingTiles != null) {
+                        topLeft?.let { resultingTiles.add(it) }
+                        bottomLeft?.let { resultingTiles.add(it) }
+                    }
+                }
+                dx == 1 && dy == 0 -> { // Moved East: bottom edge of topRight
+                    topRight?.hasBottomRiver = true
+                    if (resultingTiles != null) {
+                        topRight?.let { resultingTiles.add(it) }
+                        bottomRight?.let { resultingTiles.add(it) }
+                    }
+                }
             }
         }
-
-        private fun paintBottom(resultingTiles: MutableSet<Tile>?) {
-            myTile.hasBottomRiver = true
-            if (resultingTiles == null) return
-            resultingTiles.add(myTile)
-            myBottomCenter?.let { resultingTiles.add(it) }
-        }
-        private fun paintBottomLeft(resultingTiles: MutableSet<Tile>?) {
-            myTile.hasBottomLeftRiver = true
-            if (resultingTiles == null) return
-            resultingTiles.add(myTile)
-            myBottomLeft?.let { resultingTiles.add(it) }
-        }
-        private fun paintBottomRight(resultingTiles: MutableSet<Tile>?) {
-            myTile.hasBottomRightRiver = true
-            if (resultingTiles == null) return
-            resultingTiles.add(myTile)
-            myBottomRight?.let { resultingTiles.add(it) }
-        }
-
-        /** Count edges with a river from this vertex */
-        @Suppress("unused")  // Keep as how-to just in case
-        fun numberOfConnectedRivers(): Int = sequence {
-            yield(myTile.hasBottomRiver)
-            if (bottomRightOrLeft == BottomRightOrLeft.BottomLeft) {
-                yield(myTile.hasBottomLeftRiver)
-                yield(myBottomLeft?.hasBottomRightRiver == true)
-            } else {
-                yield(myTile.hasBottomRightRiver)
-                yield(myBottomRight?.hasBottomLeftRiver == true)
-            }
-        }.count { it }
     }
 
-    enum class RiverDirections(private val clockPosition: Int) {
-        North(12),
-        NorthEast(2),
-        SouthEast(4),
-        South(6),
-        SouthWest(8),
-        NorthWest(10);
+    enum class RiverDirections(private val direction: NeighborDirection) {
+        North(NeighborDirection.North),
+        East(NeighborDirection.East),
+        South(NeighborDirection.South),
+        West(NeighborDirection.West);
         fun getNeighborTile(selectedTile: Tile): Tile? =
-            selectedTile.tileMap.getClockPositionNeighborTile(selectedTile, clockPosition)
+            selectedTile.tileMap.getNeighborTile(selectedTile, direction)
         companion object {
             val names get() = entries.map { it.name }
         }
     }
 
     companion object {
-        /** [UniqueType.OneTimeChangeTerrain] tries to place a "River" feature.
-         *
-         *  Operates on *edges* - while [spawnRiver] hops from [vertex][RiverCoordinate] to vertex!
-         *  Placed here to make comparison easier, even though the implementation has nothing else in common.
-         *  @return success - one edge of [tile] has a new river
-         */
         fun continueRiverOn(tile: Tile): Boolean {
             if (!tile.isLand) return false
             val tileMap = tile.tileMap
 
-            /** Helper to prioritize a tile edge for river placement - accesses [tile] as closure,
-             *  and considers the edge common with [otherTile] in direction [clockPosition].
-             *
-             *  Will consider two additional tiles - those that are neighbor to both [tile] and [otherTile],
-             *  and four other edges - those connecting to "our" edge.
-             */
             class NeighborData(val otherTile: Tile) {
-                val clockPosition = tileMap.getNeighborTileClockPosition(tile, otherTile)
-                // Accesses `tile` as closure
+                val direction = tileMap.getNeighborDirection(tile, otherTile)!!
                 val isConnectedByRiver = tile.isConnectedByRiver(otherTile)
                 val edgeLeadsToSea: Boolean
                 val connectedRiverCount: Int
-                val verticesFormYCount: Int
 
                 init {
-                    // Similar: private fun Tile.getLeftSharedNeighbor in TileLayerBorders
-                    val leftSharedNeighbor = tileMap.getClockPositionNeighborTile(tile, (clockPosition - 2) % 12)
-                    val rightSharedNeighbor = tileMap.getClockPositionNeighborTile(tile, (clockPosition + 2) % 12)
-                    edgeLeadsToSea = leftSharedNeighbor?.isWater == true || rightSharedNeighbor?.isWater == true
-                    connectedRiverCount = sequence {
-                        yield(leftSharedNeighbor?.isConnectedByRiver(tile))
-                        yield(leftSharedNeighbor?.isConnectedByRiver(otherTile))
-                        yield(rightSharedNeighbor?.isConnectedByRiver(tile))
-                        yield(rightSharedNeighbor?.isConnectedByRiver(otherTile))
-                    }.count { it == true }
-                    verticesFormYCount = sequence {
-                        yield(leftSharedNeighbor?.run { isConnectedByRiver(tile) && isConnectedByRiver(otherTile) })
-                        yield(rightSharedNeighbor?.run { isConnectedByRiver(tile) && isConnectedByRiver(otherTile) })
-                    }.count { it == true }
+                    val perpA: NeighborDirection
+                    val perpB: NeighborDirection
+                    if (direction == NeighborDirection.North || direction == NeighborDirection.South) {
+                        perpA = NeighborDirection.West
+                        perpB = NeighborDirection.East
+                    } else {
+                        perpA = NeighborDirection.North
+                        perpB = NeighborDirection.South
+                    }
+                    val sideA = tileMap.getNeighborTile(tile, perpA)
+                    val sideB = tileMap.getNeighborTile(tile, perpB)
+                    val otherSideA = tileMap.getNeighborTile(otherTile, perpA)
+                    val otherSideB = tileMap.getNeighborTile(otherTile, perpB)
+
+                    edgeLeadsToSea = sideA?.isWater == true || sideB?.isWater == true ||
+                        otherSideA?.isWater == true || otherSideB?.isWater == true
+                    connectedRiverCount = listOfNotNull(
+                        sideA?.let { tile.isConnectedByRiver(it) },
+                        sideB?.let { tile.isConnectedByRiver(it) },
+                        otherSideA?.let { otherTile.isConnectedByRiver(it) },
+                        otherSideB?.let { otherTile.isConnectedByRiver(it) }
+                    ).count { it }
                 }
 
-                fun getPriority(edgeToSeaPriority: Int) =
-                    // choose a priority - only order matters, not magnitude
-                    when {
-                        isConnectedByRiver -> -9 // ensures this isn't chosen, otherwise "cannot place another river" would have bailed
-                        edgeLeadsToSea -> edgeToSeaPriority + connectedRiverCount - 3 * verticesFormYCount
-                        // Just 6 possible cases left:
-                        //  * Connect two bends = -2
-                        //  * Connect a bend to nothing = -1 // debatable!
-                        //  * Connect nothing = 0
-                        //  * Connect a bend with an open end = 1
-                        //  * Connect to one open end = 2
-                        //  * Connect two open ends = 3 (make that 4 to simplify)
-                        verticesFormYCount == 2 -> -2
-                        verticesFormYCount == 1 -> connectedRiverCount * 2 - 5
-                        else -> connectedRiverCount * 2
-                    }
+                fun getPriority(edgeToSeaPriority: Int) = when {
+                    isConnectedByRiver -> -9
+                    edgeLeadsToSea -> edgeToSeaPriority + connectedRiverCount
+                    else -> connectedRiverCount * 2
+                }
             }
 
-            // Collect data (includes tiles we already have a river edge with - need the stats)
-            val viableNeighbors = tile.neighbors.filter { it.isLand }.map { NeighborData(it) }.toList()
-            if (viableNeighbors.all { it.isConnectedByRiver }) return false // cannot place another river
+            val viableNeighbors = tile.neighbors
+                .filter { it.isLand && tileMap.getNeighborDirection(tile, it)?.isCardinal == true }
+                .map { NeighborData(it) }
+                .toList()
+            if (viableNeighbors.isEmpty() || viableNeighbors.all { it.isConnectedByRiver }) return false
 
-            // Greatly encourage connecting to sea unless the tile already has a river to sea, in which case slightly discourage another one
             val edgeToSeaPriority = if (viableNeighbors.none { it.isConnectedByRiver && it.edgeLeadsToSea }) 9 else -1
-
             val rng = GameContext(tile = tile).stateBasedRandom("RiverGenerator.continueRiverOn")
             val choice = viableNeighbors
-                .groupBy { it.getPriority(edgeToSeaPriority) } // Assign and group by priorities
-                .maxBy { it.key }.value // Get the List with best priority - can't be empty
+                .groupBy { it.getPriority(edgeToSeaPriority) }
+                .maxBy { it.key }.value
                 .random(rng)
 
             return tile.setConnectedByRiver(choice.otherTile, newValue = true, convertTerrains = true)

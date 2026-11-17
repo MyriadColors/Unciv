@@ -41,7 +41,7 @@ class MapSize private constructor(
         setNewRadius(radius)
     }
 
-    constructor(width: Int, height: Int) : this(custom, HexMath.getEquivalentHexagonalRadius(width, height), width, height)
+    constructor(width: Int, height: Int) : this(custom, GridMath.getEquivalentSquareRadius(width, height), width, height)
 
     constructor(other: MapSize) : this(other.name, other.radius, other.width, other.height)
 
@@ -135,7 +135,7 @@ class MapSize private constructor(
 
     private fun setNewRadius(radius: Int) {
         this.radius = radius
-        val size = HexMath.getEquivalentRectangularSize(radius)
+        val size = GridMath.getEquivalentRectangularSize(radius)
         width = size.x
         height = size.y
     }

@@ -12,7 +12,7 @@ import com.unciv.logic.civilization.NotificationIcon
 import com.unciv.logic.civilization.Proximity
 import com.unciv.logic.civilization.diplomacy.DiplomacyFlags
 import com.unciv.logic.civilization.managers.quests.QuestTargetHelpers.getRandom
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.Quest
 import com.unciv.models.ruleset.QuestName
 import com.unciv.models.translations.tr
@@ -167,7 +167,7 @@ class QuestManager : IsPartOfGameInfoSerialization {
         addNotification(text, actions, NotificationCategory.Diplomacy, civ.civName, NotificationIcon.Quest)
     private fun Civilization.addDiplomacyNotification(text: String) =
         addQuestNotification(text, listOf(DiplomacyAction(civ)))
-    private fun Civilization.addQuestNotification(text: String, location: HexCoord? = civ.getCapital()!!.location) =
+    private fun Civilization.addQuestNotification(text: String, location: GridCoord? = civ.getCapital()!!.location) =
         // Note: that LocationAction pseudo-constructor is able to filter out null location(s), no need for `if`
         addQuestNotification(text, LocationAction(location).asIterable())
 
@@ -508,7 +508,7 @@ class QuestManager : IsPartOfGameInfoSerialization {
      * Since [QuestName.ClearBarbarianCamp] is a global quest, it could have been assigned to
      * multiple civilizations, so after this notification all matching quests are removed.
      */
-    fun barbarianCampCleared(civInfo: Civilization, location: HexCoord) {
+    fun barbarianCampCleared(civInfo: Civilization, location: GridCoord) {
         val matchingQuests = getAssignedQuestsOfName(QuestName.ClearBarbarianCamp)
                 .filter { it.data1.toInt() == location.x && it.data2.toInt() == location.y }
 
@@ -568,11 +568,11 @@ class QuestManager : IsPartOfGameInfoSerialization {
         civ.forEachKnownCiv { thirdCiv ->
             if (!thirdCiv.isMajorCiv || thirdCiv.isDefeated() || thirdCiv.isAtWarWith(civ))
                 return@forEachKnownCiv
-            notifyAskForAssistance(thirdCiv, attacker.civID, unitsToKill, location?.toHexCoord())
+            notifyAskForAssistance(thirdCiv, attacker.civID, unitsToKill, location?.toGridCoord())
         }
     }
 
-    private fun notifyAskForAssistance(assignee: Civilization, attackerName: String, unitsToKill: Int, location: HexCoord?) {
+    private fun notifyAskForAssistance(assignee: Civilization, attackerName: String, unitsToKill: Int, location: GridCoord?) {
         if (attackerName == assignee.civID) return  // No "Hey Bob help us against Bob"
         val message = "[${civ.civName}] is being attacked by [$attackerName]!" +
             // Space relevant in template!
@@ -607,7 +607,7 @@ class QuestManager : IsPartOfGameInfoSerialization {
         if (unitsToKillForCiv.isEmpty()) return
         val location = civ.getCapital(firstCityIfNoCapital = true)?.location
         for ((attackerName, unitsToKill) in unitsToKillForCiv)
-            notifyAskForAssistance(otherCiv, attackerName, unitsToKill, location?.toHexCoord())
+            notifyAskForAssistance(otherCiv, attackerName, unitsToKill, location?.toGridCoord())
     }
 
     /** Ends War with Major pseudo-quests that aren't relevant any longer */

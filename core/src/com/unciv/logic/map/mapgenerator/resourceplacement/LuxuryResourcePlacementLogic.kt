@@ -1,6 +1,6 @@
 package com.unciv.logic.map.mapgenerator.resourceplacement
 
-import com.unciv.logic.map.HexMath.getDistance
+import com.unciv.logic.map.GridMath.getDistance
 import com.unciv.logic.map.mapgenerator.MapResourceSetting
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.mapgenerator.mapregions.*

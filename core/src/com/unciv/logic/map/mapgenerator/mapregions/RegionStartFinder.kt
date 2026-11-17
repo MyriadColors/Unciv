@@ -3,7 +3,7 @@ package com.unciv.logic.map.mapgenerator.mapregions
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.unciv.Constants
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapgenerator.mapregions.MapRegions.Companion.closeStartPenaltyForRing
 import com.unciv.logic.map.mapgenerator.mapregions.MapRegions.Companion.firstRingFoodScores
 import com.unciv.logic.map.mapgenerator.mapregions.MapRegions.Companion.firstRingProdScores
@@ -14,7 +14,7 @@ import com.unciv.logic.map.mapgenerator.mapregions.MapRegions.Companion.minimumP
 import com.unciv.logic.map.mapgenerator.mapregions.MapRegions.Companion.secondRingFoodScores
 import com.unciv.logic.map.mapgenerator.mapregions.MapRegions.Companion.secondRingProdScores
 import com.unciv.logic.map.tile.Tile
-import com.unciv.logic.map.toHexCoord
+import com.unciv.logic.map.toGridCoord
 import com.unciv.models.ruleset.tile.TerrainType
 import yairm210.purity.annotations.Pure
 import kotlin.math.roundToInt
@@ -126,7 +126,7 @@ object RegionStartFinder {
         }
 
         // Something went extremely wrong and there is somehow no place to start. Spawn some land and start there
-        val panicPosition = region.rect.getPosition(Vector2()).toHexCoord()
+        val panicPosition = region.rect.getPosition(Vector2()).toGridCoord()
         val panicTerrain = region.tileMap.ruleset!!.terrains.values.first { it.type == TerrainType.Land }.name
         region.tileMap[panicPosition].baseTerrain = panicTerrain
         region.tileMap[panicPosition].setTerrainFeatures(listOf())
@@ -191,8 +191,8 @@ object RegionStartFinder {
             // Ring-specific scoring
             when (ring) {
                 1 -> {
-                    val foodScore = firstRingFoodScores[totalFood]
-                    val prodScore = firstRingProdScores[totalProd]
+                    val foodScore = firstRingFoodScores[totalFood.coerceAtMost(firstRingFoodScores.lastIndex)]
+                    val prodScore = firstRingProdScores[totalProd.coerceAtMost(firstRingProdScores.lastIndex)]
                     totalScore += foodScore + prodScore + totalRivers + (totalGood * 2) - (totalJunk * 3)
                 }
                 2 -> {
@@ -222,7 +222,7 @@ object RegionStartFinder {
         localData.startScore = totalScore
     }
 
-    private fun setRegionStart(region: Region, position:HexCoord, tileData: TileDataMap) {
+    private fun setRegionStart(region: Region, position:GridCoord, tileData: TileDataMap) {
         region.startPosition = position
 
         for ((ring, penalty) in closeStartPenaltyForRing) {

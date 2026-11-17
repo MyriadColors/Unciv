@@ -7,7 +7,7 @@ import com.unciv.logic.civilization.*
 import com.unciv.logic.civilization.diplomacy.DiplomacyFlags
 import com.unciv.logic.civilization.diplomacy.DiplomaticModifiers
 import com.unciv.logic.civilization.managers.EspionageManager
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.unique.Unique
 import com.unciv.models.ruleset.unique.UniqueType
 import yairm210.purity.annotations.Readonly
@@ -41,7 +41,7 @@ class Spy private constructor() : IsPartOfGameInfoSerialization {
         private set
 
     // `location == null` means that the spy is in its hideout
-    private var location: HexCoord? = null
+    private var location: GridCoord? = null
 
     var action = SpyAction.None
         private set
@@ -492,7 +492,7 @@ class Spy private constructor() : IsPartOfGameInfoSerialization {
 
     /** Shorthand for [Civilization.addNotification] specialized for espionage - action, category and icon are always the same */
     fun addNotification(text: String) =
-        civInfo.addNotification(text, EspionageAction.withLocation(location?.toHexCoord()), NotificationCategory.Espionage, NotificationIcon.Spy)
+        civInfo.addNotification(text, EspionageAction.withLocation(location?.toGridCoord()), NotificationCategory.Espionage, NotificationIcon.Spy)
 
     /** Anti-save-scum: Deterministic random from city and turn
      *  @throws NullPointerException for spies in the hideout */

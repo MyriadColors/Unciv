@@ -10,7 +10,7 @@ import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.diplomacy.RelationshipLevel
 import com.unciv.logic.map.pathingmap.FixedPointMovement.Companion.FPM_POINT_FIVE
 import com.unciv.logic.map.pathingmap.FixedPointMovement.Companion.fpmFromMovement
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.MapPathing
 import com.unciv.logic.map.MapPathing.roadPreferredMovementCost
 import com.unciv.logic.map.pathingmap.RouteNode.Companion.MAX_MOVE_THIS_TURN
@@ -488,14 +488,14 @@ class PathingMap(
         }
 
         @Suppress("unused")
-        internal val ALWAYS_LOG: HexCoord = HexCoord(0xFFFF, 0xFFFE)
+        internal val ALWAYS_LOG: GridCoord = GridCoord(0xFFFF, 0xFFFE)
         @Suppress("unused")
         @VisibleForTesting
-        val NEVER_LOG: HexCoord = HexCoord(0xFFFF, 0xFFFF)
+        val NEVER_LOG: GridCoord = GridCoord(0xFFFF, 0xFFFF)
         /** You can temporarily set this to a tile position, e.g. a unit's, or to [ALWAYS_LOG],
          *  to enable verbose logging for that thing's pathfinding or for everything */
         @VisibleForTesting
-        val VERBOSE_PATHFINDING_LOGS: HexCoord = NEVER_LOG
+        val VERBOSE_PATHFINDING_LOGS: GridCoord = NEVER_LOG
 
         @Readonly
         fun createUnitPathingMap(unit: MapUnit, considerZoneOfControl: Boolean = true, includeEscortUnit: Boolean = true): PathingMap {
@@ -606,7 +606,7 @@ class PathingMap(
         }
 
         @Readonly
-        private fun civPathExistCacheKey(startingPoint: HexCoord) = PathingMapCacheKey(startingPoint,
+        private fun civPathExistCacheKey(startingPoint: GridCoord) = PathingMapCacheKey(startingPoint,
             MAX_MOVE_THIS_TURN,
             MAX_MOVE_THIS_TURN
         )

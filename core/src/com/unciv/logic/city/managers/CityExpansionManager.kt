@@ -5,7 +5,7 @@ import com.unciv.logic.city.City
 import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.NotificationCategory
 import com.unciv.logic.civilization.NotificationIcon
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.ruleset.tile.ResourceType
 import com.unciv.models.ruleset.unique.UniqueType
@@ -137,12 +137,12 @@ class CityExpansionManager : IsPartOfGameInfoSerialization {
         val resource = tile.tileResource
         if (city.civ.canSeeResource(resource)) {
             if (resource.resourceType != ResourceType.Bonus) score -= 105
-            else if (distance <= city.getWorkRange()) score -= 104
+            else if (city.isTileInWorkRange(tile)) score -= 104
         } else {
             // Water tiles without resources aren't great unless they're Atolls
             if (tile.isWater) score += 3
             // Can't work it anyways
-            if (distance > city.getWorkRange()) score += 100
+            if (!city.isTileInWorkRange(tile)) score += 100
         }
 
         if (tile.naturalWonder != null) score -= 105
@@ -161,13 +161,12 @@ class CityExpansionManager : IsPartOfGameInfoSerialization {
                 continue
             }
             // the neighbor tile is not owned by anyone
-            val adjacentDistance = city.getCenterTile().aerialDistanceTo(adjacentTile)
             val adjacentResource = adjacentTile.tileResource
             if (city.civ.canSeeResource(adjacentResource) &&
-                (adjacentDistance <= city.getWorkRange() || adjacentResource.resourceType != ResourceType.Bonus)
+                (city.isTileInWorkRange(adjacentTile) || adjacentResource.resourceType != ResourceType.Bonus)
             ) score -= 1
             if (adjacentTile.naturalWonder != null) {
-                if (adjacentDistance <= city.getWorkRange()) adjacentNaturalWonder = true
+                if (city.isTileInWorkRange(adjacentTile)) adjacentNaturalWonder = true
                 score -= 1
             }
         }
@@ -197,7 +196,7 @@ class CityExpansionManager : IsPartOfGameInfoSerialization {
         }
     }
 
-    private fun addNewTileWithCulture(): HexCoord? {
+    private fun addNewTileWithCulture(): GridCoord? {
         val chosenTile = chooseNewTileToOwn()
         if (chosenTile != null) {
             cultureStored -= getCultureToNextTile()

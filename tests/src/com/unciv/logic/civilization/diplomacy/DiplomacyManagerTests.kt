@@ -2,7 +2,7 @@ package com.unciv.logic.civilization.diplomacy
 
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.diplomacy.DiplomacyTurnManager.nextTurn
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.ruleset.BeliefType
 import com.unciv.testing.BaseTestRunner
@@ -121,7 +121,7 @@ class DiplomacyManagerTests {
         testGame.gameInfo.currentPlayerCiv = addCiv() // otherwise test crashes when puppetying city
         testGame.gameInfo.currentPlayer = testGame.gameInfo.currentPlayerCiv.civID
 
-        val bCity = testGame.addCity(b, testGame.getTile(HexCoord.Zero), initialPopulation = 2)
+        val bCity = testGame.addCity(b, testGame.getTile(GridCoord.Zero), initialPopulation = 2)
         testGame.addCity(b, testGame.getTile(1,1))  // another city otherwise b is destroyed when bCity is captured
         bCity.puppetCity(c)
 
@@ -150,7 +150,7 @@ class DiplomacyManagerTests {
         testGame.gameInfo.currentPlayerCiv = addCiv() // otherwise test crashes when puppetying city
         testGame.gameInfo.currentPlayer = testGame.gameInfo.currentPlayerCiv.civID
 
-        val bCity = testGame.addCity(b, testGame.getTile(HexCoord.Zero), initialPopulation = 2)
+        val bCity = testGame.addCity(b, testGame.getTile(GridCoord.Zero), initialPopulation = 2)
         testGame.addCity(b, testGame.getTile(1,1))  // another city otherwise b is destroyed when bCity is captured
 
         // when
@@ -242,8 +242,8 @@ class DiplomacyManagerTests {
     @Test
     fun `should gain previous influence in city state after indirect war`() {
         // given
-        val cityState = addCiv(cityStateType = "Militaristic", testGame.getTile(HexCoord.Zero)) // making peace tries to move units around, so we need to initialize their positions
-        val e = addCiv(defaultUnitTile = testGame.getTile(HexCoord(1,0)))
+        val cityState = addCiv(cityStateType = "Militaristic", testGame.getTile(GridCoord.Zero)) // making peace tries to move units around, so we need to initialize their positions
+        val e = addCiv(defaultUnitTile = testGame.getTile(GridCoord(1,0)))
         meet(e, cityState)
         // we cannot be allied and simoultaneously having a city state declare indirect war on us
         cityState.getDiplomacyManager(e)!!.addInfluence(31f)
@@ -298,8 +298,8 @@ class DiplomacyManagerTests {
         meet(a, cityState)
 
         // to spread religion, need cities
-        testGame.addCity(a, testGame.getTile(HexCoord.Zero))
-        val cityStateCapital = testGame.addCity(cityState, testGame.getTile(HexCoord(1,0)), initialPopulation = 2)
+        testGame.addCity(a, testGame.getTile(GridCoord.Zero))
+        val cityStateCapital = testGame.addCity(cityState, testGame.getTile(GridCoord(1,0)), initialPopulation = 2)
 
         val religion = testGame.addReligion(a)
         val belief = testGame.createBelief(BeliefType.Founder, "[+1 Food] from every [Shrine]")
@@ -339,8 +339,8 @@ class DiplomacyManagerTests {
         meet(a, cityState)
 
         // to spread religion, need cities
-        testGame.addCity(a, testGame.getTile(HexCoord.Zero))
-        val cityStateCapital = testGame.addCity(cityState, testGame.getTile(HexCoord(1,0)), initialPopulation = 2)
+        testGame.addCity(a, testGame.getTile(GridCoord.Zero))
+        val cityStateCapital = testGame.addCity(cityState, testGame.getTile(GridCoord(1,0)), initialPopulation = 2)
 
         val religion = testGame.addReligion(a)
         val belief = testGame.createBelief(BeliefType.Founder, "[+1 Food] from every [Shrine]")
@@ -361,8 +361,8 @@ class DiplomacyManagerTests {
         // given
         meet(a, b)
 
-        testGame.addCity(a, testGame.getTile(HexCoord.Zero), initialPopulation = 10)
-        testGame.addCity(b, testGame.getTile(HexCoord(1,0)), initialPopulation = 20)
+        testGame.addCity(a, testGame.getTile(GridCoord.Zero), initialPopulation = 10)
+        testGame.addCity(b, testGame.getTile(GridCoord(1,0)), initialPopulation = 20)
 
         val expectedSciencePerTurnCivA = 13 // 10 pop, 3 palace. Smaller than 23 science per turn of civ B (20 pop, 3 palace)
         val turns = 10
@@ -402,7 +402,7 @@ class DiplomacyManagerTests {
         testGame.gameInfo.currentPlayerCiv = addCiv()
         testGame.gameInfo.currentPlayer = testGame.gameInfo.currentPlayerCiv.civID
 
-        val csCity = testGame.addCity(cityState, testGame.getTile(HexCoord.Zero), initialPopulation = 2)
+        val csCity = testGame.addCity(cityState, testGame.getTile(GridCoord.Zero), initialPopulation = 2)
         cityState.getDiplomacyManager(ally)!!.setInfluence(93f)
         cityState.getDiplomacyManager(rival)!!.setInfluence(-20f)
         cityState.getDiplomacyManager(liberator)!!.setInfluence(19f)

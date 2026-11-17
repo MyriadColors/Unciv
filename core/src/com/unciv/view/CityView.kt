@@ -57,6 +57,7 @@ class CityView(city: City,
     @Readonly fun tileView(tile: Tile): TileView = gameView.tileMapView.getTile(tile)
 
     @Readonly fun getWorkRange(): Int = city.getWorkRange()
+    @Readonly fun isTileInWorkRange(tile: TileView): Boolean = city.isTileInWorkRange(city.tileMap[tile.position()])
     @Readonly fun isWorked(tileView: TileView): Boolean = city.isWorked(getTile(tileView))
     @Readonly fun canBuyTile(tileView: TileView): Boolean = city.expansion.canBuyTile(getTile(tileView))
     @Readonly fun getGoldCostOfTile(tileView: TileView, extraTiles: Int = 0): Int =
@@ -309,4 +310,4 @@ class CityView(city: City,
 
 /** Explored tiles in work range that belong to this city's civ and could be worked */
 @Readonly fun CityView.getWorkableTiles(): Sequence<TileView> =
-    getCenterTile().getExploredTilesInDistance(getWorkRange()).filter { it.getOwner() == owningCiv() }
+    getCenterTile().getExploredTilesInDistance(getWorkRange()).filter { it.getOwner() == owningCiv() && isTileInWorkRange(it) }

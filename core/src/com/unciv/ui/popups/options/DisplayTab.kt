@@ -176,7 +176,8 @@ internal class DisplayTab(
 
     private fun addTileSetSelectBox() {
         val unitSets = ImageGetter.getAvailableUnitsets()
-        addSelectBox("Tileset", settings::tileSet, ImageGetter.getAvailableTilesets().asIterable()) { newValue, oldValue ->
+        val availableTilesets = ImageGetter.getAvailableTilesets().filter { it in TileSetCache }.asIterable()
+        addSelectBox("Tileset", settings::tileSet, availableTilesets) { newValue, oldValue ->
             // Switch unitSet together with tileSet as long as one with the same name exists and both are selected
             if (oldValue == settings.unitSet && unitSets.contains(newValue)) {
                 settings.unitSet = newValue

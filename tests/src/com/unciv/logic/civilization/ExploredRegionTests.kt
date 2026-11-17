@@ -1,7 +1,7 @@
 package com.unciv.logic.civilization
 
-import com.unciv.logic.map.HexCoord
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.MapParameters
 import com.unciv.logic.map.MapShape
 import com.unciv.logic.map.MapSize
@@ -19,9 +19,9 @@ class ExploredRegionTests {
     private val mapParameters = MapParameters()
 
     /** Hex at longitude/latitude. Hexes only exist where long+lat is even, so an odd sum bumps [long] by one. */
-    private fun hex(long: Int, lat: Int): HexCoord {
+    private fun hex(long: Int, lat: Int): GridCoord {
         val l = if (((long + lat) and 1) == 0) long else long + 1
-        return HexCoord.of((lat + l) / 2, (lat - l) / 2)
+        return GridCoord.of((lat + l) / 2, (lat - l) / 2)
     }
 
     private fun withNewRegion(block: ExploredRegion.() -> Unit) {
@@ -42,14 +42,14 @@ class ExploredRegionTests {
         }
     }
 
-    private fun ExploredRegion.add(vararg hexes: HexCoord) = add(hexes.asIterable())
-    private fun ExploredRegion.add(hexes: Iterable<HexCoord>) = hexes.forEach { expandToInclude(it, null) }
+    private fun ExploredRegion.add(vararg hexes: GridCoord) = add(hexes.asIterable())
+    private fun ExploredRegion.add(hexes: Iterable<GridCoord>) = hexes.forEach { expandToInclude(it, null) }
     private fun ExploredRegion.add(long: Int, lat: Int) = add(hex(long, lat))
 
-    private fun describe(h: HexCoord) = "(long ${HexMath.getLongitude(h)}, lat ${HexMath.getLatitude(h)})"
-    private fun ExploredRegion.assertIn(h: HexCoord, what: String = "tile") =
+    private fun describe(h: GridCoord) = "(long ${GridMath.getLongitude(h)}, lat ${GridMath.getLatitude(h)})"
+    private fun ExploredRegion.assertIn(h: GridCoord, what: String = "tile") =
         assertTrue("$what ${describe(h)} should be inside the region", isPositionInRegion(h))
-    private fun ExploredRegion.assertOut(h: HexCoord, what: String = "tile") =
+    private fun ExploredRegion.assertOut(h: GridCoord, what: String = "tile") =
         assertFalse("$what ${describe(h)} should be outside the region", isPositionInRegion(h))
     private fun ExploredRegion.assertExtent(width: Int, height: Int) {
         assertEquals("width", width, getWidth())
@@ -81,9 +81,9 @@ class ExploredRegionTests {
     fun nonWrapRegionIsBoundingBoxOfAddedTiles() {
         val rnd = Random(42)
         // The origin is excluded, see originAsOnlyFirstTileIsKept
-        val tiles = List(50) { hex(rnd.nextInt(-10, 11), rnd.nextInt(-10, 11)) }.filter { it != HexCoord.of(0, 0) }
-        val longs = tiles.map { HexMath.getLongitude(it) }
-        val lats = tiles.map { HexMath.getLatitude(it) }
+        val tiles = List(50) { hex(rnd.nextInt(-10, 11), rnd.nextInt(-10, 11)) }.filter { it != GridCoord.of(0, 0) }
+        val longs = tiles.map { GridMath.getLongitude(it) }
+        val lats = tiles.map { GridMath.getLatitude(it) }
         withNewRegion {
             add(tiles)
             tiles.forEach { assertIn(it, "added tile") }

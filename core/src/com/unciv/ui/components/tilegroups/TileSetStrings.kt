@@ -55,9 +55,15 @@ class TileSetStrings(
     val tileSetConfig = TileSetCache[tileSet]?.config ?: TileSetConfig()
 
     // These need to be by lazy since the orFallback expects a tileset, which it may not get.
-    val hexagon: String by lazy { orFallback { tileSetLocation + "Hexagon"} }
+    val hexagon: String by lazy {
+        if (ImageGetter.imageExists(tileSetLocation + "Square")) tileSetLocation + "Square"
+        else orFallback { tileSetLocation + "Hexagon" }
+    }
     val hexagonList by lazy { listOf(hexagon) } // since it's orFallback, needs to be lazy
-    val crosshatchHexagon by lazy { orFallback { tileSetLocation + "CrosshatchHexagon" } }
+    val crosshatchHexagon by lazy {
+        if (ImageGetter.imageExists(tileSetLocation + "CrosshatchSquare")) tileSetLocation + "CrosshatchSquare"
+        else orFallback { tileSetLocation + "CrosshatchHexagon" }
+    }
     val unexploredTile by lazy { orFallback { tileSetLocation + "UnexploredTile" } }
     val crosshair by lazy { orFallback { getString(tileSetLocation, "Crosshair") } }
     val highlight by lazy { orFallback { getString(tileSetLocation, "Highlight") } }
@@ -67,9 +73,8 @@ class TileSetStrings(
     val naturalWonder = tileSetLocation + "Tiles/NaturalWonder"
 
     val tilesLocation = tileSetLocation + "Tiles/"
-    val bottomRightRiver by lazy { orFallback { tilesLocation + "River-BottomRight"} }
+    val rightRiver by lazy { orFallback { tilesLocation + "River-Right"} }
     val bottomRiver by lazy { orFallback { tilesLocation + "River-Bottom"} }
-    val bottomLeftRiver  by lazy { orFallback { tilesLocation + "River-BottomLeft"} }
     
     val edgeImagesByPosition = ImageGetter.getAllImageNames()
         .filter { it.startsWith(tileSetLocation +"Edges/") }
@@ -77,15 +82,24 @@ class TileSetStrings(
             val split = it.split('/').last() // without folder
                 .split("-")
             // Comprised of 3 parts: origin tilefilter, destination tilefilter, 
-            //   and edge type: Bottom, BottomLeft or BottomRight
+            //   and edge type: Top, Bottom, Left, or Right
             if (split.size != 4) return@mapNotNull null
 
             // split[0] is name and is unused
             val originTileFilter = split[1]
             val destinationTileFilter = split[2]
             val neighborDirection = split[3]
-            val neighborDirectionEnumValue = NeighborDirection.entries
-                .firstOrNull { it.name == neighborDirection } ?: return@mapNotNull null
+            val neighborDirectionEnumValue = when (neighborDirection) {
+                "Top" -> NeighborDirection.North
+                "Bottom" -> NeighborDirection.South
+                "Left" -> NeighborDirection.West
+                "Right" -> NeighborDirection.East
+                "TopLeft" -> NeighborDirection.NorthWest
+                "TopRight" -> NeighborDirection.NorthEast
+                "BottomLeft" -> NeighborDirection.SouthWest
+                "BottomRight" -> NeighborDirection.SouthEast
+                else -> NeighborDirection.entries.firstOrNull { dir -> dir.name == neighborDirection }
+            } ?: return@mapNotNull null
 
             EdgeTileImage(it, originTileFilter, destinationTileFilter, neighborDirectionEnumValue)
         }

@@ -276,7 +276,7 @@ class CityScreen(
 
         for (tileGroup in tileGroups) {
             tileGroup.update(cityView.viewingCiv())
-            tileGroup.layerMisc.removeHexOutline()
+            tileGroup.layerMisc.removeTileOutline()
             if (isSpying) continue // the rest is only for own cities
 
             if (tileGroup.tileState == CityTileState.BLOCKADED)
@@ -284,13 +284,13 @@ class CityScreen(
 
             when {
                 tileGroup.tileView == nextTileToOwn ->
-                    tileGroup.layerMisc.addHexOutline(colorFromRGB(200, 20, 220))
+                    tileGroup.layerMisc.addTileOutline(colorFromRGB(200, 20, 220))
                 /** Support for [UniqueType.CreatesOneImprovement] */
                 tileGroup.tileView == selectedQueueEntryTargetTile ->
-                    tileGroup.layerMisc.addHexOutline(Color.BROWN)
+                    tileGroup.layerMisc.addTileOutline(Color.BROWN)
                 pickTileData != null && cityView.isOwnedTile(tileGroup.tileView) && cityView.isInRange(tileGroup.tileView) ->
                     getPickImprovementColor(tileGroup.tileView).run {
-                        tileGroup.layerMisc.addHexOutline(first.cpy().apply { this.a = second }) }
+                        tileGroup.layerMisc.addTileOutline(first.cpy().apply { this.a = second }) }
             }
 
             if (fireworks != null && tileGroup.tileView.position() == cityView.location)
@@ -548,7 +548,7 @@ class CityScreen(
     fun exit() {
         val newScreen = game.popScreen()
         if (newScreen is WorldScreen) {
-            newScreen.mapHolder.setCenterPosition(cityView.location.toHexCoord(), immediately = true)
+            newScreen.mapHolder.setCenterPosition(cityView.location.toGridCoord(), immediately = true)
             newScreen.bottomUnitTable.selectUnit()
         }
     }

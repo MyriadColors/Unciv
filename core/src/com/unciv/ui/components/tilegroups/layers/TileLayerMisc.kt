@@ -261,7 +261,7 @@ class TileLayerMisc(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup, si
     private val arrowsToDraw = ArrayList<MapArrow>()
     private val arrows = HashMap<TileView, ArrayList<Actor>>()
 
-    private var hexOutlineIcon: Actor? = null
+    private var tileOutlineIcon: Actor? = null
 
     private var workedIcon: Actor? = null
 
@@ -428,21 +428,21 @@ class TileLayerMisc(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup, si
         determineVisibility()
     }
 
-    fun addHexOutline(color: Color) {
-        hexOutlineIcon?.let { removeOwnedActor(it) }
-        hexOutlineIcon = ImageGetter.getImage("OtherIcons/HexagonOutline").apply {
+    fun addTileOutline(color: Color) {
+        tileOutlineIcon?.let { removeOwnedActor(it) }
+        tileOutlineIcon = ImageGetter.getImage("OtherIcons/SquareOutline").apply {
             touchable = Touchable.disabled
-            setHexagonSize(1f)
+            setTileSize(1f)
         }
-        hexOutlineIcon!!.color = color
-        addOwnedActor(hexOutlineIcon!!)
-        hexOutlineIcon!!.toBack()
+        tileOutlineIcon!!.color = color
+        addOwnedActor(tileOutlineIcon!!)
+        tileOutlineIcon!!.toBack()
         determineVisibility()
     }
 
-    fun removeHexOutline() {
-        hexOutlineIcon?.let { removeOwnedActor(it) }
-        hexOutlineIcon = null
+    fun removeTileOutline() {
+        tileOutlineIcon?.let { removeOwnedActor(it) }
+        tileOutlineIcon = null
         determineVisibility()
     }
 
@@ -456,7 +456,7 @@ class TileLayerMisc(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup, si
         if (terrainOverlay == null) {
             terrainOverlay = ImageGetter.getImage(strings.hexagon).apply {
                 touchable = Touchable.disabled
-                setHexagonSize()
+                setTileSize()
             }
             addOwnedActor(terrainOverlay!!)
         }
@@ -491,7 +491,7 @@ class TileLayerMisc(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup, si
 
     override fun determineVisibility() {
         isVisible = workedIcon != null
-                || hexOutlineIcon != null
+                || tileOutlineIcon != null
                 || arrows.isNotEmpty()
                 || startingLocationIcons.isNotEmpty()
                 || terrainOverlay != null

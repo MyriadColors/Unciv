@@ -1,13 +1,13 @@
 package com.unciv.ui.screens.worldscreen.unit.presenter
 
 import com.unciv.view.idleUnitsCount
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.translations.tr
 import com.unciv.ui.screens.worldscreen.unit.UnitTable
 
 class SummaryPresenter(private val unitTable: UnitTable) : UnitTable.Presenter {
     
-    override val position: HexCoord? = null
+    override val position: GridCoord? = null
 
     override fun update() {
         unitTable.closeButton.isVisible = false

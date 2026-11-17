@@ -3,7 +3,7 @@ package com.unciv.uniques
 import com.unciv.logic.battle.BattleDamage
 import com.unciv.logic.battle.MapUnitCombatant
 import com.unciv.logic.civilization.managers.TurnManager
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.unique.UniqueType
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
@@ -20,7 +20,7 @@ class TimedUniquesTests {
             game.createPolicy("[+42]% Strength <when attacking> <for [Military] units> <for [1] turns>")
     private val enemy = game.addCiv()
     private val attacker =
-            MapUnitCombatant(game.addUnit("Warrior", civInfo, game.getTile(HexCoord.Zero)))
+            MapUnitCombatant(game.addUnit("Warrior", civInfo, game.getTile(GridCoord.Zero)))
     private val defender =
             MapUnitCombatant(game.addUnit("Warrior", enemy, game.getTile(1,0)))
 

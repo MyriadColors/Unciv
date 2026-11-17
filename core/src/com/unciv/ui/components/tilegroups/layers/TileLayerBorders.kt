@@ -56,6 +56,9 @@ class TileLayerBorders(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
         val civOuterColor = tileOwner.getOuterColor()
         val civInnerColor = tileOwner.getInnerColor()
         for (neighbor in tileGroup.neighbors) {
+            val relativeWorldPosition = tileMapView.getNeighborTilePositionAsWorldCoords(tileView, neighbor)
+            if (relativeWorldPosition.x != 0f && relativeWorldPosition.y != 0f) continue // Borders only on cardinal edges
+
             var shouldRemoveBorderSegment = false
             var shouldAddBorderSegment = false
 
@@ -110,13 +113,16 @@ class TileLayerBorders(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
                 }
 
                 val relativeWorldPosition = tileMapView.getNeighborTilePositionAsWorldCoords(tileView, neighbor)
-
-                val sign = if (relativeWorldPosition.x < 0) -1 else 1
-                val angle = sign * (atan(sign * relativeWorldPosition.y / relativeWorldPosition.x) * 180 / PI - 90.0).toFloat()
+                val angle = when {
+                    relativeWorldPosition.y > 0f -> 0f
+                    relativeWorldPosition.x > 0f -> -90f
+                    relativeWorldPosition.y < 0f -> 180f
+                    else -> 90f
+                }
 
                 val innerBorderImage = ImageGetter.getImage(
                     strings.orFallback { getBorder(borderShapeString,"Inner") }
-                ).setHexagonSize()
+                ).setTileSize()
 
                 addOwnedActor(innerBorderImage)
                 images.add(innerBorderImage)
@@ -125,7 +131,7 @@ class TileLayerBorders(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup,
 
                 val outerBorderImage = ImageGetter.getImage(
                     strings.orFallback { getBorder(borderShapeString, "Outer") }
-                ).setHexagonSize()
+                ).setTileSize()
 
                 addOwnedActor(outerBorderImage)
                 images.add(outerBorderImage)

@@ -1,6 +1,6 @@
 package com.unciv.logic.map.mapgenerator
 
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.MapShape
 import com.unciv.logic.map.tile.Tile
 import com.unciv.utils.debug
@@ -57,7 +57,7 @@ class MapGenerationRandomness {
         scale: Double,
         noiseFunction: (Double, Double, Double, Int, Double, Double, Double) -> Double
     ): Double {
-        val worldCoords = HexMath.hex2WorldCoords(tile.position)
+        val worldCoords = GridMath.grid2WorldCoords(tile.position)
         val params = tile.tileMap.mapParameters
 
         // Non-wrapping maps use standard 2D noise which naturally has a seam at the edges.
@@ -121,9 +121,9 @@ class MapGenerationRandomness {
         // Determine sensible initial distance from number of desired placements and mapRadius
         // empiric formula comes very close to eliminating retries for distance.
         // The `if` means if we need to fill 60% or more of the available tiles, no sense starting with minimum distance 2.
-        val sparsityFactor = (HexMath.getHexagonalRadiusForArea(suitableTiles.size) / mapRadius).pow(0.333f)
+        val sparsityFactor = (GridMath.getSquareRadiusForArea(suitableTiles.size) / mapRadius).pow(0.333f)
         val initialDistance = if (number == 1 || number * 5 >= suitableTiles.size * 3) 1
-            else (mapRadius * 0.666f / HexMath.getHexagonalRadiusForArea(number).pow(0.9f) * sparsityFactor).roundToInt().coerceAtLeast(1)
+            else (mapRadius * 0.666f / GridMath.getSquareRadiusForArea(number).pow(0.9f) * sparsityFactor).roundToInt().coerceAtLeast(1)
 
         // If possible, we want to equalize the base terrains upon which
         //  the resources are found, so we save how many have been

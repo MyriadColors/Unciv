@@ -2,7 +2,7 @@ package com.unciv.uniques
 
 import com.unciv.Constants
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.testing.GdxTestRunner
 import com.unciv.testing.TestGame
@@ -31,7 +31,7 @@ class CarrierTests {
         waterTile.baseTerrain = Constants.coast
         waterTile.setTerrainTransients()
         civ = game.addCiv()
-        val city = civ.addCity(HexCoord.Zero)
+        val city = civ.addCity(GridCoord.Zero)
         val fighterBase = game.createBaseUnit("Fighter", "MyFighters", "MyAircraft")
         val bomberBase = game.createBaseUnit("Bomber", "MyBombers", "MyAircraft")
         val carrierBase = game.createBaseUnit("Aircraft Carrier",

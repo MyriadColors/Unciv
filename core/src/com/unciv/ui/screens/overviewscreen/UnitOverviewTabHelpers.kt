@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.utils.Align
 import com.unciv.GUI
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.UnitActionType
 import com.unciv.models.translations.tr
 import com.unciv.ui.components.UncivTooltip.Companion.addTooltip
@@ -29,7 +29,7 @@ import yairm210.purity.annotations.Readonly
  */
 open class UnitOverviewTabHelpers {
 
-    private fun showWorldScreenAt(position: HexCoord, unit: MapUnitView?) {
+    private fun showWorldScreenAt(position: GridCoord, unit: MapUnitView?) {
         GUI.resetToWorldScreen()
         GUI.getMap().setCenterPosition(position, forceSelectUnit = unit)
     }

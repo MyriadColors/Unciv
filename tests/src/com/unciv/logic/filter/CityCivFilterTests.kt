@@ -2,7 +2,7 @@ package com.unciv.logic.filter
 
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.unique.Unique
 import com.unciv.models.ruleset.unique.UniqueTriggerActivation
 import com.unciv.testing.BaseTestRunner
@@ -24,7 +24,7 @@ class CityCivFilterTests {
         game = TestGame()
         game.makeHexagonalMap(6)
         civ = game.addCiv()
-        city = game.addCity(civ, game.getTile(HexCoord.Zero))
+        city = game.addCity(civ, game.getTile(GridCoord.Zero))
     }
 
     @Test

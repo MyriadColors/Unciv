@@ -1,7 +1,7 @@
 package com.unciv.uniques
 
 import com.unciv.Constants
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.UnitActionType
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
@@ -25,8 +25,8 @@ class TileUniquesTests {
         game.makeHexagonalMap(2)
         val civInfo = game.addCiv()
 
-        val tile = game.setTileTerrain(HexCoord.Zero, Constants.grassland)
-        val cityTile = game.setTileTerrain(HexCoord(2,0), Constants.grassland)
+        val tile = game.setTileTerrain(GridCoord.Zero, Constants.grassland)
+        val cityTile = game.setTileTerrain(GridCoord(2,0), Constants.grassland)
         val city = game.addCity(civInfo, cityTile, true)
         city.population.foodStored = 0 // just to be sure
         civInfo.addGold(-civInfo.gold) // reset gold just to be sure

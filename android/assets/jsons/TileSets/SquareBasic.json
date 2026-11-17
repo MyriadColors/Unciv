@@ -1,0 +1,24 @@
+{
+    "useColorAsBaseTerrain": false,
+    "useSummaryImages": true,
+    "fogOfWarColor": {
+        "r": 0.45,
+        "g": 0.5,
+        "b": 0.58,
+        "a": 1.0
+    },
+    "fallbackTileSet": null,
+    "tileScales": {
+        "Atoll": 0.75,
+        "City center": 0.85,
+        "Fallout": 0.75,
+        "Flood plains": 0.9,
+        "Forest": 0.85,
+        "Hill": 0.85,
+        "Ice": 0.85,
+        "Jungle": 0.85,
+        "Marsh": 0.85,
+        "NaturalWonder": 0.85,
+        "Oasis": 0.75
+    }
+}

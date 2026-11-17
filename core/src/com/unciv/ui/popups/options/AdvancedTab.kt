@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.unciv.Constants
 import com.unciv.GUI
 import com.unciv.UncivGame
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.metadata.BaseRuleset
 import com.unciv.models.metadata.GameSettings
 import com.unciv.models.metadata.GameSettings.ScreenSize
@@ -225,13 +225,13 @@ internal class AdvancedTab(
 
         // Can't use UncivGame.Current.translations.modsWithTranslations here, it's selective to the chosen language
         val entries = listOf("All mods") +
-            (if (isRunFromJar(this)) emptyList() else listOf(BaseRuleset.Civ_V_GnK.fullName)) +
+            (if (isRunFromJar(this)) emptyList() else listOf(BaseRuleset.BasicSquare.fullName)) +
             RulesetCache.keys.filter { mod -> BaseRuleset.entries.none { it.fullName == mod } }.sorted()
         val modSelect = TranslatedSelectBox(entries, "All mods")
 
         val backupCheckBox = "backup".toCheckBox()
         modSelect.onChange {
-            backupCheckBox.isDisabled = modSelect.selected.value == BaseRuleset.Civ_V_GnK.fullName
+            backupCheckBox.isDisabled = modSelect.selected.value == BaseRuleset.BasicSquare.fullName
         }
 
         addWrapped {
@@ -281,10 +281,10 @@ internal class AdvancedTab(
                 // I'm not sure why we need to advance the y by 2 for every screenshot... but that's the only way it remains centered
                 generateScreenshots(
                     settings, arrayListOf(
-                        ScreenshotConfig(630, 500, ScreenSize.Medium, "$extraImagesLocation/itch.io image.png", HexCoord(-2, 2), false),
-                        ScreenshotConfig(1280, 640, ScreenSize.Medium, "$extraImagesLocation/GithubPreviewImage.png", HexCoord(-2, 4)),
-                        ScreenshotConfig(1024, 500, ScreenSize.Medium, "$extraImagesLocation/Feature graphic - Google Play.png", HexCoord(-2, 6)),
-                        ScreenshotConfig(1024, 500, ScreenSize.Medium, "../../fastlane/metadata/android/en-US/images/featureGraphic.png", HexCoord(-2, 8))
+                        ScreenshotConfig(630, 500, ScreenSize.Medium, "$extraImagesLocation/itch.io image.png", GridCoord(-2, 2), false),
+                        ScreenshotConfig(1280, 640, ScreenSize.Medium, "$extraImagesLocation/GithubPreviewImage.png", GridCoord(-2, 4)),
+                        ScreenshotConfig(1024, 500, ScreenSize.Medium, "$extraImagesLocation/Feature graphic - Google Play.png", GridCoord(-2, 6)),
+                        ScreenshotConfig(1024, 500, ScreenSize.Medium, "../../fastlane/metadata/android/en-US/images/featureGraphic.png", GridCoord(-2, 8))
                     )
                 )
             }
@@ -298,7 +298,7 @@ internal class AdvancedTab(
         val height: Int,
         val screenSize: ScreenSize,
         var fileLocation: String,
-        var centerTile: HexCoord,
+        var centerTile: GridCoord,
         var attackCity: Boolean = true
     )
 

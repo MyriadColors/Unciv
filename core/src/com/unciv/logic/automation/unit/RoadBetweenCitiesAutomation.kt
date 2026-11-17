@@ -3,8 +3,8 @@ package com.unciv.logic.automation.unit
 import com.unciv.UncivGame
 import com.unciv.logic.city.City
 import com.unciv.logic.map.BFS
-import com.unciv.logic.map.HexCoord
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.tile.RoadStatus
 import com.unciv.utils.Log
 import com.unciv.utils.debug
@@ -63,7 +63,7 @@ class RoadBetweenCitiesAutomation(val civView: CivView, private val cachedForTur
      * value: The [BFS] searching from that city, whether successful or not
      */
     // TODO: If BFS were to deal in vectors instead of Tiles, we could copy this on cloning
-    @Cache private val bfsCache = HashMap<HexCoord, BFS<TileView>>()
+    @Cache private val bfsCache = HashMap<GridCoord, BFS<TileView>>()
 
     /** Caches road type to build for connecting cities, unless option is off or ruleset removed all roads */
     internal val bestRoadAvailable: RoadStatus =
@@ -275,7 +275,7 @@ class RoadBetweenCitiesAutomation(val civView: CivView, private val cachedForTur
         }
         @LocalState val bfs: BFS<TileView> = bfsCache[toConnectTile.position()] ?: run {
             val bfs = BFS(toConnectTile, isCandidateTilePredicate)
-            bfs.maxSize = HexMath.getNumberOfTilesInHexagon(
+            bfs.maxSize = GridMath.getNumberOfTilesInSquareRadius(
                 WorkerAutomationConst.maxBfsReachPadding +
                         tilesOfConnectedCities.minOf { it.aerialDistanceTo(toConnectTile) }
             )

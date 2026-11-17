@@ -6,7 +6,7 @@ import com.unciv.logic.IsPartOfGameInfoSerialization
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.NotificationCategory
 import com.unciv.logic.civilization.NotificationIcon
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
@@ -71,7 +71,7 @@ class BarbarianManager : IsPartOfGameInfoSerialization {
     }
 
     /** Called when an encampment was attacked, will speed up time to next spawn */
-    fun campAttacked(position: HexCoord) {
+    fun campAttacked(position: GridCoord) {
         encampments.firstOrNull { it.position == position }?.wasAttacked()
     }
 
@@ -217,7 +217,7 @@ class BarbarianManager : IsPartOfGameInfoSerialization {
 
     /** Attempts to spawn a barbarian on [position], returns true if successful and false if unsuccessful. */
     private fun spawnUnit(
-        position: HexCoord,
+        position: GridCoord,
         naval: Boolean,
         allegiance: Civilization = gameInfo.getBarbarianCivilization()
     ): MapUnit? {

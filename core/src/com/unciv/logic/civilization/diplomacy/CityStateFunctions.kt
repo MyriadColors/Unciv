@@ -134,9 +134,9 @@ class CityStateFunctions(val civInfo: Civilization) {
         val rng = civInfo.getDiplomacyManager(receivingCiv)!!.state.stateBasedRandom("CityStateFunctions.giveGreatPersonToPatron")
         val giftedUnit = giftableUnits.random(rng)
         val city = NextTurnAutomation.getForeignCityNearCapital(civInfo.getCapital(), receivingCiv)?.city ?: return
-        val placedUnit = receivingCiv.units.placeUnitNearTile(city.location.toHexCoord(), giftedUnit)
+        val placedUnit = receivingCiv.units.placeUnitNearTile(city.location.toGridCoord(), giftedUnit)
             ?: return
-        val locations = LocationAction(placedUnit.getTile().position, civInfo.getCapital()!!.location.toHexCoord())
+        val locations = LocationAction(placedUnit.getTile().position, civInfo.getCapital()!!.location.toGridCoord())
         receivingCiv.addNotification( "[${civInfo.civName}] gave us a [${giftedUnit.name}] as a gift!", locations,
             NotificationCategory.Units, civInfo.civName, giftedUnit.name)
     }
@@ -170,7 +170,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             ?: return  // That filter _can_ result in no candidates, if so, quit silently
 
         // placing the unit may fail - in that case stay quiet
-        val placedUnit = receivingCiv.units.placeUnitNearTile(city.location.toHexCoord(), militaryUnit.name) ?: return
+        val placedUnit = receivingCiv.units.placeUnitNearTile(city.location.toGridCoord(), militaryUnit.name) ?: return
 
         // The unit should have bonuses from Barracks, Alhambra etc as if it was built in the CS capital
         militaryUnit.addConstructionBonuses(placedUnit, civInfo.getCapital()!!.cityConstructions)
@@ -417,7 +417,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             city.moveToCiv(otherCiv)
             city.isPuppet = true // Human players get a popup that allows them to annex instead
         }
-        civInfo.destroy(notificationLocation.toHexCoord())
+        civInfo.destroy(notificationLocation.toGridCoord())
     }
     
     fun hostileTakeover(otherCiv: Civilization) {
@@ -475,7 +475,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             city.moveToCiv(otherCiv)
             city.isPuppet = true // Human players get a popup that allows them to annex instead
         }
-        civInfo.destroy(notificationLocation.toHexCoord())
+        civInfo.destroy(notificationLocation.toGridCoord())
     }
 
     @Readonly
@@ -604,7 +604,7 @@ class CityStateFunctions(val civInfo: Civilization) {
                 it.value.isCivilian() && it.value.isBuildable(civInfo)
         }
         if (buildableWorkerLikeUnits.isEmpty()) return  // Bad luck?
-        demandingCiv.units.placeUnitNearTile(civInfo.getCapital()!!.location.toHexCoord(), buildableWorkerLikeUnits.values.random(rng))
+        demandingCiv.units.placeUnitNearTile(civInfo.getCapital()!!.location.toGridCoord(), buildableWorkerLikeUnits.values.random(rng))
 
         civInfo.getDiplomacyManager(demandingCiv)!!.addInfluence(-50f)
         cityStateBullied(demandingCiv)

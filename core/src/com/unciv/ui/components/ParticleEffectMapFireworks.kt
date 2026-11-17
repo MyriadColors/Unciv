@@ -33,7 +33,7 @@ class ParticleEffectMapFireworks(
 
     // The factors below are just fine-tuning the looks, and avoid lengthy particle effect file edits
     fun setActorBounds(tileGroup: CityTileGroup) {
-        tileGroup.run { actorBounds.set(x + (width - hexagonImageWidth) / 2, y + height / 4, hexagonImageWidth, height * 1.667f) }
+        tileGroup.run { actorBounds.set(x + (width - tileImageSize) / 2, y + height / 4, tileImageSize, height * 1.667f) }
     }
 
     override fun getScale() = mapHolder.scaleX * 0.667f

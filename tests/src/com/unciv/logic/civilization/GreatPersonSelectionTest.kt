@@ -3,7 +3,7 @@ package com.unciv.logic.civilization
 import com.unciv.view.GameView
 import com.unciv.Constants
 import com.unciv.logic.automation.civilization.NextTurnAutomation
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.metadata.BaseRuleset
 import com.unciv.models.ruleset.RulesetCache
 import com.unciv.testing.BaseTestRunner
@@ -64,7 +64,7 @@ class GreatPersonSelectionTest {
 
     @Test
     fun `Maya choice uses only the current pool and consumes it after placement`() {
-        val scenario = createScenario(BaseRuleset.Civ_V_GnK, "The Maya")
+        val scenario = createScenario(BaseRuleset.BasicSquare, "The Maya")
         val manager = scenario.civ.greatPeople
         manager.freeGreatPeople = 2
         manager.mayaLimitedFreeGP = 1
@@ -102,7 +102,7 @@ class GreatPersonSelectionTest {
 
     @Test
     fun `invalid exhausted stale and cityless choices preserve state`() {
-        val scenario = createScenario(BaseRuleset.Civ_V_GnK, "Rome")
+        val scenario = createScenario(BaseRuleset.BasicSquare, "Rome")
         val manager = scenario.civ.greatPeople
         manager.freeGreatPeople = 1
         manager.longCountGPPool = hashSetOf("stored value")
@@ -129,7 +129,7 @@ class GreatPersonSelectionTest {
         assertNull(manager.chooseFreeGreatPerson("Great Scientist"))
         assertEquals(-1, manager.freeGreatPeople)
 
-        val cityless = createScenario(BaseRuleset.Civ_V_GnK, "Rome", addCity = false)
+        val cityless = createScenario(BaseRuleset.BasicSquare, "Rome", addCity = false)
         cityless.civ.greatPeople.freeGreatPeople = 1
         assertTrue(cityless.civ.greatPeople.getFreeGreatPersonOptions().isEmpty())
         assertNull(cityless.civ.greatPeople.chooseFreeGreatPerson("Great Scientist"))
@@ -141,7 +141,7 @@ class GreatPersonSelectionTest {
     fun `blocked placement preserves counters pool live units and notifications`() {
         val game = TestGame()
         val civ = game.addCiv(isPlayer = true)
-        val city = game.addCity(civ, game.getTile(HexCoord.Zero))
+        val city = game.addCity(civ, game.getTile(GridCoord.Zero))
         val blocker = game.addUnit("Worker", civ, city.getCenterTile())
         val manager = civ.greatPeople
         manager.freeGreatPeople = 1
@@ -166,7 +166,7 @@ class GreatPersonSelectionTest {
 
     @Test
     fun `automation commits its preferred available great person`() {
-        val scenario = createScenario(BaseRuleset.Civ_V_GnK, "Rome")
+        val scenario = createScenario(BaseRuleset.BasicSquare, "Rome")
         val manager = scenario.civ.greatPeople
         manager.freeGreatPeople = 1
 
@@ -180,7 +180,7 @@ class GreatPersonSelectionTest {
     fun `automation retains a pick when its chosen unit cannot be placed`() {
         val game = TestGame()
         val civ = game.addCiv()
-        val city = game.addCity(civ, game.getTile(HexCoord.Zero))
+        val city = game.addCity(civ, game.getTile(GridCoord.Zero))
         val blocker = game.addUnit("Worker", civ, city.getCenterTile())
         civ.greatPeople.freeGreatPeople = 1
         val originalUnits = civ.units.getCivUnits().toList()
@@ -194,7 +194,7 @@ class GreatPersonSelectionTest {
 
     @Test
     fun `deferred pending choice remains the next turn action and reopens its picker`() {
-        val scenario = createScenario(BaseRuleset.Civ_V_GnK, "Rome")
+        val scenario = createScenario(BaseRuleset.BasicSquare, "Rome")
         scenario.civ.greatPeople.freeGreatPeople = 1
         val autoPlay = mock(AutoPlay::class.java)
         var pickerOpenCalls = 0
@@ -235,7 +235,7 @@ class GreatPersonSelectionTest {
         val game = TestGame()
         game.makeHexagonalMap(1, Constants.grassland)
         val civ = game.addCiv()
-        game.addCity(civ, game.getTile(HexCoord.Zero))
+        game.addCity(civ, game.getTile(GridCoord.Zero))
         val conditionalGreatPerson = game.createBaseUnit(
             "Civilian",
             "Great Person - [Test]",
@@ -275,8 +275,7 @@ class GreatPersonSelectionTest {
         val game = TestGame()
         game.makeHexagonalMap(1, Constants.grassland)
         val ruleset = when (baseRuleset) {
-            BaseRuleset.Civ_V_GnK -> game.ruleset
-            BaseRuleset.Civ_V_Vanilla -> RulesetCache[baseRuleset.fullName]!!.clone()
+            BaseRuleset.BasicSquare -> game.ruleset
         }
 
         game.gameInfo.ruleset = ruleset
@@ -293,7 +292,7 @@ class GreatPersonSelectionTest {
         game.gameInfo.civilizations.add(civ)
         civ.setTransients()
         civ.tech.addTechnology(ruleset.technologies.values.minBy { it.era() }.name)
-        if (addCity) game.addCity(civ, game.getTile(HexCoord.Zero))
+        if (addCity) game.addCity(civ, game.getTile(GridCoord.Zero))
         return Scenario(game, civ)
     }
 

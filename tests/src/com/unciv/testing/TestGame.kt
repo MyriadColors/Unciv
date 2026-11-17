@@ -7,7 +7,7 @@ import com.unciv.logic.city.City
 import com.unciv.logic.city.managers.CityFounder
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.PlayerType
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.MapSize
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.mapunit.MapUnit
@@ -27,7 +27,7 @@ import com.unciv.ui.images.ImageGetter
 import kotlin.random.Random
 
 /**
- *  A testing game using a fresh clone of the Civ_V_GnK ruleset so it can be modded in-place.
+ *  A testing game using a fresh clone of the BasicSquare ruleset so it can be modded in-place.
  *  * By default, it will have a map consisting of a single Tile. Use [makeHexagonalMap] or [makeRectangularMap] for more room.
  *  * Starts with no civilizations, not even barbarians. Use [addCiv], [addBarbarianCiv] as needed. Note addCiv has two overloads, one creating a Nation and one using a G&K Nation.
  *  * Initially, [GameInfo.currentPlayerCiv] is an uninitialized dummy and not suitable for e.g. a nextTurn.
@@ -63,7 +63,7 @@ class TestGame(vararg addGlobalUniques: String, forUITesting: Boolean = false) {
         // Create a new ruleset we can easily edit, and set the important variables of gameInfo
         if (RulesetCache.isEmpty())
             RulesetCache.loadRulesets(noMods = true)
-        ruleset = RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!.clone()
+        ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!.clone()
         ruleset.addGlobalUniques(*addGlobalUniques)
         if (forUITesting)
             ImageGetter.ruleset = ruleset
@@ -129,23 +129,23 @@ class TestGame(vararg addGlobalUniques: String, forUITesting: Boolean = false) {
         tileMap.gameInfo = gameInfo
     }
 
-    fun getTile(position: HexCoord) = tileMap[position]
+    fun getTile(position: GridCoord) = tileMap[position]
     fun getTile(x: Int, y: Int) = tileMap[x, y]
 
     /** Sets the [terrain] and [features] of the tile at [position], and then returns it */
-    fun setTileTerrainAndFeatures(position: HexCoord, terrain: String, vararg features: String): Tile {
+    fun setTileTerrainAndFeatures(position: GridCoord, terrain: String, vararg features: String): Tile {
         setTileTerrain(position, terrain)
         return setTileFeatures(position, *features)
     }
 
-    fun setTileTerrain(position: HexCoord, terrain: String): Tile {
+    fun setTileTerrain(position: GridCoord, terrain: String): Tile {
         val tile = tileMap[position]
         tile.baseTerrain = terrain
         tile.setTerrainTransients()
         return tile
     }
 
-    fun setTileFeatures(position: HexCoord, vararg features: String): Tile {
+    fun setTileFeatures(position: GridCoord, vararg features: String): Tile {
         val tile = tileMap[position]
         tile.setTerrainFeatures(listOf())
         for (feature in features) {

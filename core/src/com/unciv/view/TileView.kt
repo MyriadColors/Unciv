@@ -9,6 +9,7 @@ import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.pathingmap.PathingMap
 import com.unciv.logic.map.tile.ImprovementBuildingProblem
 import com.unciv.logic.map.tile.RoadStatus
+import com.unciv.logic.map.NeighborDirection
 import com.unciv.logic.map.tile.Tile
 import com.unciv.logic.map.tile.TileInterface
 import com.unciv.models.ruleset.Ruleset
@@ -116,7 +117,7 @@ class TileView internal constructor(private val tile: Tile, val tileMapView: Til
             .filter { viewer == null || it.isExplored(viewer) }
             .map { tileMapView.getTile(it) }
     // Maybe we can move this to hexmath, will require extra input of map width/radius
-    @Readonly fun getNeighborClockPosition(neighbor: TileView): Int = tile.tileMap.getNeighborTileClockPosition(tile, neighbor.unwrap())
+    @Readonly fun getNeighborDirection(neighbor: TileView): NeighborDirection? = tile.tileMap.getNeighborDirection(tile, neighbor.unwrap())
     // This is an odd one - ideally the API should expose terrains, not...this, this is a specific performance boost 
     //. that's not really relevant for the API
     // We should see if we can avoid this entirely
@@ -125,10 +126,10 @@ class TileView internal constructor(private val tile: Tile, val tileMapView: Til
         tile.getTilesAtDistance(distance)
             .filter { viewer == null || it.isExplored(viewer) }
             .map { tileMapView.getTile(it) }
-    /** Views only expose explored tiles, so unexplored tiles at [distance] are estimated as a full hex ring (6 * [distance]) minus the explored ones.
+    /** Views only expose explored tiles, so unexplored tiles at [distance] are estimated as a full square ring (8 * [distance]) minus the explored ones.
      * Overestimates near the true map edge, where tiles beyond the edge are counted as unexplored. */
     @Readonly fun estimateUnexploredTilesAtDistance(distance: Int): Int =
-        (6 * distance - getExploredTilesAtDistance(distance).count()).coerceAtLeast(0)
+        (8 * distance - getExploredTilesAtDistance(distance).count()).coerceAtLeast(0)
     @Readonly fun getExploredTilesInDistance(distance: Int): Sequence<TileView> =
         tile.getTilesInDistance(distance)
             .filter { viewer == null || it.isExplored(viewer) }
@@ -204,9 +205,8 @@ class TileView internal constructor(private val tile: Tile, val tileMapView: Til
 
     val isLand: Boolean get() = tile.isLand
     val isWater: Boolean get() = tile.isWater
-    val hasBottomRightRiver: Boolean get() = tile.hasBottomRightRiver
+    val hasRightRiver: Boolean get() = tile.hasRightRiver
     val hasBottomRiver: Boolean get() = tile.hasBottomRiver
-    val hasBottomLeftRiver: Boolean get() = tile.hasBottomLeftRiver
     @Readonly fun getRuleset(): Ruleset = tile.ruleset
 
     @Readonly fun getTileStats(viewingCiv: CivView?, cityView: CityView? = null): Stats {

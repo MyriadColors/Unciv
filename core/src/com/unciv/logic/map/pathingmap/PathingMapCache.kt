@@ -1,6 +1,6 @@
 package com.unciv.logic.map.pathingmap
 
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.mapunit.movement.PathsToTilesWithinTurn
 import com.unciv.logic.map.tile.Tile
@@ -18,7 +18,7 @@ import java.util.Locale
 
 
 data class PathingMapCacheKey(
-    val startingPoint: HexCoord,
+    val startingPoint: GridCoord,
     val moveRemaining: FixedPointMovement,
     val fullMove: FixedPointMovement,
 ) {

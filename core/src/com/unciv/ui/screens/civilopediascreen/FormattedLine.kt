@@ -209,7 +209,7 @@ data class FormattedLine (
             !UncivGame.isCurrentInitialized() -> Ruleset()
             UncivGame.Current.gameInfo == null ->
                 (UncivGame.Current.screen as? CivilopediaScreen)?.ruleset // Best bet when we're running this without a gameInfo
-                    ?: RulesetCache[BaseRuleset.Civ_V_Vanilla.fullName]!!
+                    ?: RulesetCache[BaseRuleset.BasicSquare.fullName]!!
             else -> UncivGame.Current.gameInfo!!.ruleset
         }
         private fun initNamesCategoryMap(ruleSet: Ruleset): Map<String, CivilopediaCategories> {

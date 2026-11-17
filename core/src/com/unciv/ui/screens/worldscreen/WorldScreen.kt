@@ -16,7 +16,7 @@ import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.PlayerType
 import com.unciv.logic.civilization.diplomacy.DiplomaticStatus
 import com.unciv.logic.event.EventBus
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.multiplayer.MultiplayerGameUpdated
 import com.unciv.logic.multiplayer.storage.FileStorageRateLimitReached
 import com.unciv.logic.multiplayer.storage.MultiplayerAuthException
@@ -224,11 +224,11 @@ class WorldScreen(
         battleTable.x = stage.width / 3
         stage.addActor(battleTable)
 
-        val tileToCenterOn: HexCoord =
+        val tileToCenterOn: GridCoord =
                 when {
-                    viewingCiv.getCapital() != null -> viewingCiv.getCapital()!!.location.toHexCoord()
+                    viewingCiv.getCapital() != null -> viewingCiv.getCapital()!!.location.toGridCoord()
                     viewingCiv.units.getCivUnits().any() -> viewingCiv.units.getCivUnits().first().getTile().position
-                    else -> HexCoord.Zero
+                    else -> GridCoord.Zero
                 }
 
         mapHolder.isAutoScrollEnabled = Gdx.app.type == Application.ApplicationType.Desktop && game.settings.mapAutoScroll
@@ -321,7 +321,7 @@ class WorldScreen(
         globalShortcuts.add(KeyboardBinding.QuickLoad) { QuickSave.load(this) }
         globalShortcuts.add(KeyboardBinding.ViewCapitalCity) {
             val capital = gameInfo.getCurrentPlayerCivilization().getCapital()
-            if (capital != null && !mapHolder.setCenterPosition(capital.location.toHexCoord()))
+            if (capital != null && !mapHolder.setCenterPosition(capital.location.toGridCoord()))
                 game.pushScreen { CityScreen(selectedGameView.getCityView(capital)) }
         }
         globalShortcuts.add(KeyboardBinding.Options) { // Game Options
@@ -689,7 +689,7 @@ class WorldScreen(
         val nextDueUnit = if (GUI.getSettings().alternateUnitCycleOrder) {
             val center = unitToSkip?.getTile()
                 ?: civView.getCapital()?.getCenterTile()
-                ?: selectedGameView.tileMapView.getTile(HexCoord.Zero)
+                ?: selectedGameView.tileMapView.getTile(GridCoord.Zero)
             val dueUnits = civView.getUnits().filter { it.due && it.isIdle() && it != unitToSkip }
             if (center == null) dueUnits.firstOrNull()
             else dueUnits.minByOrNull { it.getTile().aerialDistanceTo(center) }

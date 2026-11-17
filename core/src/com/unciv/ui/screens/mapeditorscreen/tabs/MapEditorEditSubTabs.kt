@@ -365,32 +365,17 @@ class MapEditorEditRiversTab(
             add("Remove rivers".toLabel(fontSize = 32))
             onClick {
                 editTab.setBrush(BrushHandlerType.River,"Remove rivers", getRemoveRiverIcon(), pediaLink) { tile ->
-                    tile.hasBottomLeftRiver = false
-                    tile.hasBottomRightRiver = false
+                    tile.hasRightRiver = false
                     tile.hasBottomRiver = false
-                    // User probably expects all six edges to be cleared
+                    // User probably expects all four cardinal edges to be cleared
                     val x = tile.position.x
                     val y = tile.position.y
-                    tile.tileMap.getIfTileExistsOrNull(x, y + 1)?.hasBottomLeftRiver = false
-                    tile.tileMap.getIfTileExistsOrNull(x + 1, y)?.hasBottomRightRiver = false
-                    tile.tileMap.getIfTileExistsOrNull(x + 1, y + 1)?.hasBottomRiver = false
+                    tile.tileMap.getIfTileExistsOrNull(x, y + 1)?.hasBottomRiver = false
+                    tile.tileMap.getIfTileExistsOrNull(x - 1, y)?.hasRightRiver = false
                 }
             }
         }
         add(removeLine).row()
-
-        val leftRiverLine = Table().apply {
-            add(getRiverIcon(RiverEdge.Left)).padRight(10f)
-            add("Bottom left river".toLabel(fontSize = 32))
-            onClick {
-                editTab.setBrush(BrushHandlerType.Direct,"Bottom left river", getTileGroupWithRivers(
-                    RiverEdge.Left
-                ), pediaLink) { tile ->
-                    tile.hasBottomLeftRiver = !tile.hasBottomLeftRiver
-                }
-            }
-        }
-        add(leftRiverLine).row()
 
         val bottomRiverLine = Table().apply {
             add(getRiverIcon(RiverEdge.Bottom)).padRight(10f)
@@ -407,12 +392,12 @@ class MapEditorEditRiversTab(
 
         val rightRiverLine = Table().apply {
             add(getRiverIcon(RiverEdge.Right)).padRight(10f)
-            add("Bottom right river".toLabel(fontSize = 32))
+            add("Right river".toLabel(fontSize = 32))
             onClick {
-                editTab.setBrush(BrushHandlerType.Direct,"Bottom right river", getTileGroupWithRivers(
+                editTab.setBrush(BrushHandlerType.Direct,"Right river", getTileGroupWithRivers(
                     RiverEdge.Right
                 ), pediaLink) { tile ->
-                    tile.hasBottomRightRiver = !tile.hasBottomRightRiver
+                    tile.hasRightRiver = !tile.hasRightRiver
                 }
             }
         }
@@ -450,17 +435,15 @@ class MapEditorEditRiversTab(
         }
     }
 
-    private enum class RiverEdge { Left, Bottom, Right, All }
+    private enum class RiverEdge { Bottom, Right, All }
     private fun getTileGroupWithRivers(edge: RiverEdge) =
         Tile().apply {
             baseTerrain = showOnTerrain.name
             when (edge) {
-                RiverEdge.Left -> hasBottomLeftRiver = true
                 RiverEdge.Bottom -> hasBottomRiver = true
-                RiverEdge.Right -> hasBottomRightRiver = true
+                RiverEdge.Right -> hasRightRiver = true
                 RiverEdge.All -> {
-                    hasBottomLeftRiver = true
-                    hasBottomRightRiver = true
+                    hasRightRiver = true
                     hasBottomRiver = true
                 }
             }

@@ -1,7 +1,7 @@
 package com.unciv.logic
 
 import com.unciv.logic.city.CityFlags
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.Ruleset
 import com.unciv.models.ruleset.unique.*
 import com.unciv.models.ruleset.validation.UniqueValidator
@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 class MultiFilterTests {
     private val game = TestGame()
     private val civ = game.addCiv()
-    private val city = game.addCity(civ, game.getTile(HexCoord.Zero))
+    private val city = game.addCity(civ, game.getTile(GridCoord.Zero))
     private val gameContext = GameContext(city)
 
     @Test

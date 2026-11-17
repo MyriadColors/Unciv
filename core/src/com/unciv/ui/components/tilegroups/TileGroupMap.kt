@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Group
 import com.badlogic.gdx.scenes.scene2d.Touchable
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.TileMap
 import com.unciv.ui.components.tilegroups.layers.*
 import com.unciv.ui.components.widgets.ZoomableScrollPane
@@ -28,20 +28,8 @@ class TileGroupMap<T: TileGroup>(
 ): Group() {
 
     companion object {
-        /** Vertical size of a hex in world coordinates, or the distance between the centers of any two opposing edges
-         *  (the hex is oriented so it has corners to the left and right of the center and its upper and lower bounds are horizontal edges) */
+        /** Side length of a square tile in world coordinates. */
         const val groupSize = 50f
-
-        /** Length of the diagonal of a hex, or distance between two opposing corners */
-        const val groupSizeDiagonal = groupSize * 1.1547005f  // groupSize * sqrt(4/3)
-
-        /** Horizontal displacement per hex, meaning the increase in overall map size (in world coordinates) when adding a column.
-         *  On the hex, this can be visualized as the horizontal distance between the leftmost corner and the
-         *  line connecting the two corners at 2 and 4 o'clock. */
-        const val groupHorizontalAdvance = groupSizeDiagonal * 3 / 4
-        //TODO magic numbers that **seem** like they might depend on these values can be found in
-        //   TileGroupMap.getPositionalVector, TileGroup.updateArrows, TileGroup.updateRoadImages
-        //   and other places. I can't understand them so I'm leaving cleanup of hardcoding to someone else.
     }
 
     /** If the [act] method should be performed. If this is false, every child within this [TileGroupMap] will not get their [act] method called
@@ -75,27 +63,19 @@ class TileGroupMap<T: TileGroup>(
 
         for (tileGroup in tileGroups) {
             val positionalVector = if (tileGroupsToUnwrap?.contains(tileGroup) == true) {
-                HexMath.hex2WorldCoords(
+                GridMath.grid2WorldCoords(
                     tileGroup.tileView.getTileMap().getUnwrappedPosition(tileGroup.tileView.position())
                 )
             } else {
-                HexMath.hex2WorldCoords(tileGroup.tileView.position())
+                GridMath.grid2WorldCoords(tileGroup.tileView.position())
             }
 
             tileGroup.setPosition(
-                positionalVector.x * 0.8f * groupSize,
-                positionalVector.y * 0.8f * groupSize
+                positionalVector.x * groupSize,
+                positionalVector.y * groupSize
             )
 
-            topX =
-                    if (worldWrap)
-                    // Well it's not pretty but it works
-                    // The resulting topX was always missing 1.2 * groupSize in every possible
-                    // combination of map size and shape
-                        max(topX, tileGroup.x + groupSize * 1.2f)
-                    else
-                        max(topX, tileGroup.x + groupSize + 4f)
-
+            topX = max(topX, tileGroup.x + groupSize)
             topY = max(topY, tileGroup.y + groupSize)
             bottomX = min(bottomX, tileGroup.x)
             bottomY = min(bottomY, tileGroup.y)
@@ -141,7 +121,7 @@ class TileGroupMap<T: TileGroup>(
         // Apparently the sortedByDescending is kinda memory-intensive because it needs to sort ALL the tiles
         //  So instead we group by and then sort on the groups
         // Profiling is a bit iffy if this is actually better but...probably?
-        val sortedGroups = tileGroups.groupBy { it.tileView.position().x + it.tileView.position().y }
+        val sortedGroups = tileGroups.groupBy { it.tileView.position().y }
             .entries.sortedByDescending { it.key }.flatMap { it.value }
 
         for (group in sortedGroups) {
@@ -204,11 +184,10 @@ class TileGroupMap<T: TileGroup>(
      * Returns the positional coordinates of the TileGroupMap center.
      */
     fun getPositionalVector(stageCoords: Vector2): Vector2 {
-        val trueGroupSize = 0.8f * groupSize
         return Vector2(bottomX, bottomY)
             .add(stageCoords)
             .sub(groupSize / 2f, groupSize / 2f)
-            .scl(1f / trueGroupSize)
+            .scl(1f / groupSize)
     }
 
     override fun act(delta: Float) {
@@ -279,7 +258,7 @@ class TileGroupMap<T: TileGroup>(
                 for ((i, referenceTileLayer) in referenceMapLayer.tileLayers.withIndex()) {
                     val shouldMove = when {
                         beyondRight -> referenceTileLayer.tileX - drawBottomX <= diffRight
-                        beyondLeft  -> referenceTileLayer.tileX + groupSize + 4f >= drawTopX + diffLeft
+                        beyondLeft  -> referenceTileLayer.tileX + groupSize >= drawTopX + diffLeft
                         else        -> false
                     }
                     if (shouldMove) {
@@ -292,7 +271,7 @@ class TileGroupMap<T: TileGroup>(
                         sortedTileGroups[i].x += dx
                     }
                     newBottomX = min(newBottomX, referenceTileLayer.tileX)
-                    newTopX    = max(newTopX,    referenceTileLayer.tileX + groupSize + 4f)
+                    newTopX    = max(newTopX,    referenceTileLayer.tileX + groupSize)
                 }
 
                 // Also reposition any actors added directly to this group (e.g. transient overlays).
@@ -302,7 +281,7 @@ class TileGroupMap<T: TileGroup>(
                             if (child.x - drawBottomX <= diffRight)
                                 child.x += width
                         } else if (beyondLeft) {
-                            if (child.x + groupSize + 4f >= drawTopX + diffLeft)
+                            if (child.x + groupSize >= drawTopX + diffLeft)
                                 child.x -= width
                         }
                     }

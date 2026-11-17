@@ -13,7 +13,7 @@ import com.unciv.logic.city.managers.CityReligionManager
 import com.unciv.logic.city.managers.SpyFleeReason
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.transients.CapitalConnectionsFinder.CapitalConnectionMedium
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.pathingmap.PathingMap
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.mapunit.MapUnit
@@ -67,7 +67,7 @@ class City : IsPartOfGameInfoSerialization, INamed {
     // This is so that military units can enter the city, even before we decide what to do with it
     var hasJustBeenConquered = false
 
-    var location = HexCoord()
+    var location = GridCoord()
     var id: String = NO_ID
     override var name: String = ""
     /** Serialization field for [foundingCivObject]. Is equivalent to `foundingCivObject.civName` */
@@ -101,13 +101,13 @@ class City : IsPartOfGameInfoSerialization, INamed {
     var resourceStockpiles = Counter<String>()
 
     /** All tiles that this city controls */
-    var tiles = HashSet<HexCoord>()
+    var tiles = HashSet<GridCoord>()
 
     /** Tiles that have population assigned to them */
-    var workedTiles = HashSet<HexCoord>()
+    var workedTiles = HashSet<GridCoord>()
 
     /** Tiles that the population in them won't be reassigned */
-    var lockedTiles = HashSet<HexCoord>()
+    var lockedTiles = HashSet<GridCoord>()
 
     var manualSpecialists = false
     fun resetSpecialistsControl() {
@@ -232,6 +232,21 @@ class City : IsPartOfGameInfoSerialization, INamed {
     @Readonly fun getBombardRange(): Int = civ.gameInfo.ruleset.modOptions.constants.baseCityBombardRange
     @Readonly fun getWorkRange(): Int = civ.gameInfo.ruleset.modOptions.constants.cityWorkRange
     @Readonly fun getExpandRange(): Int = civ.gameInfo.ruleset.modOptions.constants.cityExpandRange
+
+    @Readonly
+    fun isTileInWorkRange(tile: Tile): Boolean {
+        val range = getWorkRange()
+        var dx = kotlin.math.abs(tile.position.x - location.x)
+        if (tileMap.mapParameters.worldWrap && dx > tileMap.width / 2) {
+            dx = tileMap.width - dx
+        }
+        val dy = kotlin.math.abs(tile.position.y - location.y)
+        if (dx > range || dy > range) return false
+        if (civ.gameInfo.ruleset.modOptions.constants.cityWorkRangeExcludeCorners && range >= 2) {
+            return dx + dy <= 2 * range - 1
+        }
+        return true
+    }
 
     @Readonly
     fun isConnectedToCapital() = this in civ.cache.citiesConnectedToCapitalToMediums
@@ -400,7 +415,7 @@ class City : IsPartOfGameInfoSerialization, INamed {
         tileMap = civInfo.gameInfo.tileMap
         centerTile = tileMap[location]
         state = GameContext(this)
-        tilesInRange = getCenterTile().getTilesInDistance(getWorkRange()).toHashSet()
+        tilesInRange = getCenterTile().getTilesInDistance(getWorkRange()).filter { isTileInWorkRange(it) }.toHashSet()
         population.city = this
         expansion.city = this
         expansion.setTransients()

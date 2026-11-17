@@ -1,7 +1,7 @@
 package com.unciv.logic.battle
 
 import com.unciv.logic.IsPartOfGameInfoSerialization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.tile.Tile
 import yairm210.purity.annotations.LocalState
 import yairm210.purity.annotations.Readonly
@@ -14,8 +14,8 @@ enum class AttackResolution {Completed, Withdrawn }
  */
 class AttackEvent() : IsPartOfGameInfoSerialization {
     var turn = 0
-    var sourceTile = HexCoord.Zero
-    var targetTile = HexCoord.Zero
+    var sourceTile = GridCoord.Zero
+    var targetTile = GridCoord.Zero
     var civIdsKnowingAttackSource = HashSet<String>()
     var civIdsKnowingAttackTarget = HashSet<String>()
     var resolution: AttackResolution? = null 

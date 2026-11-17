@@ -1,7 +1,7 @@
 package com.unciv.logic.map.mapgenerator
 
 import com.unciv.Constants
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.ruleset.tile.Terrain
 import com.unciv.models.ruleset.unique.UniqueType
@@ -26,7 +26,7 @@ class NaturalWonderGeneratorTests {
         game = TestGame()
         game.makeHexagonalMap(3, Constants.grassland)
         wonder = game.ruleset.terrains["Rock of Gibraltar"]!!
-        location = game.getTile(HexCoord.Zero)
+        location = game.getTile(GridCoord.Zero)
     }
 
     @Test
@@ -48,10 +48,10 @@ class NaturalWonderGeneratorTests {
     @Test
     fun `Rock of Gibraltar preserves filters and existing conversion clearing behavior`() {
         val land = game.getTile(1, 0)
-        val existingCoast = game.setTileTerrain(HexCoord(0, 1), Constants.coast)
-        val ocean = game.setTileTerrain(HexCoord(-1, 0), Constants.ocean)
-        val mountain = game.setTileTerrain(HexCoord(0, -1), Constants.mountain)
-        val unrelatedLake = game.setTileTerrain(HexCoord(-3, -3), "Lakes")
+        val existingCoast = game.setTileTerrain(GridCoord(0, 1), Constants.coast)
+        val ocean = game.setTileTerrain(GridCoord(-1, 0), Constants.ocean)
+        val mountain = game.setTileTerrain(GridCoord(0, -1), Constants.mountain)
+        val unrelatedLake = game.setTileTerrain(GridCoord(-3, -3), "Lakes")
         game.setTileFeatures(land.position, Constants.forest)
         land.tileResource = game.ruleset.tileResources["Deer"]
         land.setImprovementBasic("Camp")

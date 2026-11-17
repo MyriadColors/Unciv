@@ -42,6 +42,26 @@ fun gdxNatives(platform: String) = "${libs.gdx.platform.get()}:natives-$platform
 
 // from here on you can't simply use `libs` anymore, see https://github.com/gradle/gradle/issues/18237#issuecomment-928079890
 
+val requestedTasks = gradle.startParameter.taskNames.map { it.substringAfterLast(':').lowercase() }
+val isDistributionTask: (String) -> Boolean = { name ->
+    name == "dist" ||
+        name.startsWith("packr") ||
+        name.startsWith("zip") ||
+        name.endsWith("release")
+}
+val isTestOrDebugTask: (String) -> Boolean = { name ->
+    name == "test" ||
+        name == "check" ||
+        name == "debug" ||
+        name == "run" ||
+        name.contains("test") ||
+        name.contains("debug")
+}
+val purityEnabled = providers.gradleProperty("purity").map(String::toBoolean).orNull
+    ?: (requestedTasks.isEmpty() ||
+        requestedTasks.any(isTestOrDebugTask) ||
+        !requestedTasks.all(isDistributionTask))
+
 allprojects {
 //    repositories { // for local purity
 //        mavenLocal()
@@ -49,6 +69,7 @@ allprojects {
     val purityId = rootProject.libs.plugins.purity.get().pluginId
     apply(plugin = purityId)
     configure<yairm210.purity.PurityConfiguration> {
+        enabled = purityEnabled
         wellKnownPureFunctions = setOf(
             "io.ktor.http.Url", //constructor
         )

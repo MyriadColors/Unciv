@@ -263,7 +263,7 @@ class MainMenuScreen: BaseScreen(), RecreateOnResize {
         stopBackgroundMapGeneration()  // shouldn't be necessary as resize re-instantiates this class
         backgroundMapGenerationJob = Concurrency.run("ShowMapBackground") {
             // MapSize.Small has easily enough tiles to fill the entire background - unless the user sized their window to some extreme aspect ratio
-            val mapWidth = stage.width / TileGroupMap.groupHorizontalAdvance
+            val mapWidth = stage.width / TileGroupMap.groupSize
             val mapHeight = stage.height / TileGroupMap.groupSize
             @Pure fun Float.scaleCoord(scale: Float) = ceil(this * scale).toInt().coerceAtLeast(6)
             // These scale values are chosen so that a common 4:3 screen minus taskbar gives the same as MapSize.Small
@@ -383,7 +383,7 @@ class MainMenuScreen: BaseScreen(), RecreateOnResize {
         if (easterEggRuleset != null) return easterEggRuleset!!
         val rulesetParameters = game.settings.lastGameSetup?.gameParameters
         if (rulesetParameters != null) return RulesetCache.getComplexRuleset(rulesetParameters)
-        return RulesetCache[BaseRuleset.Civ_V_GnK.fullName]
+        return RulesetCache[BaseRuleset.BasicSquare.fullName]
             ?: throw IllegalStateException("No ruleset found")
     }
 

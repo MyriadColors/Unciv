@@ -11,8 +11,11 @@ import com.unciv.ui.images.ImageGetter
 
 object TileSetCache : HashMap<String, TileSet>() {
 
-    fun getCurrent() : TileSet {
-        return get(UncivGame.Current.settings.tileSet)!!
+    fun getCurrent(): TileSet {
+        val tileSet = UncivGame.Current.settings.tileSet
+        return get(tileSet)
+            ?: get(Constants.defaultTileset)
+            ?: TileSet(tileSet)
     }
 
     /** Combine [TileSetConfig]s for chosen mods.

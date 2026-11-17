@@ -1,6 +1,6 @@
 package com.unciv.uniques
 
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.unique.GameContext
 import com.unciv.models.ruleset.unique.expressions.Parser
 import com.unciv.testing.BaseTestRunner
@@ -94,7 +94,7 @@ class ExpressionTests {
         val game = TestGame()
         game.makeHexagonalMap(2)
         val civ = game.addCiv()
-        val city = game.addCity(civ, game.getTile(HexCoord.Zero))
+        val city = game.addCity(civ, game.getTile(GridCoord.Zero))
 
         val input = listOf(
             "√[[Your] Cities]" to 1.0,

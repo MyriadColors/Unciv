@@ -156,10 +156,7 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
 
         randomness.seedRNG(mapParameters.seed)
 
-        val map: TileMap = if (mapParameters.shape == MapShape.rectangular)
-            TileMap(mapSize.width, mapSize.height, ruleset, mapParameters.worldWrap)
-        else
-            TileMap(mapSize.radius, ruleset, mapParameters.worldWrap)
+        val map = TileMap(mapSize.width, mapSize.height, ruleset, mapParameters.worldWrap)
 
         mapParameters.createdWithVersion = UncivGame.VERSION.toSerializeString()
         map.mapParameters = mapParameters
@@ -257,8 +254,8 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
 
         return mapParameters.mapSize
     }
-    private fun flipTopBottom(vector: HexCoord): HexCoord = HexCoord.of(-vector.y, -vector.x)
-    private fun flipLeftRight(vector: HexCoord): HexCoord = HexCoord.of(vector.y, vector.x)
+    private fun flipTopBottom(vector: GridCoord): GridCoord = GridCoord.of(-vector.y, -vector.x)
+    private fun flipLeftRight(vector: GridCoord): GridCoord = GridCoord.of(vector.y, vector.x)
 
     private fun mirror(map: TileMap) {
         val mirroringType = map.mapParameters.mirroring
@@ -560,17 +557,7 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
          */
         fun getExpectedTemperature(tile: Tile): Double {
             /** Latitude in range -1.0 (south pole equivalent) to +1.0 (north pole equivalent). */
-            val normalizedLatitude =
-                if (tileMap.mapParameters.shape == MapShape.flatEarth) 2 * getTileRadius(tile, tileMap) - 1
-                else tile.latitude.toDouble() / tileMap.maxLatitude
-            /**
-             * Flat earth temperature should be -1.0 at latitudes ±0.9, and -1.111 at latitudes ±1.0.
-             * Instead of adjusting the temperature later, we can adjust the latitude here.
-             * This way, custom map types don't have to worry as much about flat earth logic.
-             */
-            val adjustedLatitude = 
-                if (tileMap.mapParameters.shape == MapShape.flatEarth) normalizedLatitude * 10.0 / 9.0
-                else normalizedLatitude
+            val adjustedLatitude = tile.latitude.toDouble() / tileMap.maxLatitude
             /** This part translates from latitude to temperature. */
             return when (tileMap.mapParameters.type) {
                 // Starting temperature is -0.4 across most (southern ~75%) of the map, but declines to -1.0 in the north so ice can spawn
@@ -688,10 +675,6 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
 
         if (iceTerrains.isEmpty()) return
 
-        if (tileMap.mapParameters.shape == MapShape.flatEarth) {
-            spawnFlatEarthIceWalls(tileMap, iceTerrains, oceanTerrains)
-        }
-
         tileMap.setTransients(ruleset)
         val temperatureSeed = randomness.RNG.nextInt().toDouble()
         for (tile in tileMap.values) {
@@ -726,7 +709,7 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
         // Flat Earth needs a 1 tile wide perimeter of ice/mountain/snow and a 2 radius cluster of ice in the center.
         for (tile in tileMap.values) {
             val isCenterTile = tile.latitude == 0 && tile.longitude == 0
-            val isEdgeTile = tile.neighbors.count() < 6
+            val isEdgeTile = tile.neighbors.count() < 8
 
             // Make center tiles ice or snow or mountain depending on availability
             if (isCenterTile) {
@@ -815,7 +798,7 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
 
         // Spawn partial circle of arctic tiles next to the edge
         for (neighbor in tile.neighbors) {
-            val neighborIsEdgeTile = neighbor.neighbors.count() < 6
+            val neighborIsEdgeTile = neighbor.neighbors.count() < 8
             // Do not redo edge tile. It is already done.
             // Do nothing most of the time at random.
             if (!neighborIsEdgeTile && randomness.RNG.nextDouble() >= 0.75) {

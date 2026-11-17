@@ -56,7 +56,7 @@ class TestComplexRulesetMerging(
     private fun getGnKRuleset(): Ruleset {
         if (RulesetCache.isEmpty() || !verifyPolicyReferences) // As long as policy merge is broken, we must load fresh copies
             RulesetCache.loadRulesets(noMods = true)
-        return RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!
+        return RulesetCache[BaseRuleset.BasicSquare.fullName]!!
     }
 
     /** Pseudo-load, mirrors the block in Ruleset.load */

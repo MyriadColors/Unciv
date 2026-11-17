@@ -281,7 +281,7 @@ object MinorCivPlacer {
     private fun canPlaceMinorCiv(tile: Tile, tileData: TileDataMap) = !tile.isWater && !tile.isImpassible() &&
         !tileData[tile]!!.isJunk &&
         tile.getBaseTerrain().getMatchingUniques(UniqueType.HasQuality).none { it.params[0] == "Undesirable" } && // So we don't get snow hills
-        tile.neighbors.count() == 6 // Avoid map edges
+        tile.neighbors.count() == 8 // Avoid map edges
 
     private fun placeMinorCiv(civ: Civilization, tileMap: TileMap, tile: Tile, tileData: TileDataMap, ruleset: Ruleset) {
         tileMap.addStartingLocation(civ.civID, tile)

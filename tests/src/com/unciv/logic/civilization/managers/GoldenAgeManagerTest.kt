@@ -1,6 +1,6 @@
 package com.unciv.logic.civilization.managers
 
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -121,7 +121,7 @@ class GoldenAgeManagerTest {
     fun `should increase golden age cost with more cities`() {
         // given
         testGame.makeHexagonalMap(1)
-        testGame.addCity(civ, testGame.getTile(HexCoord.Zero), initialPopulation = 10)
+        testGame.addCity(civ, testGame.getTile(GridCoord.Zero), initialPopulation = 10)
         val happinessRequiredForGoldenAgeOneCity = goldenAgeManager.happinessRequiredForNextGoldenAge()
 
         // when

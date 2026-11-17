@@ -7,13 +7,11 @@ import com.unciv.view.TileMapView
 import com.unciv.view.TileView
 import com.unciv.logic.map.tile.Tile
 import com.unciv.ui.components.tilegroups.layers.*
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 open class TileGroup(
     tileView: TileView,
     val tileSetStrings: TileSetStrings,
-    groupSize: Float = TileGroupMap.groupSize + 4
+    groupSize: Float = TileGroupMap.groupSize
 ) : Group() {
 
     /** A var because if we're spectator, the viewing civ can change as we select different civs to view as */
@@ -35,13 +33,9 @@ open class TileGroup(
         8) City Button
     */
 
-    /** Cache simple but frequent calculations.
-     * Honestly, I got these numbers empirically by printing `.x` and `.y` after `.center()`, and I'm not totally
-     * clear on the stack of transformations that makes them work. But they are still exact ratios, AFAICT. */
-    val hexagonImageWidth = groupSize * 1.5f
-    val hexagonImageOriginX = hexagonImageWidth / 2f
-    val hexagonImageOriginY = sqrt((hexagonImageWidth / 2f).pow(2) - (hexagonImageWidth / 4f).pow(2))
-    val hexagonImagePosition = Pair(-hexagonImageOriginX / 3f, -hexagonImageOriginY / 4f)
+    /** Square tile image dimensions matching orthogonal [groupSize] x [groupSize] layout. */
+    val tileImageSize = groupSize
+    val tileImageOrigin = groupSize / 2f
 
     var isForMapEditorIcon = false
 
@@ -111,7 +105,7 @@ open class TileGroup(
                 tileView = viewingCiv.gameView.getTile(tileView)
         }
         neighbors = tileView.getNeighbors().toList()
-        layerMisc.removeHexOutline()
+        layerMisc.removeTileOutline()
         layerMisc.hideTerrainOverlay()
         layerOverlay.hideHighlight()
         layerOverlay.hideCrosshair()

@@ -7,7 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor
 import com.badlogic.gdx.scenes.scene2d.Touchable
 import com.badlogic.gdx.scenes.scene2d.ui.Image
 import com.badlogic.gdx.scenes.scene2d.ui.Table
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.ui.components.extensions.addRoundCloseButton
 import com.unciv.ui.components.extensions.addSeparator
 import com.unciv.ui.components.extensions.center
@@ -130,7 +130,7 @@ class UnitTable(val worldScreen: WorldScreen) : Table() {
             onClick {
                 presenter.position?.let {
                     worldScreen.mapHolder.setCenterPosition(
-                        it.toHexCoord(),
+                        it.toGridCoord(),
                         immediately = false,
                         selectUnit = false
                     )
@@ -281,7 +281,7 @@ class UnitTable(val worldScreen: WorldScreen) : Table() {
 
     interface Presenter {
         /** map position of the selected entity */
-        val position: HexCoord?
+        val position: GridCoord?
         /** called every time [WorldScreen] is updated */
         fun update() {}
         /** only called when [UnitTable.shouldUpdate] is true */

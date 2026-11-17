@@ -7,8 +7,8 @@ import com.unciv.UncivGame
 import com.unciv.logic.automation.Timers.Companion.timeThis
 import com.unciv.logic.civilization.diplomacy.RelationshipLevel
 import com.unciv.logic.map.BFS
-import com.unciv.logic.map.HexCoord
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.MapPathing
 import com.unciv.logic.map.pathingmap.PathingMap
 import com.unciv.logic.map.mapunit.MapUnit
@@ -64,7 +64,7 @@ class UnitMovement(val unit: MapUnit) {
      */
     @Readonly @Suppress("purity") // mutates passed parameter
     fun getMovementToTilesAtPosition(
-        position: HexCoord,
+        position: GridCoord,
         unitMovement: Float,
         considerZoneOfControl: Boolean = true,
         tilesToIgnoreBitset: BitSet? = null,
@@ -119,7 +119,7 @@ class UnitMovement(val unit: MapUnit) {
                         // You need to assume his tile is reachable, otherwise all movement algorithms on reaching enemy
                         // cities and units goes kaput.
                         else -> {
-                            val key = HexMath.tilesAndNeighborUniqueIndex(tileToCheck, neighbor)
+                            val key = GridMath.tilesAndNeighborUniqueIndex(tileToCheck, neighbor)
                             val movementCost = movementCostCache.getOrPut(key) {
                                 MovementCost.getMovementCostBetweenAdjacentTilesEscort(unit, tileToCheck, neighbor, considerZoneOfControl, includeOtherEscortUnit)
                             }

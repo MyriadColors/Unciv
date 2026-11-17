@@ -3,7 +3,7 @@ package com.unciv.logic.battle
 import com.unciv.Constants
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.managers.TurnManager
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
 import com.unciv.testing.BaseTestRunner
@@ -87,7 +87,7 @@ class BattleDamageTest {
     fun `should retrieve modifiers from buldings`() {
         // given
         val building = testGame.createBuilding("[+15]% Strength <for [Military] units>")
-        val attackerCity = testGame.addCity(attackerCiv, testGame.getTile(HexCoord.Zero))
+        val attackerCity = testGame.addCity(attackerCiv, testGame.getTile(GridCoord.Zero))
         attackerCity.cityConstructions.addBuilding(building.name)
 
         // when
@@ -103,7 +103,7 @@ class BattleDamageTest {
         // given
         val civ = testGame.addCiv("[+10]% Strength <for [All] units> <during a Golden Age>") // i.e., Persia national ability
         civ.goldenAges.enterGoldenAge(2)
-        val attackerTile = testGame.getTile(HexCoord.Zero)
+        val attackerTile = testGame.getTile(GridCoord.Zero)
         val attackerUnit = testGame.addUnit("Warrior", civ, attackerTile)
 
         // when
@@ -118,7 +118,7 @@ class BattleDamageTest {
     fun `should retrieve modifiers from lack of strategic resource`() {
         // given
         defaultAttackerTile.militaryUnit = null // otherwise we'll also get a flanking bonus
-        val attackerTile = testGame.getTile(HexCoord.Zero)
+        val attackerTile = testGame.getTile(GridCoord.Zero)
         val attackerUnit = testGame.addUnit("Horseman", attackerCiv, attackerTile)
 
         // when
@@ -132,7 +132,7 @@ class BattleDamageTest {
     @Test
     fun `should retrieve attacking flank bonus modifiers`() {
         // given
-        val flankingAttackerTile = testGame.getTile(HexCoord.Zero)
+        val flankingAttackerTile = testGame.getTile(GridCoord.Zero)
         testGame.addUnit("Warrior", attackerCiv, flankingAttackerTile)
 
         // when
@@ -174,7 +174,7 @@ class BattleDamageTest {
     @Test
     fun `should not retrieve defence terrain modifiers when unit doesn't get them`() {
         // given
-        val defenderTile = testGame.getTile(HexCoord.Zero)
+        val defenderTile = testGame.getTile(GridCoord.Zero)
         testGame.setTileFeatures(defenderTile.position, Constants.hill)
         val defenderUnit = testGame.addDefaultMeleeUnitWithUniques(defenderCiv, defenderTile, "No defensive terrain bonus")
 

@@ -2,7 +2,7 @@ package com.unciv.logic.map.pathingmap
 
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.diplomacy.RelationshipLevel
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.RoadStatus
 import com.unciv.logic.map.tile.Tile
@@ -37,29 +37,29 @@ class PathingMapTest {
     @Test
     fun shortestPathEvenWhenItsWayMoreTiles() {
         // A straight road from 0,0 up the x axis
-        testGame.getTile(HexCoord(0, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(1, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(2, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(3, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(4, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(5, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(0, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(1, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(2, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(3, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(4, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(5, 0)).setRoadStatus(RoadStatus.Railroad, civInfo)
         // then straight down the y axis for 4 tiles
-        testGame.getTile(HexCoord(5, 1)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(5, 2)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(5, 3)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(5, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(5, 1)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(5, 2)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(5, 3)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(5, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
         // then straight down the x axis for 4 tiles
-        testGame.getTile(HexCoord(4, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(3, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(2, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(1, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
-        testGame.getTile(HexCoord(0, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(4, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(3, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(2, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(1, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
+        testGame.getTile(GridCoord(0, 4)).setRoadStatus(RoadStatus.Railroad, civInfo)
         // The total roads are be 14 tiles, but only 1.4 movement. the direct route is 3 tiles, but
         // 3 movement.  So the road route should be chosen, despite gong way out of the way.
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 1
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
-        val target = testGame.getTile(HexCoord(0, 4))
+        val target = testGame.getTile(GridCoord(0, 4))
 
         val pathing = PathingMap.createUnitPathingMap(unit)
         val path = pathing.getShortestPath(target)!!
@@ -67,8 +67,8 @@ class PathingMapTest {
         // expect movement along the railroad, even though it's 13 tiles
         Assert.assertEquals(
             listOf(
-                HexCoord(3, 4),
-                HexCoord(0, 4)
+                GridCoord(3, 4),
+                GridCoord(0, 4)
             ),
             path.map { it.position },
         )
@@ -99,13 +99,13 @@ class PathingMapTest {
         for (tile in testGame.tileMap.tileList) {
             testGame.setTileTerrain(tile.position, "Mountain")
         }
-        testGame.setTileTerrain(HexCoord(0, 0), "Plains")
-        testGame.setTileTerrain(HexCoord(0, 1), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 0), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 1), "Plains")
         // unit has two cross two mountains here, so MUST stop on 0,1 to safely cross
-        testGame.setTileTerrain(HexCoord(0, 4), "Plains")
-        testGame.setTileTerrain(HexCoord(0, 5), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 4), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 5), "Plains")
         // unit has two cross two mountains here, so MUST stop on 0,5 to safely cross
-        testGame.setTileTerrain(HexCoord(0, 8), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 8), "Plains")
         
         // Enable Carthage LandUnitsCrossTerrainAfterUnitGained
         civInfo.passThroughImpassableUnlocked = true
@@ -114,17 +114,17 @@ class PathingMapTest {
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 3
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
-        val target = testGame.getTile(HexCoord(0, 8))
+        val target = testGame.getTile(GridCoord(0, 8))
 
         val pathing = PathingMap.createUnitPathingMap(unit)
         val path = pathing.getShortestPath(target)
 
         Assert.assertEquals(
             listOf(
-                HexCoord(0, 1),
-                HexCoord(0, 4),
-                HexCoord(0, 5),
-                HexCoord(0, 8),
+                GridCoord(0, 1),
+                GridCoord(0, 4),
+                GridCoord(0, 5),
+                GridCoord(0, 8),
             ), path?.map { it.position })
         Assert.assertEquals(
             """
@@ -149,7 +149,7 @@ class PathingMapTest {
     
     @Test
     fun getMovementToTilesAtPosition_returnsRightTiles() {
-        testGame.setTileTerrain(HexCoord(0, 1), "Hill")
+        testGame.setTileTerrain(GridCoord(0, 1), "Hill")
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 2
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
@@ -178,8 +178,8 @@ class PathingMapTest {
     fun getShortestPath_takesOverMaxTurns_returnsNull() {
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 1
-        originTile = testGame.getTile(HexCoord(-8, -8))
-        val targetTile = testGame.getTile(HexCoord(8, 8))
+        originTile = testGame.getTile(GridCoord(-8, -8))
+        val targetTile = testGame.getTile(GridCoord(8, 8))
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
         unit.currentMovement = 1f
 
@@ -196,8 +196,8 @@ class PathingMapTest {
         testGame.makeHexagonalMap(100)
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 1
-        originTile = testGame.getTile(HexCoord(-50, 0))
-        val targetTile = testGame.getTile(HexCoord(50, 0))
+        originTile = testGame.getTile(GridCoord(-50, 0))
+        val targetTile = testGame.getTile(GridCoord(50, 0))
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
         unit.currentMovement = 1f
 
@@ -251,12 +251,12 @@ class PathingMapTest {
         
         // cant hit enemy at -4,2 or 3,2 because unit would have no movement left.
         val expected = listOf(
-            HexCoord(-3, 2),
-            HexCoord(-2, 2),
-            HexCoord(-1, 2),
-            HexCoord(0, 2),
-            HexCoord(1, 2),
-            HexCoord(2, 2),
+            GridCoord(-3, 2),
+            GridCoord(-2, 2),
+            GridCoord(-1, 2),
+            GridCoord(0, 2),
+            GridCoord(1, 2),
+            GridCoord(2, 2),
         )
         val actual = attackableTiles.map {it.position}.sortedWith { l, r -> if (l.x != r.x) l.x.compareTo(r.x) else l.y.compareTo(r.y) }
         Assert.assertEquals(expected, actual)
@@ -288,7 +288,7 @@ class PathingMapTest {
         val pathing = PathingMap.createUnitPathingMap(unit)
         val attackableTiles = pathing.bfsAllMatchingTilesThisTurn { tile, _ -> tile.civilianUnit?.civ == civInfo}
 
-        val expected = listOf(HexCoord(0, 0))
+        val expected = listOf(GridCoord(0, 0))
         Assert.assertEquals(expected, attackableTiles.map { it.position })
         // And affirm full recalculation using cached tiles has same result.
         Assert.assertEquals(
@@ -301,14 +301,14 @@ class PathingMapTest {
     fun safeCacheIsPreferredOverDamageCacheWhenBothReachTargetEquallyFast() {
         // Two routes of identical length from origin to target: one straight through a Mountain
         // (damaging), one around through Plains (safe). The safe, damage-free route must win.
-        testGame.setTileTerrain(HexCoord(1, 0), "Mountain")
+        testGame.setTileTerrain(GridCoord(1, 0), "Mountain")
         val civ = testGame.addCiv("Land units may cross [Mountain] tiles after the first [Great General] is earned")
         civ.passThroughImpassableUnlocked = true
         civ.passableImpassables.add("Mountain")
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 3
         val unit = testGame.addUnit(baseUnit.name, civ, originTile)
-        val target = testGame.getTile(HexCoord(2, 0))
+        val target = testGame.getTile(GridCoord(2, 0))
 
         val pathing = PathingMap.createUnitPathingMap(unit)
         val path = pathing.getShortestPath(target)
@@ -325,8 +325,8 @@ class PathingMapTest {
         for (tile in testGame.tileMap.tileList) {
             testGame.setTileTerrain(tile.position, "Mountain")
         }
-        testGame.setTileTerrain(HexCoord(0, 0), "Plains")
-        testGame.setTileTerrain(HexCoord(2, 0), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 0), "Plains")
+        testGame.setTileTerrain(GridCoord(2, 0), "Plains")
         val civ = testGame.addCiv("Land units may cross [Mountain] tiles after the first [Great General] is earned")
         civ.passThroughImpassableUnlocked = true
         civ.passableImpassables.add("Mountain")
@@ -334,12 +334,12 @@ class PathingMapTest {
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 1
         val unit = testGame.addUnit(baseUnit.name, civ, originTile)
-        val target = testGame.getTile(HexCoord(2, 0))
+        val target = testGame.getTile(GridCoord(2, 0))
 
         val pathing = PathingMap.createUnitPathingMap(unit)
         val path = pathing.getShortestPath(target)
 
-        Assert.assertEquals(listOf(testGame.getTile(HexCoord(1, 0)), target), path)
+        Assert.assertEquals(listOf(testGame.getTile(GridCoord(1, 0)), target), path)
         val node = pathing.getCachedNode(target)
         Assert.assertEquals(1, node.damagingTiles)
     }
@@ -351,8 +351,8 @@ class PathingMapTest {
         for (tile in testGame.tileMap.tileList) {
             testGame.setTileTerrain(tile.position, "Mountain")
         }
-        testGame.setTileTerrain(HexCoord(0, 0), "Plains")
-        testGame.setTileTerrain(HexCoord(4, 0), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 0), "Plains")
+        testGame.setTileTerrain(GridCoord(4, 0), "Plains")
         val civ = testGame.addCiv("Land units may cross [Mountain] tiles after the first [Great General] is earned")
         civ.passThroughImpassableUnlocked = true
         civ.passableImpassables.add("Mountain")
@@ -360,16 +360,16 @@ class PathingMapTest {
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 1
         val unit = testGame.addUnit(baseUnit.name, civ, originTile)
-        val target = testGame.getTile(HexCoord(4, 0))
+        val target = testGame.getTile(GridCoord(4, 0))
 
         val pathing = PathingMap.createUnitPathingMap(unit)
         val path = pathing.getShortestPath(target)
 
         Assert.assertEquals(
             listOf(
-                testGame.getTile(HexCoord(1, 0)),
-                testGame.getTile(HexCoord(2, 0)),
-                testGame.getTile(HexCoord(3, 0)),
+                testGame.getTile(GridCoord(1, 0)),
+                testGame.getTile(GridCoord(2, 0)),
+                testGame.getTile(GridCoord(3, 0)),
                 target,
             ), path
         )
@@ -382,20 +382,20 @@ class PathingMapTest {
     fun occupiedTileDoesNotInterfereWithDamageAccounting() {
         // The direct route is blocked by another unit; the detour crosses a Mountain instead.
         // The two concepts (blocked-for-ending-turn vs damage) must not interfere with each other.
-        testGame.setTileTerrain(HexCoord(1, 0), "Grassland")
-        testGame.setTileTerrain(HexCoord(1, -1), "Mountain")
-        testGame.setTileTerrain(HexCoord(2, -1), "Grassland")
-        testGame.setTileTerrain(HexCoord(2, 0), "Grassland")
+        testGame.setTileTerrain(GridCoord(1, 0), "Grassland")
+        testGame.setTileTerrain(GridCoord(1, -1), "Mountain")
+        testGame.setTileTerrain(GridCoord(2, -1), "Grassland")
+        testGame.setTileTerrain(GridCoord(2, 0), "Grassland")
         val civ = testGame.addCiv("Land units may cross [Mountain] tiles after the first [Great General] is earned")
         civ.passThroughImpassableUnlocked = true
         civ.passableImpassables.add("Mountain")
         val blockerCiv = testGame.addCiv()
-        testGame.addUnit("Warrior", blockerCiv, testGame.getTile(HexCoord(1, 0)))
+        testGame.addUnit("Warrior", blockerCiv, testGame.getTile(GridCoord(1, 0)))
 
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 3
         val unit = testGame.addUnit(baseUnit.name, civ, originTile)
-        val target = testGame.getTile(HexCoord(2, 0))
+        val target = testGame.getTile(GridCoord(2, 0))
 
         val pathing = PathingMap.createUnitPathingMap(unit)
         val path = pathing.getShortestPath(target)
@@ -408,28 +408,28 @@ class PathingMapTest {
         for (tile in testGame.tileMap.tileList) {
             testGame.setTileTerrain(tile.position, "Ocean")
         }
-        testGame.setTileTerrain(HexCoord(0, 0), "Plains")
-        testGame.setTileTerrain(HexCoord(0, 1), "Mountain")
-        testGame.setTileTerrain(HexCoord(0, 2), "Plains")
-        testGame.setTileTerrain(HexCoord(0, 3), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 0), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 1), "Mountain")
+        testGame.setTileTerrain(GridCoord(0, 2), "Plains")
+        testGame.setTileTerrain(GridCoord(0, 3), "Plains")
         civInfo.passThroughImpassableUnlocked = true
         civInfo.passableImpassables.add("Mountain")
-        testGame.addUnit("Warrior", civInfo, testGame.getTile(HexCoord(0, 2)))
+        testGame.addUnit("Warrior", civInfo, testGame.getTile(GridCoord(0, 2)))
 
         val unit = testGame.addUnit("Warrior", civInfo, originTile)
         unit.currentMovement = 2f
-        val target = testGame.getTile(HexCoord(0, 3))
+        val target = testGame.getTile(GridCoord(0, 3))
         val pathing = PathingMap.createUnitPathingMap(unit)
         val path = pathing.getShortestPath(target)
 
-        Assert.assertEquals(listOf(testGame.getTile(HexCoord(0, 1)), target), path)
+        Assert.assertEquals(listOf(testGame.getTile(GridCoord(0, 1)), target), path)
         Assert.assertEquals(1, pathing.getCachedNode(target).damagingTiles)
     }
 
     @Test
     fun manyWarriorsConvergingOnRoad_doNotQueueSingleFile() {
         for (x in -8..8)
-            testGame.getTile(HexCoord(x, 0)).setRoadStatus(RoadStatus.Road, civInfo)
+            testGame.getTile(GridCoord(x, 0)).setRoadStatus(RoadStatus.Road, civInfo)
         for (tile in testGame.tileMap.tileList)
             tile.setExplored(civInfo, true)
         //make 18 warriors between [-8,-8] and [-7,0]

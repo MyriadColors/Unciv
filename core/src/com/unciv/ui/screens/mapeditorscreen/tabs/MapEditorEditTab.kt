@@ -329,8 +329,7 @@ class MapEditorEditTab(
         setImprovementBasic(other.tileImprovement)
         naturalWonder = other.naturalWonder
         roadStatus = other.roadStatus
-        hasBottomLeftRiver = other.hasBottomLeftRiver
-        hasBottomRightRiver = other.hasBottomRightRiver
+        hasRightRiver = other.hasRightRiver
         hasBottomRiver = other.hasBottomRiver
         setTerrainTransients()
     }

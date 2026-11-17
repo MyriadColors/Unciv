@@ -2,7 +2,7 @@ package com.unciv.ui.screens.worldscreen.unit.presenter
 
 import com.unciv.view.location
 import com.badlogic.gdx.graphics.Color
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.translations.tr
 import com.unciv.ui.images.ImageGetter
 import com.unciv.ui.screens.worldscreen.unit.UnitTable
@@ -12,7 +12,7 @@ class SpyPresenter(private val unitTable: UnitTable) : UnitTable.Presenter {
 
     var selectedSpy: SpyView? = null
 
-    override val position: HexCoord?
+    override val position: GridCoord?
         get() = selectedSpy?.getCityViewOrNull()?.location
 
     fun selectSpy(spyView: SpyView?) {

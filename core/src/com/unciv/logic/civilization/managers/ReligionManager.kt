@@ -500,7 +500,7 @@ class ReligionManager : IsPartOfGameInfoSerialization {
             if (civInfo in civ.getKnownCivs()) {
                 if (civ.hasExplored(holyCity.getCenterTile()))
                     civ.addNotification("[${civInfo.civName}] has founded [$displayName] in [${holyCity.name}]!",
-                        ReligionAction.withLocation(holyCity.location.toHexCoord(), name),
+                        ReligionAction.withLocation(holyCity.location.toGridCoord(), name),
                         Notification.NotificationCategory.Religion, NotificationIcon.Faith)
                 else civ.addNotification("[${civInfo.civName}] has founded [$displayName]!",
                     ReligionAction(name), Notification.NotificationCategory.Religion, NotificationIcon.Faith)

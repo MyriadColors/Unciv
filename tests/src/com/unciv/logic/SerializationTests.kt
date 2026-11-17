@@ -2,7 +2,7 @@ package com.unciv.logic
 
 import com.unciv.json.LastSeenImprovement
 import com.unciv.logic.civilization.*
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.tile.TileHistory
 import com.unciv.models.Counter
 import com.unciv.testing.BaseTestRunner
@@ -37,9 +37,9 @@ class SerializationTests {
     //@RedirectOutput(RedirectPolicy.Show)
     fun `test LastSeenImprovement serialization roundtrip`() {
         val data = LastSeenImprovement()
-        data[HexCoord.Zero] = "Borehole"
-        data[HexCoord(1,0)] = "Smokestack"
-        data[HexCoord(0,1)] = "Waffle stand"
+        data[GridCoord.Zero] = "Borehole"
+        data[GridCoord(1,0)] = "Smokestack"
+        data[GridCoord(0,1)] = "Waffle stand"
         testRoundtrip(data)
     }
 
@@ -81,9 +81,9 @@ class SerializationTests {
         val data = arrayListOf(
             Notification("hello", emptyArray(), emptyList(), Notification.NotificationCategory.Espionage),
             Notification("Oh my goddesses", arrayOf("ReligionIcons/Pray"), listOf(CivilopediaAction("Tutorial/Religion")), Notification.NotificationCategory.Religion),
-            Notification("There's Horses", arrayOf("ResourceIcons/Horses"), LocationAction(HexCoord.Zero, HexCoord(1,0)).asIterable(), Notification.NotificationCategory.General),
+            Notification("There's Horses", arrayOf("ResourceIcons/Horses"), LocationAction(GridCoord.Zero, GridCoord(1,0)).asIterable(), Notification.NotificationCategory.General),
             Notification("An evil overlord has arisen", arrayOf("PersonalityIcons/Devil"), listOf(DiplomacyAction("Russia")), Notification.NotificationCategory.War),
-            Notification("Here's a Wizzard", arrayOf("EmojiIcons/Great Scientist"), listOf(MapUnitAction(HexCoord(0,1), 42)), Notification.NotificationCategory.Units),
+            Notification("Here's a Wizzard", arrayOf("EmojiIcons/Great Scientist"), listOf(MapUnitAction(GridCoord(0,1), 42)), Notification.NotificationCategory.Units),
         )
 
         // Neither Notification nor NotificationAction support equality contract

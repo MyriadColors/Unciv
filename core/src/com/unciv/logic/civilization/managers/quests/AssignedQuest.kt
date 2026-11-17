@@ -4,7 +4,7 @@ import com.unciv.GUI
 import com.unciv.logic.GameInfo
 import com.unciv.logic.IsPartOfGameInfoSerialization
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.ruleset.Quest
 import com.unciv.models.ruleset.QuestName
 import com.unciv.models.translations.fillPlaceholders
@@ -87,11 +87,11 @@ class AssignedQuest(
         when (questNameInstance) {
             QuestName.ClearBarbarianCamp -> {
                 GUI.resetToWorldScreen()
-                GUI.getMap().setCenterPosition(HexCoord(data1.toInt(), data2.toInt()), selectUnit = false)
+                GUI.getMap().setCenterPosition(GridCoord(data1.toInt(), data2.toInt()), selectUnit = false)
             }
             QuestName.Route -> {
                 GUI.resetToWorldScreen()
-                GUI.getMap().setCenterPosition(assignerCiv.getCapital()!!.location.toHexCoord(), selectUnit = false)
+                GUI.getMap().setCenterPosition(assignerCiv.getCapital()!!.location.toGridCoord(), selectUnit = false)
             }
             QuestName.BullyCityState, QuestName.ConquerCityState -> {
                 // In case they were destroyed after issuing the quest
@@ -102,7 +102,7 @@ class AssignedQuest(
                     val capital = targetCs.getCapital()
                     if (capital != null) {
                         GUI.resetToWorldScreen()
-                        GUI.getMap().setCenterPosition(capital.location.toHexCoord(), selectUnit = false)
+                        GUI.getMap().setCenterPosition(capital.location.toGridCoord(), selectUnit = false)
                     }
                 }
             }

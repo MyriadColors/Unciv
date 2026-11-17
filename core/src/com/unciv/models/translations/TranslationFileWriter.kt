@@ -490,7 +490,7 @@ object TranslationFileWriter {
 
     @VisibleForTesting
     fun getGeneratedStringsSize(): Int {
-        return GenerateStringsFromJSONs(Gdx.files.local("jsons/Civ V - Vanilla")).values.sumOf {
+        return GenerateStringsFromJSONs(Gdx.files.local("jsons/BasicSquare")).values.sumOf {
             // exclude empty lines
             it.count { line: String -> !line.startsWith(specialNewLineCode) }
         }
@@ -543,7 +543,7 @@ object TranslationFileWriter {
             ::defaultFileFilter
         )
         constructor(jsonsFolder: FileHandle, fileFilter: (File) -> Boolean = ::defaultFileFilter) : this(
-            RulesetCache[jsonsFolder.parent().name()]?.takeIf { it.modOptions.isBaseRuleset } ?: RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!,
+            RulesetCache[jsonsFolder.parent().name()]?.takeIf { it.modOptions.isBaseRuleset } ?: RulesetCache[BaseRuleset.BasicSquare.fullName]!!,
             jsonsFolder, fileFilter
         )
 

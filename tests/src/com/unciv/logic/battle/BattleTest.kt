@@ -3,7 +3,7 @@ package com.unciv.logic.battle
 import com.unciv.UncivGame
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.diplomacy.DiplomaticStatus
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.models.metadata.GameSettings.PathfindingAlgorithm
 import com.unciv.models.metadata.GameSettings.PathfindingAlgorithm.AStarPathfinding
@@ -47,7 +47,7 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
 
         defaultAttackerUnit = testGame.addUnit("Warrior", attackerCiv, testGame.getTile(1,0))
         defaultAttackerUnit.currentMovement = 2f
-        defaultDefenderUnit = testGame.addUnit("Warrior", defenderCiv, testGame.getTile(HexCoord.Zero))
+        defaultDefenderUnit = testGame.addUnit("Warrior", defenderCiv, testGame.getTile(GridCoord.Zero))
         defaultDefenderUnit.currentMovement = 2f
     }
 
@@ -206,7 +206,7 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         // then
         assertEquals(0, attack.attackerDealt)
         assertEquals(0, attack.defenderDealt)
-        assertEquals(HexCoord(2,0), defaultAttackerUnit.getTile().position)
+        assertEquals(GridCoord(2,0), defaultAttackerUnit.getTile().position)
         assertEquals(attackerCiv, defaultAttackerUnit.getTile().civilianUnit!!.civ)  // captured unit
     }
 

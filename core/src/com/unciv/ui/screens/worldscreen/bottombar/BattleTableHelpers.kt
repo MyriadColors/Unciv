@@ -15,7 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup
 import com.badlogic.gdx.utils.Align
 import com.unciv.UncivGame
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridMath
 import com.unciv.models.translations.tr
 import com.unciv.ui.components.tilegroups.TileSetStrings
 import com.unciv.ui.components.widgets.ShadowedLabel
@@ -179,8 +179,8 @@ object BattleTableHelpers {
 
         val actorsToMove = getMapActorsForCombatant(attacker).toList()
 
-        val attackVectorHexCoords = defender.getTile().position().minus(attacker.getTile().position())
-        val attackVectorWorldCoords = HexMath.hex2WorldCoords(attackVectorHexCoords)
+        val attackVectorGridCoords = defender.getTile().position().minus(attacker.getTile().position())
+        val attackVectorWorldCoords = GridMath.grid2WorldCoords(attackVectorGridCoords)
             .nor()  // normalize vector to length of "1"
             .scl(moveActorsDisplacement)
 

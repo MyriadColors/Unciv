@@ -2,10 +2,10 @@ package com.unciv.logic.automation.civilization
 
 import com.unciv.logic.GameInfo
 import com.unciv.logic.IsPartOfGameInfoSerialization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 
 class BarbarianEncampment() : IsPartOfGameInfoSerialization {
-    var position = HexCoord()
+    var position = GridCoord()
     var countdown = 0
     var spawnedUnits = -1
     var destroyed = false // destroyed encampments haunt the vicinity for 15 turns preventing new spawns
@@ -13,7 +13,7 @@ class BarbarianEncampment() : IsPartOfGameInfoSerialization {
     @Transient
     lateinit var gameInfo: GameInfo
 
-    constructor(position: HexCoord): this() {
+    constructor(position: GridCoord): this() {
         this.position = position
     }
 

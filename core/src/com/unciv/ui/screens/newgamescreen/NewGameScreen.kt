@@ -417,7 +417,7 @@ class NewGameScreen(
         val (_, errors) = RulesetCache.checkCombinedModLinks(gameParameters.mods, gameParameters.baseRuleset)
         if (!errors.isError()) return
         gameParameters.mods.clear()
-        gameParameters.baseRuleset = BaseRuleset.Civ_V_GnK.fullName
+        gameParameters.baseRuleset = BaseRuleset.BasicSquare.fullName
     }
 
     /** Updates our local [ruleset] from [gameSetupInfo], guarding against exceptions.
@@ -433,8 +433,8 @@ class NewGameScreen(
             success = false
             ToastPopup(message, this, 5000)
             gameSetupInfo.gameParameters.mods.clear()
-            gameSetupInfo.gameParameters.baseRuleset = BaseRuleset.Civ_V_GnK.fullName
-            return RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!
+            gameSetupInfo.gameParameters.baseRuleset = BaseRuleset.BasicSquare.fullName
+            return RulesetCache[BaseRuleset.BasicSquare.fullName]!!
         }
 
         val newRuleset = try {

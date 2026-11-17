@@ -275,7 +275,7 @@ class MapParametersTable(
     }
 
     private fun updateHexagonalWarnings() {
-        val tiles = HexMath.getNumberOfTilesInHexagon(customMapSizeRadius.intValue ?: 0)
+        val tiles = GridMath.getNumberOfTilesInSquareRadius(customMapSizeRadius.intValue ?: 0)
         hexWarningLabel.isVisible = tiles >= LARGE_MAP_TILES
         if (tiles >= VERY_LARGE_MAP_TILES) hexWarningLabel.setText(VERY_LARGE_MAP_WARNING.tr())
         else hexWarningLabel.setText(LARGE_MAP_WARNING.tr())
@@ -317,9 +317,7 @@ class MapParametersTable(
     private fun updateWorldSizeTable() {
         customWorldSizeTable.clear()
 
-        if ((mapParameters.shape == MapShape.hexagonal || mapParameters.shape == MapShape.flatEarth) && worldSizeSelectBox.selected.value == MapSize.custom)
-            customWorldSizeTable.add(hexagonalSizeTable).grow().row()
-        else if (mapParameters.shape == MapShape.rectangular && worldSizeSelectBox.selected.value == MapSize.custom)
+        if (worldSizeSelectBox.selected.value == MapSize.custom)
             customWorldSizeTable.add(rectangularSizeTable).grow().row()
         else
             mapParameters.mapSize = MapSize(worldSizeSelectBox.selected.value)

@@ -50,7 +50,8 @@ class ModConstants {
     var minimalCityDistanceOnDifferentContinents = 2
 
     var baseCityBombardRange = 2
-    var cityWorkRange = 3
+    var cityWorkRange = 2
+    var cityWorkRangeExcludeCorners = true
     var cityExpandRange = 5
     
     // Number of air units that can be stationed in a city

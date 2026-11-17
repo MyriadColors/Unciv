@@ -45,7 +45,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     var civilianUnit: MapUnit? = null
     var airUnits = ArrayList<MapUnit>(0)
 
-    var position = HexCoord()
+    var position = GridCoord()
     lateinit var baseTerrain: String
     var terrainFeatures: List<String> = listOf()
         private set
@@ -86,9 +86,8 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
 
     @Transient private var roadOwnerObject: Civilization? = null
 
-    var hasBottomRightRiver = false
+    var hasRightRiver = false
     var hasBottomRiver = false
-    var hasBottomLeftRiver = false
 
     var history: TileHistory = TileHistory()
 
@@ -181,9 +180,9 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     var hasVegetation: Boolean = false
 
     val latitude: Int
-        get() = HexMath.getLatitude(position)
+        get() = GridMath.getLatitude(position)
     val longitude: Int
-        get() = HexMath.getLongitude(position)
+        get() = GridMath.getLongitude(position)
 
     @Transient @Cache
     private var tileResourceCache: TileResource? = null
@@ -256,8 +255,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         toReturn.roadStatus = roadStatus
         toReturn.roadIsPillaged = roadIsPillaged
         toReturn.roadOwner = roadOwner
-        toReturn.hasBottomLeftRiver = hasBottomLeftRiver
-        toReturn.hasBottomRightRiver = hasBottomRightRiver
+        toReturn.hasRightRiver = hasRightRiver
         toReturn.hasBottomRiver = hasBottomRiver
         toReturn.continent = continent
         toReturn.exploredBy = exploredBy
@@ -403,8 +401,8 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     @Readonly fun hasFalloutEquivalent(): Boolean = terrainFeatures.any { ruleset.terrains[it]!!.hasUnique(UniqueType.NullifyYields)}
 
 
-    fun getRow() = HexMath.getRow(position)
-    fun getColumn() = HexMath.getColumn(position)
+    fun getRow() = GridMath.getRow(position)
+    fun getColumn() = GridMath.getColumn(position)
 
     @Readonly fun getBaseTerrain(): Terrain = baseTerrainObject
 
@@ -666,19 +664,16 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
      */
     @Readonly
     fun aerialDistanceTo(otherTile: Tile): Int {
-        val positionHexcoord = position
-        val otherPositionHexcoord = otherTile.position
-
-        val xDelta = positionHexcoord.x - otherPositionHexcoord.x
-        val yDelta = positionHexcoord.y - otherPositionHexcoord.y
-        val distance = maxOf(abs(xDelta), abs(yDelta), abs(xDelta - yDelta))
+        val xDelta = position.x - otherTile.position.x
+        val yDelta = position.y - otherTile.position.y
+        val distance = maxOf(abs(xDelta), abs(yDelta))
 
         if (!tileMap.mapParameters.worldWrap || distance <= tileMap.width / 2) return distance
 
-        val otherTileUnwrappedPos = tileMap.getUnwrappedPosition(otherPositionHexcoord)
-        val xDeltaWrapped = positionHexcoord.x - otherTileUnwrappedPos.x
-        val yDeltaWrapped = positionHexcoord.y - otherTileUnwrappedPos.y
-        val wrappedDistance = maxOf(abs(xDeltaWrapped), abs(yDeltaWrapped), abs(xDeltaWrapped - yDeltaWrapped))
+        val otherTileUnwrappedPos = tileMap.getUnwrappedPosition(otherTile.position)
+        val xDeltaWrapped = position.x - otherTileUnwrappedPos.x
+        val yDeltaWrapped = position.y - otherTileUnwrappedPos.y
+        val wrappedDistance = maxOf(abs(xDeltaWrapped), abs(yDeltaWrapped))
 
         return min(distance, wrappedDistance)
     }
@@ -698,19 +693,19 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         }
     }
 
-    /** The two tiles have a river between them */
+    /** The two tiles have a river between them (cardinal edges only; diagonal neighbors never share a river edge) */
     @Readonly
     fun isConnectedByRiver(otherTile: Tile): Boolean {
         if (otherTile == this) throw Exception("Should not be called to compare to self!")
 
-        return when (tileMap.getNeighborTileClockPosition(this, otherTile)) {
-            2 -> otherTile.hasBottomLeftRiver // we're to the bottom-left of it
-            4 -> hasBottomRightRiver // we're to the top-left of it
-            6 -> hasBottomRiver // we're directly above it
-            8 -> hasBottomLeftRiver // we're to the top-right of it
-            10 -> otherTile.hasBottomRightRiver // we're to the bottom-right of it
-            12 -> otherTile.hasBottomRiver // we're directly below it
-            else -> throw Exception("Should never call this function on a non-neighbor!")
+        return when (tileMap.getNeighborDirection(this, otherTile)) {
+            NeighborDirection.North -> otherTile.hasBottomRiver
+            NeighborDirection.East -> hasRightRiver
+            NeighborDirection.South -> hasBottomRiver
+            NeighborDirection.West -> otherTile.hasRightRiver
+            NeighborDirection.NorthEast, NeighborDirection.SouthEast,
+            NeighborDirection.SouthWest, NeighborDirection.NorthWest -> false
+            null -> throw Exception("Should never call this function on a non-neighbor!")
         }
     }
 
@@ -723,9 +718,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     fun isAdjacentToRiver(): Boolean {
         if (!isAdjacentToRiverKnown) {
             isAdjacentToRiver =
-            // These are so if you add a river at the bottom of the map (no neighboring tile to be connected to)
-                //   that tile is still considered adjacent to river
-                hasBottomLeftRiver || hasBottomRiver || hasBottomRightRiver
+                hasRightRiver || hasBottomRiver
                     || neighbors.any { isConnectedByRiver(it) }
             isAdjacentToRiverKnown = true
         }
@@ -899,7 +892,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         }
         owningCity = city
         stateThisTile = GameContext(tile = this, city = city, gameInfo = tileMap.gameInfo)
-        isCityCenterInternal = getCity()?.location?.toHexCoord() == position
+        isCityCenterInternal = getCity()?.location?.toGridCoord() == position
     }
 
     /**
@@ -1193,7 +1186,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         }
     }
 
-    fun setExplored(player: Civilization, isExplored: Boolean, explorerPosition: HexCoord? = null) {
+    fun setExplored(player: Civilization, isExplored: Boolean, explorerPosition: GridCoord? = null) {
         if (isExplored) {
             // Disable the undo button if a new tile has been explored
             if (!exploredBy.contains(player.civID)) {
@@ -1233,14 +1226,11 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
      *  @return The state did change (`false`: the edge already had the `newValue`)
      */
     fun setConnectedByRiver(otherTile: Tile, newValue: Boolean, convertTerrains: Boolean = false): Boolean {
-        //todo synergy potential with [MapEditorEditRiversTab]?
-        val field = when (tileMap.getNeighborTileClockPosition(this, otherTile)) {
-            2 -> otherTile::hasBottomLeftRiver // we're to the bottom-left of it
-            4 -> ::hasBottomRightRiver // we're to the top-left of it
-            6 -> ::hasBottomRiver // we're directly above it
-            8 -> ::hasBottomLeftRiver // we're to the top-right of it
-            10 -> otherTile::hasBottomRightRiver // we're to the bottom-right of it
-            12 -> otherTile::hasBottomRiver // we're directly below it
+        val field = when (tileMap.getNeighborDirection(this, otherTile)) {
+            NeighborDirection.North -> otherTile::hasBottomRiver
+            NeighborDirection.East -> ::hasRightRiver
+            NeighborDirection.South -> ::hasBottomRiver
+            NeighborDirection.West -> otherTile::hasRightRiver
             else -> return false
         }
         if (field.get() == newValue) return false

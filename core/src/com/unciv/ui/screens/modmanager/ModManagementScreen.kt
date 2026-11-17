@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.SerializationException
+import com.unciv.Constants
 import com.unciv.UncivGame
 import com.unciv.logic.UncivShowableException
 import com.unciv.logic.github.DownloadAndExtractState
@@ -149,9 +150,9 @@ class ModManagementScreen private constructor(
         //setDefaultCloseAction() // we're adding the tileSet check
         rightSideButton.isVisible = false
         closeButton.onActivation {
-            val tileSets = ImageGetter.getAvailableTilesets()
+            val tileSets = ImageGetter.getAvailableTilesets().filter { it in TileSetCache }.toList()
             if (game.settings.tileSet !in tileSets) {
-                game.settings.tileSet = tileSets.first()
+                game.settings.tileSet = tileSets.firstOrNull() ?: Constants.defaultTileset
             }
             val screen = game.popScreen()
 

@@ -1,7 +1,7 @@
 package com.unciv.ui.screens.worldscreen.unit.presenter
 
 import com.unciv.view.location
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.models.translations.tr
 import com.unciv.ui.components.input.onClick
 import com.unciv.ui.screens.pickerscreens.CityRenamePopup
@@ -12,7 +12,7 @@ class CityPresenter(private val unitTable: UnitTable, private val unitPresenter:
 
     var selectedCity: ForeignCityView? = null
 
-    override val position: HexCoord?
+    override val position: GridCoord?
         get() = selectedCity?.location
 
     fun selectCity(city: ForeignCityView): Boolean {

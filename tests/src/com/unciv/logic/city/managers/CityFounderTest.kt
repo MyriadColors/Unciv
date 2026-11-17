@@ -2,7 +2,7 @@ package com.unciv.logic.city.managers
 
 import com.unciv.Constants
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.*
@@ -27,7 +27,7 @@ class CityFounderTest {
     @Test
     fun `should save original founding civ`() {
         // when
-        val foundedCity = cityFounder.foundCity(civ, HexCoord.Zero)
+        val foundedCity = cityFounder.foundCity(civ, GridCoord.Zero)
 
         // then
         assertEquals(civ, foundedCity.foundingCivObject)
@@ -39,9 +39,9 @@ class CityFounderTest {
         civ.nation.cities = arrayListOf("1", "2", "3")
 
         // when
-        val foundedCity1 = cityFounder.foundCity(civ, HexCoord.Zero)
-        val foundedCity2 = cityFounder.foundCity(civ, HexCoord(1,0))
-        val foundedCity3 = cityFounder.foundCity(civ, HexCoord(0,1))
+        val foundedCity1 = cityFounder.foundCity(civ, GridCoord.Zero)
+        val foundedCity2 = cityFounder.foundCity(civ, GridCoord(1,0))
+        val foundedCity3 = cityFounder.foundCity(civ, GridCoord(0,1))
 
         // then
         assertEquals("1", foundedCity1.name)
@@ -55,10 +55,10 @@ class CityFounderTest {
         val borrowerCiv = testGame.addCiv("\"Borrows\" city names from other civilizations in the game")
         borrowerCiv.nation.cities = arrayListOf()
         civ.nation.cities = arrayListOf("1", "2", "3")
-        cityFounder.foundCity(civ, HexCoord(1,0)) // otherwise "civ" is considered dead
+        cityFounder.foundCity(civ, GridCoord(1,0)) // otherwise "civ" is considered dead
 
         // when
-        val foundedCity = cityFounder.foundCity(borrowerCiv, HexCoord.Zero)
+        val foundedCity = cityFounder.foundCity(borrowerCiv, GridCoord.Zero)
 
         // then
         assertEquals("3", foundedCity.name)
@@ -67,8 +67,8 @@ class CityFounderTest {
     @Test
     fun `should make only first founded city capital`() {
         // when
-        val capitalCity = cityFounder.foundCity(civ, HexCoord.Zero)
-        val nonCapitalCity = cityFounder.foundCity(civ, HexCoord(1,0))
+        val capitalCity = cityFounder.foundCity(civ, GridCoord.Zero)
+        val nonCapitalCity = cityFounder.foundCity(civ, GridCoord(1,0))
 
         // then
         assertTrue(capitalCity.isCapital())
@@ -83,7 +83,7 @@ class CityFounderTest {
         val freeBuildingCiv = testGame.addCiv("Gain a free [Granary] [in all cities]")
 
         // when
-        val foundedCity = cityFounder.foundCity(freeBuildingCiv, HexCoord.Zero)
+        val foundedCity = cityFounder.foundCity(freeBuildingCiv, GridCoord.Zero)
 
         // then
         assertTrue(foundedCity.cityConstructions.containsBuildingOrEquivalent("Granary"))
@@ -92,11 +92,11 @@ class CityFounderTest {
     @Test
     fun `should remove removable terrain features upon city founding`() {
         // given
-        testGame.setTileFeatures(HexCoord.Zero, Constants.forest)
-        assertTrue(testGame.getTile(HexCoord.Zero).terrainFeatures.contains(Constants.forest))
+        testGame.setTileFeatures(GridCoord.Zero, Constants.forest)
+        assertTrue(testGame.getTile(GridCoord.Zero).terrainFeatures.contains(Constants.forest))
 
         // when
-        val foundedCity = cityFounder.foundCity(civ, HexCoord.Zero)
+        val foundedCity = cityFounder.foundCity(civ, GridCoord.Zero)
 
         // then
         assertFalse(foundedCity.getCenterTile().terrainFeatures.contains(Constants.forest))
@@ -105,11 +105,11 @@ class CityFounderTest {
     @Test
     fun `should keep non-removable terrain features upon city founding`() {
         // given
-        testGame.setTileFeatures(HexCoord.Zero, Constants.hill)
-        assertTrue(testGame.getTile(HexCoord.Zero).terrainFeatures.contains(Constants.hill))
+        testGame.setTileFeatures(GridCoord.Zero, Constants.hill)
+        assertTrue(testGame.getTile(GridCoord.Zero).terrainFeatures.contains(Constants.hill))
 
         // when
-        val foundedCity = cityFounder.foundCity(civ, HexCoord.Zero)
+        val foundedCity = cityFounder.foundCity(civ, GridCoord.Zero)
 
         // then
         assertTrue(foundedCity.getCenterTile().terrainFeatures.contains(Constants.hill))
@@ -118,11 +118,11 @@ class CityFounderTest {
     @Test
     fun `should remove improvements upon city founding`() {
         // given
-        val tile = testGame.getTile(HexCoord.Zero)
+        val tile = testGame.getTile(GridCoord.Zero)
         tile.setImprovementBasic("Farm")
 
         // when
-        cityFounder.foundCity(civ, HexCoord.Zero)
+        cityFounder.foundCity(civ, GridCoord.Zero)
 
         // then
         assertFalse(tile.improvement == "Farm")
@@ -131,13 +131,13 @@ class CityFounderTest {
     @Test
     fun `should exploit city center yields without requiring pop`() {
         // given
-        testGame.setTileTerrainAndFeatures(HexCoord.Zero, Constants.desert, Constants.hill) // 2 hammers expected
-        testGame.setTileTerrainAndFeatures(HexCoord(1,0), Constants.desert)  // no yields expected
+        testGame.setTileTerrainAndFeatures(GridCoord.Zero, Constants.desert, Constants.hill) // 2 hammers expected
+        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.desert)  // no yields expected
 
         // when
-        val city = cityFounder.foundCity(civ, HexCoord.Zero)
+        val city = cityFounder.foundCity(civ, GridCoord.Zero)
         city.clearWorkedTiles()
-        val tile10 = city.tileMap[HexCoord(1,0)]
+        val tile10 = city.tileMap[GridCoord(1,0)]
         city.workTile(tile10)
         city.lockTile(tile10)
         city.cityStats.update()
@@ -150,7 +150,7 @@ class CityFounderTest {
     @Test
     fun `should autoassign new population`() {
         // when
-        val city = cityFounder.foundCity(civ, HexCoord.Zero)
+        val city = cityFounder.foundCity(civ, GridCoord.Zero)
 
         // then
         assertEquals(0, city.population.getFreePopulation())
@@ -159,7 +159,7 @@ class CityFounderTest {
     @Test
     fun `should acquire ownership of tiles surrounding the city center`() {
         // when
-        val city = cityFounder.foundCity(civ, HexCoord.Zero)
+        val city = cityFounder.foundCity(civ, GridCoord.Zero)
 
         // then
         assertEquals(7, city.tiles.size) // 6 surrounding + 1 due to city center itself
@@ -172,7 +172,7 @@ class CityFounderTest {
         assertEquals(0, uniqueCiv.gold)
 
         // when
-        cityFounder.foundCity(uniqueCiv, HexCoord.Zero)
+        cityFounder.foundCity(uniqueCiv, GridCoord.Zero)
 
         // then
         assertEquals(5, uniqueCiv.gold)
@@ -181,11 +181,11 @@ class CityFounderTest {
     @Test
     fun `should not be able to found city in same tile of another city`() {
         // given
-        cityFounder.foundCity(civ, HexCoord.Zero)
+        cityFounder.foundCity(civ, GridCoord.Zero)
 
         // when
         try {
-            cityFounder.foundCity(civ, HexCoord.Zero)
+            cityFounder.foundCity(civ, GridCoord.Zero)
         } catch (e: IllegalStateException) {
             assertEquals("Trying to found a city in a tile that already has one", e.message)
             return

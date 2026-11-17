@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Json
 import com.badlogic.gdx.utils.JsonValue
 import com.unciv.logic.IsPartOfGameInfoSerialization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import yairm210.purity.annotations.Pure
 
 /**
@@ -17,8 +17,8 @@ import yairm210.purity.annotations.Pure
  *  See git history for previous more complicated solutions.
  */
 class LastSeenImprovement(
-    private val map: HashMap<HexCoord, String> = hashMapOf()
-) : MutableMap<HexCoord, String> by map, IsPartOfGameInfoSerialization, Json.Serializable {
+    private val map: HashMap<GridCoord, String> = hashMapOf()
+) : MutableMap<GridCoord, String> by map, IsPartOfGameInfoSerialization, Json.Serializable {
     override fun write(json: Json) {
         for ((key, value) in entries) {
             val name = key.toPrettyString()
@@ -28,7 +28,7 @@ class LastSeenImprovement(
 
     override fun read(json: Json, jsonData: JsonValue) {
         for (entry in jsonData) {
-            val key = entry.name.toHexCoord()
+            val key = entry.name.toGridCoord()
             val value = if (entry.isValue) entry.asString() else entry.getString("value")
             put(key, value)
         }
@@ -40,9 +40,9 @@ class LastSeenImprovement(
         return Vector2(x.toFloat(), y.toFloat())
     }
     @Pure
-    private fun String.toHexCoord(): HexCoord {
+    private fun String.toGridCoord(): GridCoord {
         val (x, y) = removeSurrounding("(", ")").split(',')
-        return HexCoord(x.toFloat().toInt(),y.toFloat().toInt())
+        return GridCoord(x.toFloat().toInt(),y.toFloat().toInt())
     }
 
     override fun equals(other: Any?) = when (other) {

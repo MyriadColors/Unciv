@@ -7,7 +7,7 @@ import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.PlayerType
 import com.unciv.logic.civilization.PopupAlert
 import com.unciv.logic.files.MapSaver
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridMath
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.mapgenerator.MapGenerator
 import com.unciv.logic.map.tile.Tile
@@ -581,7 +581,7 @@ class GameStarter private constructor(
     private fun getFreeTiles(landTilesInBigEnoughGroup: Map<Tile, Float>, minimumDistanceBetweenStartingLocations: Int): MutableList<Tile> {
         return landTilesInBigEnoughGroup.asSequence()
             .filter {
-                HexMath.getDistanceFromEdge(it.key.position, tileMap.mapParameters) >=
+                GridMath.getDistanceFromEdge(it.key.position, tileMap.mapParameters) >=
                     (minimumDistanceBetweenStartingLocations * 2) / 3
             }.sortedBy { it.value }
             .map { it.key }

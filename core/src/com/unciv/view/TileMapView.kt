@@ -2,11 +2,12 @@ package com.unciv.view
 
 import com.badlogic.gdx.math.Vector2
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.GridMath
+import com.unciv.logic.map.NeighborDirection
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.tile.Tile
-import com.unciv.logic.map.toHexCoord
+import com.unciv.logic.map.toGridCoord
 import yairm210.purity.annotations.Cache
 import yairm210.purity.annotations.Readonly
 
@@ -32,25 +33,37 @@ class TileMapView(private val tileMap: TileMap,
     }
 
     /** Returns the [TileView] at [position], or `null` if it isn't explored by [viewer]. */
-    @Readonly fun getTile(position: HexCoord): TileView? = tileMap[position].toViewIfExplored()
+    @Readonly fun getTile(position: GridCoord): TileView? = tileMap[position].toViewIfExplored()
 
     /** Position of [position] normalized to the map's non-wrapped bounds, for world-wrap rendering. */
-    @Readonly fun getUnwrappedPosition(position: HexCoord): HexCoord = tileMap.getUnwrappedPosition(position)
+    @Readonly fun getUnwrappedPosition(position: GridCoord): GridCoord = tileMap.getUnwrappedPosition(position)
 
     // Not sure if I want these as part of the API -
     // we can separate the "get coord" part and put it in HexMath,
     // And add a new function of "get tile by coord" in here :thunk:
     // These are really only used for borders so IDK
     @Readonly fun getLeftSharedNeighbor(tile: TileView, neighbor: TileView): TileView? {
-        val clockPos = tileMap.getNeighborTileClockPosition(tile.unwrap(), neighbor.unwrap())
-        val n = tileMap.getClockPositionNeighborTile(tile.unwrap(), (clockPos - 2) % 12) ?: return null
-        return n.toViewIfExplored()
+        val dir = tileMap.getNeighborDirection(tile.unwrap(), neighbor.unwrap()) ?: return null
+        val leftDir = when (dir) {
+            NeighborDirection.North -> NeighborDirection.West
+            NeighborDirection.East -> NeighborDirection.North
+            NeighborDirection.South -> NeighborDirection.East
+            NeighborDirection.West -> NeighborDirection.South
+            else -> return null
+        }
+        return tileMap.getNeighborTile(tile.unwrap(), leftDir)?.toViewIfExplored()
     }
 
     @Readonly fun getRightSharedNeighbor(tile: TileView, neighbor: TileView): TileView? {
-        val clockPos = tileMap.getNeighborTileClockPosition(tile.unwrap(), neighbor.unwrap())
-        val n = tileMap.getClockPositionNeighborTile(tile.unwrap(), (clockPos + 2) % 12) ?: return null
-        return n.toViewIfExplored()
+        val dir = tileMap.getNeighborDirection(tile.unwrap(), neighbor.unwrap()) ?: return null
+        val rightDir = when (dir) {
+            NeighborDirection.North -> NeighborDirection.East
+            NeighborDirection.East -> NeighborDirection.South
+            NeighborDirection.South -> NeighborDirection.West
+            NeighborDirection.West -> NeighborDirection.North
+            else -> return null
+        }
+        return tileMap.getNeighborTile(tile.unwrap(), rightDir)?.toViewIfExplored()
     }
 
     @Readonly fun getNeighborTilePositionAsWorldCoords(tile: TileView, neighbor: TileView): Vector2 =
@@ -61,9 +74,9 @@ class TileMapView(private val tileMap: TileMap,
         val fromTile = from.unwrap()
         var targetPos = Vector2(to.unwrap().position.toVector2())
         if (tileMap.mapParameters.worldWrap)
-            targetPos = HexMath.getUnwrappedNearestTo(targetPos.toHexCoord(), fromTile.position, tileMap.maxLongitude)
-        val targetWorld = HexMath.hex2WorldCoords(targetPos.toHexCoord())
-        val fromWorld = HexMath.hex2WorldCoords(fromTile.position)
+            targetPos = GridMath.getUnwrappedNearestTo(targetPos.toGridCoord(), fromTile.position, tileMap.width)
+        val targetWorld = GridMath.grid2WorldCoords(targetPos.toGridCoord())
+        val fromWorld = GridMath.grid2WorldCoords(fromTile.position)
         return Vector2(targetWorld.x - fromWorld.x, targetWorld.y - fromWorld.y)
     }
 

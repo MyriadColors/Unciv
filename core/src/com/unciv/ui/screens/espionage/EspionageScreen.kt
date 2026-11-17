@@ -230,7 +230,7 @@ class EspionageScreen(val civInfo: Civilization, val worldScreen: WorldScreen) :
         if (location != null) {
             label.onClick {
                 worldScreen.game.popScreen() // If a detour to this screen (i.e. not directly from worldScreen) is made possible, use resetToWorldScreen instead
-                worldScreen.mapHolder.setCenterPosition(location.location.toHexCoord())
+                worldScreen.mapHolder.setCenterPosition(location.location.toGridCoord())
             }
         }
         locationSelectionTable.add(label).left()

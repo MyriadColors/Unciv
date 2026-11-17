@@ -16,7 +16,7 @@ import com.unciv.logic.civilization.managers.quests.QuestTargetHelpers.getMostRe
 import com.unciv.logic.civilization.managers.quests.QuestTargetHelpers.getNaturalWonderToFindForQuest
 import com.unciv.logic.civilization.managers.quests.QuestTargetHelpers.getResourceForQuest
 import com.unciv.logic.civilization.managers.quests.QuestTargetHelpers.getWonderToBuildForQuest
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.models.ruleset.Quest
 import com.unciv.models.ruleset.QuestName
@@ -44,7 +44,7 @@ sealed class QuestImplementation : IQuestImplementation {
         civ.gameInfo.tileMap[data1.toInt(), data2.toInt()]
     @Readonly
     protected fun AssignedQuest.getPosition() =
-        HexCoord(data1.toInt(), data2.toInt())
+        GridCoord(data1.toInt(), data2.toInt())
 
     class None : QuestImplementation() {
         override fun isValid(civ: Civilization, challenger: Civilization) = false

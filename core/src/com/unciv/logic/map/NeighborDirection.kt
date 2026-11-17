@@ -1,14 +1,24 @@
 package com.unciv.logic.map
 
-enum class NeighborDirection(val clockPosition: Int) {
-    TopRight(2),
-    BottomRight(4),
-    Bottom(6),
-    BottomLeft(8),
-    TopLeft(10),
-    Top(12);
+import yairm210.purity.annotations.Pure
+
+enum class NeighborDirection(val dx: Int, val dy: Int, val isCardinal: Boolean) {
+    North(0, 1, true),
+    NorthEast(1, 1, false),
+    East(1, 0, true),
+    SouthEast(1, -1, false),
+    South(0, -1, true),
+    SouthWest(-1, -1, false),
+    West(-1, 0, true),
+    NorthWest(-1, 1, false);
+
+    val offset: GridCoord get() = GridCoord.of(dx, dy)
 
     companion object {
-        val byClockPosition = entries.associateBy { it.clockPosition }
+        val cardinals = entries.filter { it.isCardinal }
+
+        @Pure
+        fun fromDelta(dx: Int, dy: Int): NeighborDirection? =
+            entries.firstOrNull { it.dx == dx && it.dy == dy }
     }
 }

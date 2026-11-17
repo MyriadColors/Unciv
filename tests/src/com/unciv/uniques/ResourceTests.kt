@@ -1,7 +1,7 @@
 package com.unciv.uniques
 
 import com.unciv.logic.civilization.PlayerType
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.trade.TradeLogic
 import com.unciv.logic.trade.TradeOffer
 import com.unciv.logic.trade.TradeOfferType
@@ -235,7 +235,7 @@ class ResourceTests {
         val building = game.createBuilding("Provides [4] [Coal]")
         city.cityConstructions.addBuilding(building)
 
-        val otherCity = civInfo.addCity(HexCoord(2,2))
+        val otherCity = civInfo.addCity(GridCoord(2,2))
 
         // when
         val resourceAmountInOtherCity = otherCity.getAvailableResourceAmount("Coal")
@@ -252,7 +252,7 @@ class ResourceTests {
         val building = game.createBuilding("Provides [4] [${resource.name}]")
         city.cityConstructions.addBuilding(building)
 
-        val otherCity = civInfo.addCity(HexCoord(2,2))
+        val otherCity = civInfo.addCity(GridCoord(2,2))
 
         // when
         val resourceAmountInOtherCity = otherCity.getAvailableResourceAmount(resource.name)
@@ -284,7 +284,7 @@ class ResourceTests {
         religion.addBeliefs(listOf(belief))
         city.population.setPopulation(1)
         city.religion.addPressure(religion.name, 1000)
-        val otherCity = civInfo.addCity(HexCoord(2,2)) // NOT religionized
+        val otherCity = civInfo.addCity(GridCoord(2,2)) // NOT religionized
 
         // when
         val resourceAmountInCapital = city.getAvailableResourceAmount("Iron")

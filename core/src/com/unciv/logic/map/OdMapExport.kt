@@ -65,7 +65,7 @@ object OdMapExport {
 
         val byCell = HashMap<Long, Tile>(tiles.size * 2)
         for (ri in 0 until rows) for (ci in 0 until columns) {
-            val position = HexMath.getTileCoordsFromColumnRow(ci + colMin, ri + rowMin)
+            val position = GridMath.getTileCoordsFromColumnRow(ci + colMin, ri + rowMin)
             if (!map.contains(position)) continue
             byCell[cellKey(ci + colMin, ri + rowMin)] = map[position]
         }

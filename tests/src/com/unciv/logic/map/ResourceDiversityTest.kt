@@ -69,14 +69,14 @@ class ResourceDiversityTest {
 
         // Pangaea × every size (hexagonal)
         for ((size, minUnique, minEntropy) in sizeCases) {
-            val counts = countResources(mapType = MapType.pangaea, shape = MapShape.hexagonal, size = size, ruleset = ruleset)
+            val counts = countResources(mapType = MapType.pangaea, shape = MapShape.rectangular, size = size, ruleset = ruleset)
             assertDiversity("Pangaea / ${size.name}", counts, minUnique, minEntropy)
         }
 
         // Large hexagonal × every map type
         for (mapType in MapType.allValues) {
             val (minUnique, minEntropy) = largeTypeThresholds.getValue(mapType)
-            val counts = countResources(mapType = mapType, shape = MapShape.hexagonal, size = MapSize.Large, ruleset = ruleset)
+            val counts = countResources(mapType = mapType, shape = MapShape.rectangular, size = MapSize.Large, ruleset = ruleset)
             assertDiversity("$mapType / Large", counts, minUnique, minEntropy)
         }
     }

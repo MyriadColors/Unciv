@@ -26,7 +26,7 @@ class CityStateTypeStartBiasTests {
 
     @Test
     fun `G&K Maritime city-state type has Coast start bias unique`() {
-        val ruleset = RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!
+        val ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!
         val maritime = ruleset.cityStateTypes["Maritime"]!!
         Assert.assertTrue(
             maritime.uniqueMap.getMatchingUniques(UniqueType.StartBias, GameContext.IgnoreConditionals)
@@ -36,7 +36,7 @@ class CityStateTypeStartBiasTests {
 
     @Test
     fun `Nation getStartBias merges type unique and nation field`() {
-        val ruleset = RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!
+        val ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!
         val type = CityStateType().apply {
             name = "TestType"
             uniques = arrayListOf("Start bias [Coast]")
@@ -55,7 +55,7 @@ class CityStateTypeStartBiasTests {
 
     @Test
     fun `Nation StartBias unique merges with field`() {
-        val ruleset = RulesetCache[BaseRuleset.Civ_V_GnK.fullName]!!
+        val ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!
         val nation = Nation().apply {
             name = "BiasNation"
             startBias = arrayListOf("Hills")
@@ -91,8 +91,8 @@ class CityStateTypeStartBiasTests {
         val game = TestGame()
         game.makeHexagonalMap(2, Constants.grassland)
         // Distance 2 so Avoid [Snow] on the hill tile does not see the snow neighbor.
-        val hillTile = game.setTileTerrainAndFeatures(HexCoord.Zero, Constants.grassland, Constants.hill)
-        val snowTile = game.setTileTerrain(HexCoord(2, 0), Constants.snow)
+        val hillTile = game.setTileTerrainAndFeatures(GridCoord.Zero, Constants.grassland, Constants.hill)
+        val snowTile = game.setTileTerrain(GridCoord(2, 0), Constants.snow)
 
         val tiles = listOf(hillTile, snowTile)
         val hillOnly = MinorCivPlacer.filterTilesByStartBias(tiles, listOf("Hill"))

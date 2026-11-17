@@ -2,7 +2,7 @@ package com.unciv.logic.map.mapgenerator.mapregions
 
 import com.badlogic.gdx.math.Rectangle
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.ruleset.unique.UniqueType
@@ -15,7 +15,7 @@ class Region (val tileMap: TileMap, val rect: Rectangle, val continentID: Int = 
     var totalFertility = 0
     var type = "Hybrid" // being an undefined or indeterminate type
     var luxury: String? = null
-    var startPosition: HexCoord? = null
+    var startPosition: GridCoord? = null
     val assignedMinorCivs = ArrayList<Civilization>()
 
     var affectedByWorldWrap = false

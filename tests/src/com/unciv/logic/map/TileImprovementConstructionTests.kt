@@ -8,7 +8,7 @@ import com.unciv.logic.city.City.Companion.NO_ID
 import com.unciv.logic.city.City.Companion.pseudoRandomId
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.managers.TurnManager
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.tile.ImprovementBuildingProblem
 import com.unciv.logic.map.tile.RoadStatus
 import com.unciv.logic.map.tile.Tile
@@ -513,7 +513,7 @@ class TileImprovementConstructionTests {
         game.makeHexagonalMap(3)
         val civ = game.addCiv(isPlayer = isPlayer)
         civ.tech.addTechnology("The Wheel", false)
-        val city = game.addCity(civ, game.getTile(HexCoord.Zero))
+        val city = game.addCity(civ, game.getTile(GridCoord.Zero))
         return RoadMaintenanceSetup(game, civ, city)
     }
 

@@ -216,12 +216,12 @@ object Nuke {
 
         // Damage city and reduce its population
         val city = tile.getCity()
-        if (city != null && tile.position.toHexCoord() == city.location.toHexCoord()) {
+        if (city != null && tile.position.toGridCoord() == city.location.toGridCoord()) {
             val attackContext = GameContext(attacker.getCivInfo(), ourCombatant = attacker, theirCombatant = CityCombatant(city), tile = tile)
             buildingModifier = city.getAggregateModifier(UniqueType.GarrisonDamageFromNukes)
             doNukeExplosionDamageToCity(city, nukeStrength, damageModifierFromMissingResource, attackContext)
             Battle.postBattleNotifications(attacker, CityCombatant(city), city.getCenterTile())
-            Battle.destroyIfDefeated(city.civ, attacker.getCivInfo(), city.location.toHexCoord())
+            Battle.destroyIfDefeated(city.civ, attacker.getCivInfo(), city.location.toGridCoord())
         }
 
         // Damage and/or destroy units on the tile

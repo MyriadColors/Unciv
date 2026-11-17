@@ -1,7 +1,7 @@
 package com.unciv.logic.battle
 
 import com.unciv.logic.IsPartOfGameInfoSerialization
-import com.unciv.logic.map.HexCoord
+import com.unciv.logic.map.GridCoord
 import yairm210.purity.annotations.InternalState
 import yairm210.purity.annotations.LocalState
 import yairm210.purity.annotations.ModifiesInternalStateOnly
@@ -18,7 +18,7 @@ class AttackParticipant() : IsPartOfGameInfoSerialization {
     var civID = ""
     var name = ""
     var instanceName: String? = null
-    var position = HexCoord.Zero
+    var position = GridCoord.Zero
     var healthBefore = 0
     var healthAfter: Int? = null
     /**

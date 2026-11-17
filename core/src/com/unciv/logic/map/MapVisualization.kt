@@ -19,6 +19,6 @@ class MapVisualization(val gameInfo: GameInfo, val viewingCiv: Civilization) {
     }
 
     /** @return Whether an attack by a unit to a target should be visible to the player. */
-    @Readonly fun isAttackVisible(attacker: Civilization, source: HexCoord, target: HexCoord) = (attacker == viewingCiv || gameInfo.tileMap[source] in viewingCiv.viewableTiles || gameInfo.tileMap[target] in viewingCiv.viewableTiles)
+    @Readonly fun isAttackVisible(attacker: Civilization, source: GridCoord, target: GridCoord) = (attacker == viewingCiv || gameInfo.tileMap[source] in viewingCiv.viewableTiles || gameInfo.tileMap[target] in viewingCiv.viewableTiles)
     // Attacks by the player civ should always be visible, and attacks by foreign civs should be visible if either the tile they targeted or the attacker's tile are visible. E.G. Civ V shows bombers coming out of the Fog of War.
 }

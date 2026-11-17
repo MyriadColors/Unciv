@@ -12,7 +12,7 @@ import com.unciv.logic.city.CityFlags
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.diplomacy.DiplomacyManager
 import com.unciv.logic.civilization.diplomacy.DiplomaticStatus
-import com.unciv.logic.map.HexMath
+import com.unciv.logic.map.NeighborDirection
 import com.unciv.models.ruleset.tile.ResourceType
 import com.unciv.models.ruleset.tile.TileResource
 import com.unciv.models.ruleset.unique.GameContext
@@ -72,7 +72,7 @@ internal enum class FasterUIDevTesters : IFasterUITester {
             for ((i, civ) in civs.withIndex()) {
                 // civ.isDefeated() is still true, and CS get-relation code runs deep, especially get tribute willingness needs a fully defined capital
 
-                val pos = HexMath.getClockPositionToHexcoord(i * 2).times(3)
+                val pos = NeighborDirection.entries[i % NeighborDirection.entries.size].offset.times(3)
                 game.addCity(civ, game.tileMap[pos])
                 // create random relations
                 for ((j, other) in civs.withIndex()) {

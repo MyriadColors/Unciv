@@ -1,7 +1,6 @@
 package com.unciv.logic.map
 
 import com.unciv.logic.IsPartOfGameInfoSerialization
-import com.unciv.logic.map.HexMath.getNumberOfTilesInHexagon
 import com.unciv.logic.map.mapgenerator.MapResourceSetting
 import com.unciv.models.metadata.BaseRuleset
 import yairm210.purity.annotations.Readonly
@@ -9,10 +8,8 @@ import yairm210.purity.annotations.Readonly
 
 object MapShape {
     const val rectangular = "Rectangular"
-    const val hexagonal = "Hexagonal"
-    const val flatEarth = "Flat Earth Hexagonal"
-    
-    val allValues = listOf(rectangular, hexagonal, flatEarth)
+
+    val allValues = listOf(rectangular)
 }
 
 object MapGeneratedMainType {
@@ -72,8 +69,8 @@ object MirroringType {
 class MapParameters : IsPartOfGameInfoSerialization {
     var name = ""
     var type = MapType.pangaea
-    // DO NOT CHANGE DEFAULTS since that changes all existing games to new default!
-    var shape = MapShape.hexagonal
+    var shape = MapShape.rectangular
+    var gridFormat = "square"
     var mapSize = MapSize.Medium
     var mapResources = MapResourceSetting.default.label
     var mirroring: String = MirroringType.none
@@ -86,7 +83,7 @@ class MapParameters : IsPartOfGameInfoSerialization {
 
     /** This is used mainly for the map editor, so you can continue editing a map under the same ruleset you started with */
     var mods = LinkedHashSet<String>()
-    var baseRuleset = BaseRuleset.Civ_V_GnK.fullName // Hardcoded as the RulesetCache is not yet initialized when starting up
+    var baseRuleset = BaseRuleset.BasicSquare.fullName // Hardcoded as the RulesetCache is not yet initialized when starting up
 
     /** Unciv Version of creation for support cases */
     var createdWithVersion = ""
@@ -158,14 +155,20 @@ class MapParameters : IsPartOfGameInfoSerialization {
     @JvmName("legendaryStartGetter")
     fun getLegendaryStart() = legendaryStart || mapResources == MapResourceSetting.legendaryStart.label
 
+    fun assertSquareCompatible() {
+        if (gridFormat != "square" || shape != MapShape.rectangular) {
+            throw IllegalArgumentException(
+                "Incompatible map/save format: this square-grid version of Unciv cannot load legacy hexagonal maps (gridFormat='$gridFormat', shape='$shape')."
+            )
+        }
+    }
+
     fun getArea() = when {
-        shape == MapShape.hexagonal || shape == MapShape.flatEarth -> getNumberOfTilesInHexagon(mapSize.radius)
         worldWrap && mapSize.width % 2 != 0 -> (mapSize.width - 1) * mapSize.height
         else -> mapSize.width * mapSize.height
     }
     private fun displayMapDimensions() = mapSize.run {
-        (if (shape == MapShape.hexagonal || shape == MapShape.flatEarth) "R$radius" else "${width}x$height") +
-        (if (worldWrap) "w" else "")
+        "${width}x$height" + (if (worldWrap) "w" else "")
     }
 
     // Human readable float representation akin to .net "0.###" - round to N digits but without redundant trailing zeroes
@@ -198,10 +201,5 @@ class MapParameters : IsPartOfGameInfoSerialization {
     }.joinToString("")
 
     @Readonly
-    fun numberOfTiles() =
-        if (shape == MapShape.hexagonal || shape == MapShape.flatEarth) {
-            1 + 3 * mapSize.radius * (mapSize.radius - 1)
-        } else {
-            mapSize.width * mapSize.height
-        }
+    fun numberOfTiles() = mapSize.width * mapSize.height
 }

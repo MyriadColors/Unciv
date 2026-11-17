@@ -8,7 +8,6 @@ import com.unciv.logic.map.tile.Tile
 import com.unciv.ui.screens.worldscreen.minimap.MinimapTile
 import com.unciv.ui.screens.worldscreen.minimap.MinimapTileUtil
 import kotlin.math.min
-import kotlin.math.sqrt
 
 // Mostly copied from MiniMap
 
@@ -85,10 +84,9 @@ class LoadMapPreview(
             height = mapSize.height.toFloat()
             width = mapSize.width.toFloat()
         }
-        // See HexMath.worldFromLatLong, the 0.6 is empiric to avoid rounding to cause the map to spill over
         return min(
-            maxWidth / (width + 0.6f) / 1.5f * 2f,
-            maxHeight / (height + 0.6f) / sqrt(3f) * 2f,
+            maxWidth / (width + 0.5f),
+            maxHeight / (height + 0.5f),
         )
     }
 }
@@ -114,9 +112,9 @@ class ReplayMap(
     override fun calcTileSize(maxWidth: Float, maxHeight: Float): Float {
         val height = viewingCiv.exploredRegion.getHeight().toFloat()
         val width = viewingCiv.exploredRegion.getWidth().toFloat()
-        return min (
-            maxHeight / (height + 1.5f) / sqrt(3f) * 4f, // 1.5 - padding, hex height = sqrt(3) / 2 * d / 2 -> d = height / sqrt(3) * 2 * 2
-            maxWidth / (width + 0.5f) / 0.75f // 0.5 - padding, hex width = 0.75 * d -> d = width / 0.75
+        return min(
+            maxHeight / (height + 0.5f),
+            maxWidth / (width + 0.5f)
         )
     }
 
