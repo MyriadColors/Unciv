@@ -25,7 +25,7 @@ class CottageUpgradeTests {
     fun `worked improvement increments turns and upgrades at threshold while unworked does not`() {
         val civ = testGame.addCiv()
         val city = testGame.addCity(civ, testGame.getTile(0, 0))
-        city.population.setPopulation(5)
+        city.population.setPopulation(1)
 
         val hamlet = testGame.createTileImprovement()
         val cottage = testGame.createTileImprovement("Upgrades to [${hamlet.name}] after [3] turns worked")
@@ -36,6 +36,7 @@ class CottageUpgradeTests {
         unworkedTile.setImprovement(cottage.name, civ)
 
         city.workedTiles = hashSetOf(workedTile.position)
+        city.lockedTiles = hashSetOf(workedTile.position)
 
         val turnManager = CityTurnManager(city)
         turnManager.endTurn()

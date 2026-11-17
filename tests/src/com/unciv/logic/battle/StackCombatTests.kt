@@ -49,7 +49,7 @@ class StackCombatTests {
         val attackerTile = testGame.getTile(0, 0)
         val stackTile = testGame.getTile(0, 1)
 
-        val horseman = testGame.addUnit("Horseman", attackerCiv, attackerTile)
+        val horseman = testGame.addUnit("Horse Archer", attackerCiv, attackerTile)
         testGame.addUnit("Warrior", defenderCiv, stackTile)
         val spearman = testGame.addUnit("Spearman", defenderCiv, stackTile)
 

@@ -90,7 +90,11 @@ object UnitActionsReligion {
         if (unit.civ.isCiv4ReligionEnabled()) {
             val civ4Uniques = UnitActionModifiers.getUsableUnitActionUniques(unit, UniqueType.CanSpreadCiv4Religion)
             return civ4Uniques.mapNotNull { unique ->
-                val religionName = unique.params[0]
+                val religionName = if (unique.params[0] == "any") {
+                    unit.civ.civ4Religion.stateReligion ?: return@mapNotNull null
+                } else {
+                    unique.params[0]
+                }
                 if (!unit.civ.civ4Religion.canSpreadReligionToCity(religionName, city)) return@mapNotNull null
                 val title = UnitActionModifiers.actionTextWithSideEffects("Spread [$religionName]", unique, unit)
                 UnitAction(

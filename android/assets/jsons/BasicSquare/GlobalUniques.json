@@ -1,28 +1,57 @@
 {
     "name": "Global Uniques",
     "uniques": [
-        "Requires establishing embassies to conduct advanced diplomacy",
-        "[-75]% growth [in all cities] <when between [-10] and [-1] [Happiness]>",
-        "Nullifies Growth [in all cities] <when below [-10] [Happiness]>",
-        "[-50]% [Production] [in all cities] <when below [-10] [Happiness]>",
-        "[-33]% Strength <for [All] units> <when below [-10] [Happiness]>",
-        "Cannot build [Settler] units <when below [-10] [Happiness]>",
-        "Rebel units may spawn <when below [-20] [Happiness]>",
-        "[-1] Sight <for [Embarked] units>",
+        "[+6 Happiness] [in your cities]",
+        "[-1 Happiness] per [1] population [in all cities]",
+        "[+1 Happiness] [in all cities] <with a garrison>",
 
-        // TODO: Implement the uniques below
-        // "[+20]% [Culture] [in all cities] <during a golden age>",
-        // "[+20]% [Production] [in all cities] <during a golden age>",
+        "[+25]% Production when constructing [All] units [in all cities] <on [Marathon] game speed>",
+        "[-100]% maintenance cost for [all] buildings [in your cities] <during We Love The King Day>",
 
-        // "[+10]% growth [in all cities] <during We Love The King Day>",
+        "All newly-trained [Sword] units [in your cities] receive the [Combat I] promotion <for [Aggressive] Civilizations>",
+        "All newly-trained [Gunpowder] units [in your cities] receive the [Combat I] promotion <for [Aggressive] Civilizations>",
+        "[+100]% Production when constructing [Barracks] buildings [in your cities] <for [Aggressive] Civilizations>",
+        "[+100]% Production when constructing [Drydock] buildings [in your cities] <for [Aggressive] Civilizations>",
 
-        // "Nullifies All Yield <while is in resistance>",
+        "[+100]% Production when constructing [Theatre] buildings [in your cities] <for [Creative] Civilizations>",
+        "[+100]% Production when constructing [Colosseum] buildings [in your cities] <for [Creative] Civilizations>",
 
-        // "[-25]% [Science] [in pupetted cities]" -- Imo cityFilters should ideally become conditionals anyway
-        // "[-25]% [Culture] [in pupetted cities]"
+        "[+2] Health <for [Expansive] Civilizations>",
+        "[+25]% Production when constructing [Worker] units [in your cities] <for [Expansive] Civilizations>",
+        "[+100]% Production when constructing [Granary] buildings [in your cities] <for [Expansive] Civilizations>",
+        "[+100]% Production when constructing [Harbor] buildings [in your cities] <for [Expansive] Civilizations>",
 
-        // "[+20]% [Production] [in cities connected via railroad]"
-        // something something unit supply
+        "[+1 Gold] [in your cities] <for [Financial] Civilizations>",
+        "[+100]% Production when constructing [Bank] buildings [in your cities] <for [Financial] Civilizations>",
+
+        "[+50]% Production when constructing [Wonder] buildings [in your cities] <for [Industrious] Civilizations>",
+        "[+100]% Production when constructing [Forge] buildings [in your cities] <for [Industrious] Civilizations>",
+
+        "[-50]% Civic upkeep <for [Organized] Civilizations>",
+        "[+100]% Production when constructing [Lighthouse] buildings [in your cities] <for [Organized] Civilizations>",
+        "[+100]% Production when constructing [Factory] buildings [in your cities] <for [Organized] Civilizations>",
+        "[+100]% Production when constructing [Courthouse] buildings [in your cities] <for [Organized] Civilizations>",
+
+        "[+100]% Great Person generation [in your cities] <for [Philosophical] Civilizations>",
+        "[+100]% Production when constructing [University] buildings [in your cities] <for [Philosophical] Civilizations>",
+
+        "No Anarchy when switching Civics or State Religion <for [Spiritual] Civilizations>",
+        "[+100]% Production when constructing [Temple] buildings [in your cities] <for [Spiritual] Civilizations>",
+
+        "[+1 Happiness] <for [Charismatic] Civilizations>",
+        "[+25]% XP gained from combat <for [Charismatic] Civilizations>",
+        "[+1 Happiness] from every [Monument] <for [Charismatic] Civilizations>",
+        "[+1 Happiness] from every [Broadcast Tower] <for [Charismatic] Civilizations>",
+
+        "[Great General] is earned [+100]% faster <for [Imperialistic] Civilizations>",
+        "[+100]% Production when constructing [Settler] units [in your cities] <for [Imperialistic] Civilizations>",
+
+        "All newly-trained [Archery] units [in your cities] receive the [Drill I] promotion <for [Protective] Civilizations>",
+        "All newly-trained [Gunpowder] units [in your cities] receive the [Drill I] promotion <for [Protective] Civilizations>",
+        "All newly-trained [Archery] units [in your cities] receive the [City Garrison I] promotion <for [Protective] Civilizations>",
+        "All newly-trained [Gunpowder] units [in your cities] receive the [City Garrison I] promotion <for [Protective] Civilizations>",
+        "[+100]% Production when constructing [Walls] buildings [in your cities] <for [Protective] Civilizations>",
+        "[+100]% Production when constructing [Castle] buildings [in your cities] <for [Protective] Civilizations>"
     ],
     "civilopediaText": [
         {"text": "Global uniques are ruleset-wide modifiers that apply to all civilizations."}

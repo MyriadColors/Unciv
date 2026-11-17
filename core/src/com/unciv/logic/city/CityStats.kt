@@ -445,6 +445,15 @@ class CityStats(val city: City) {
                 }
                 newHappinessList["State Religion"] = stateRelHappiness
             }
+            if (city.presentReligions.isNotEmpty()) {
+                var perRelHappiness = 0f
+                city.forEachMatchingUnique(UniqueType.HappinessPerPresentReligion) { unique ->
+                    perRelHappiness += unique.params[0].toFloat()
+                }
+                if (perRelHappiness != 0f) {
+                    newHappinessList["Religions"] = perRelHappiness * city.presentReligions.size
+                }
+            }
         }
 
         // we don't want to modify the existing happiness list because that leads

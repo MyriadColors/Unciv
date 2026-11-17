@@ -2,706 +2,1127 @@
 	{
 		"columnNumber": 0,
 		"era": "Ancient era",
-		"techCost": 20,
-		"buildingCost": 40,
-		"wonderCost": 185,
+		"techCost": 40,
 		"techs": [
+			{
+				"name": "Fishing",
+				"row": 1,
+				"cost": 40,
+				"quote": "\"Give a man a fish and you feed him for a day. Teach a man to fish and you feed him for a lifetime.\" - Lao Tzu"
+			},
+			{
+				"name": "The Wheel",
+				"cost": 60,
+				"row": 16,
+				"quote": "\"Put your shoulder to the wheel.\" - Aesop"
+			},
 			{
 				"name": "Agriculture",
-				"row": 6,
-				"quote": "'Where tillage begins, other arts follow. The farmers therefore are the founders of human civilization.' - Daniel Webster",
-				"uniques": ["Starting tech"]
-			}
-		]
-	},
-	{
-		"columnNumber": 1,
-		"era": "Ancient era",
-		"techCost": 35,
-		"buildingCost": 60,
-		"wonderCost": 185,
-		"techs": [
-			{
-				"name": "Pottery",
-				"row": 2,
-				"prerequisites": ["Agriculture"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Shall the clay say to him that fashioneth it, what makest thou?' - Bible Isaiah 45:9"
+				"row": 3,
+				"cost": 60,
+				"quote": "\"Oh farmers, pray that your summers be wet and your winters clear.\" - Virgil"
 			},
 			{
-				"name": "Animal Husbandry",
+				"name": "Hunting",
 				"row": 5,
-				"prerequisites": ["Agriculture"],
-				"quote": "'Thou shalt not muzzle the ox when he treadeth out the corn.' - Bible Deuteronomy 25:4"
+				"cost": 40,
+				"quote": "\"If you chase two rabbits, you will lose them both.\" - Native American saying"
 			},
 			{
-				"name": "Archery",
-				"row": 7,
-				"prerequisites": ["Agriculture"],
-                "uniques": ["[-50]% weight to this choice for AI decisions"],
-				"quote": "'The haft of the arrow has been feathered with one of the eagle's own plumes, we often give our enemies the means of our own destruction' - Aesop"
+				"name": "Mysticism",
+				"row": 8,
+				"cost": 50,
+				"quote": "\"Nature herself has imprinted on the minds of all the idea of God.\" - Cicero"
 			},
 			{
 				"name": "Mining",
-				"row": 9,
-				"prerequisites": ["Agriculture"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'The meek shall inherit the Earth, but not its mineral rights.' - J. Paul Getty"
+				"row": 14,
+				"cost": 50,
+				"quote": "\"The man who moves a mountain begins by carrying away small stones.\" - Confucius"
 			}
 
 		]
 	},
+
 	{
-		"columnNumber": 2,
+		"columnNumber": 1,
 		"era": "Ancient era",
-		"techCost": 55,
-		"buildingCost": 75,
-		"wonderCost": 185,
+		"techCost": 80,
+		"buildingCost": 60,
 		"techs": [
 			{
 				"name": "Sailing",
+				"cost": 100,
 				"row": 1,
-				"prerequisites": ["Pottery"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'He who commands the sea has command of everything.' - Themistocles"
+				"prerequisites": ["Fishing"],
+				"uniques": [
+					// TODO: Can trade over Coast (See also: Astronomy)
+				],
+				"quote": "\"You can't direct the wind, but you can adjust your sails.\" - Unknown"
 			},
 			{
-				"name": "Calendar",
-				"row": 2,
-				"prerequisites": ["Pottery"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'So teach us to number our days, so that we may apply our hearts unto wisdom.' - Bible Psalms 90:12"
+				"name": "Pottery",
+				"cost":80,
+				"row": 16,
+				"prerequisites": ["The Wheel"],
+				"uniques": [
+					"Unavailable <before discovering [Agriculture]> <before discovering [Fishing]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Agriculture...",
+						"link": "Technologies/Agriculture"
+					},
+					{
+						"text": "...or Fishing",
+						"link": "Technologies/Fishing"
+					}
+				],
+				"quote": "\"Hath not the potter power over the clay, to make one vessel unto honor and another unto dishonor?' - The Bible, Romans"
 			},
 			{
-				"name": "Writing",
+				"name": "Animal Husbandry",
+				"cost": 100,
 				"row": 3,
-				"prerequisites": ["Pottery"],
-                "uniques": ["Enables establishment of embassies <Civilopedia link [Tutorials/Embassies]>"],
-				"quote": "'He who destroys a good book kills reason itself.' - John Milton"
+				"uniques": [
+					"Unavailable <before discovering [Agriculture]> <before discovering [Hunting]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Agriculture...",
+						"link": "Technologies/Agriculture"
+					},
+					{
+						"text": "...or Hunting",
+						"link": "Technologies/Hunting"
+					}
+				],
+				"quote": "\"Blessed shall be the fruit of thy cattle, the increase of thy kine, and the flocks of thy sheep.\" - The Bible, Deuteronomy 28:4"
 			},
 			{
-				"name": "Trapping",
+				"name": "Archery",
 				"row": 5,
-				"prerequisites": ["Animal Husbandry"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Even brute beasts and wandering birds do not fall into the same traps or nets twice.' - Saint Jerome"
+				"cost": 60,
+				"prerequisites": ["Hunting"],
+				"quote": "\"Do not throw the arrow which will return against you.\" - Kurdish proverb"
 			},
 			{
-				"name": "The Wheel",
-				"row": 7,
-				"prerequisites": ["Animal Husbandry", "Archery"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Wisdom and virtue are like the two wheels of a cart.' - Japanese proverb"
+				"name": "Meditation",
+				"row": 8,
+				"cost": 80,
+				"prerequisites": ["Mysticism"],
+				"uniques": [
+					"Founds [Buddhism] if not yet founded"
+				],
+				"quote": "\"Meditation brings wisdom, lack of wisdom leaves ignorance, know well what leads you forward and what holds you back.\" - Buddha"
+			},
+			{
+				"name": "Polytheism",
+				"row": 12,
+				"cost": 100,
+				"prerequisites": ["Mysticism"],
+				"uniques": [
+					"Founds [Hinduism] if not yet founded"
+				],
+				"quote": "\"Not at all similar are the race of the immortal gods and the race of men who walk upon the Earth.\" - Homer"
 			},
 			{
 				"name": "Masonry",
-				"row": 9,
-				"prerequisites": ["Mining"],
-				"quote": "'How happy are those whose walls already rise!' - Virgil"
+				"row": 10,
+				"cost": 80,
+				"uniques": [
+					"Unavailable <before discovering [Mining]> <before discovering [Mysticism]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Mining...",
+						"link": "Technologies/Mining"
+					},
+					{
+						"text": "...or Mysticism",
+						"link": "Technologies/Mysticism"
+					}
+				],
+				"quote": "\"It is from their foes, not their friends, that cities learn the lesson of building high walls.\" - Aristophanes"
+			}
+		]
+	},
+
+	{
+		"columnNumber": 2,
+		"era": "Ancient era",
+		"techs": [
+			{
+				"name": "Horseback Riding",
+				"row": 3,
+				"cost": 250,
+				"prerequisites": ["Animal Husbandry"],
+				"quote": "\"If you speak the truth, have a foot on the stirrup.\" - Turkish proverb"
+			},
+			{
+				"name": "Priesthood",
+				"row": 5,
+				"cost": 60,
+				"uniques": [
+					"Unavailable <before discovering [Polytheism]> <before discovering [Meditation]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Polytheism...",
+						"link": "Technologies/Polytheism"
+					},
+					{
+						"text": "...or Meditation",
+						"link": "Technologies/Meditation"
+					}
+				],
+				"quote": "\"The lord bless you and keep you. The Lord make his face to shine upon you and be gracious to you. The Lord lift up his countenance upon you and give you peace.\" - The Bible, Numbers"
+			},
+			{
+				"name": "Monotheism",
+				"row": 13,
+				"cost": 120,
+				"prerequisites": ["Masonry", "Polytheism"],
+				"uniques": [
+					"Comment [Enables Organized Religion]",
+					"Founds [Judaism] if not yet founded"
+				],
+				"quote": "\"I am the Lord thy God. Thou shalt have no other gods before me.\" - The Bible, Exodus"
 			},
 			{
 				"name": "Bronze Working",
-				"row": 10,
+				"cost": 120,
+				"row": 14,
 				"prerequisites": ["Mining"],
-                "uniques": ["[+50]% weight to this choice for AI decisions"],
-				"quote": "'Here Hector entered, with a spear eleven cubits long in his hand; the bronze point gleamed in front of him, and was fastened to the shaft of the spear by a ring of gold.' - Homer"
+				"uniques": [
+					"Comment [Enables Slavery]"
+				],
+				"quote": "\"It is entirely seemly for a young man killed in battle to lie mangled by the bronze spear. In his death all things appear fair.\" - Homer"
 			}
 		]
 	},
+
 	{
 		"columnNumber": 3,
-		"era": "Classical era",
-		"techCost": 105,
-		"buildingCost": 100,
-		"wonderCost": 250,
+		"era": "Ancient era",
 		"techs": [
 			{
-				"name": "Optics",
-				"cost": 85,
-				"row": 1,
-				"prerequisites": ["Sailing"],
-				"uniques": ["Enables embarkation for land units"],
-				"quote": "'He made an instrument to know if the moon shine at full or no.' - Samuel Butler"
-			},
-			{
-				"name": "Horseback Riding",
-				"row": 5,
-				"prerequisites": ["Trapping","The Wheel"],
-                "uniques": ["[+50]% weight to this choice for AI decisions"],
-				"quote": "'A Horse! A Horse! My kingdom for a horse!' - Shakespeare (Richard III)"
-			},
-			{
-				"name": "Mathematics",
-				"row": 7,
-				"prerequisites": ["The Wheel"],
-				"quote": "'Mathematics is the gate and key to the sciences.' - Roger Bacon"
-			},
-			{
-				"name": "Construction",
-				"row": 9,
-				"prerequisites": ["Masonry","The Wheel"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Three things are to be looked to in a building: that it stands on the right spot; that it be securely founded; that it be successfully executed.' - Johann Wolfgang von Goethe"
-			}
-		]
-	},
-	{
-		"columnNumber": 4,
-		"era": "Classical era",
-		"techCost": 175,
-		"buildingCost": 100,
-		"wonderCost": 250,
-		"techs": [
-			{
-				"name": "Philosophy",
-				"row": 2,
-				"prerequisites": ["Writing","Calendar"],
-				"quote": "'There is only one good, knowledge, and one evil, ignorance.' - Socrates"
-			},
-			{
-				"name": "Drama and Poetry",
+				"name": "Writing",
+				"cost": 120,
 				"row": 3,
-				"prerequisites": ["Writing"],
-				"quote": "'What is drama but life with the dull bits cut out.' - Alfred Hitchcock"
-			},
-			{
-				"name": "Currency",
-				"row": 7,
-				"prerequisites": ["Mathematics"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Better is bread with a happy heart than wealth with vexation.' - Amenemope"
-			},
-			{
-				"name": "Engineering",
-				"row": 8,
-				"prerequisites": ["Mathematics","Construction"],
-				"uniques": ["Roads connect tiles across rivers","[+100]% weight to this choice for AI decisions"],
-				"quote": "'Instrumental or mechanical science is the noblest and, above all others, the most useful.' - Leonardo da Vinci"
-			},
-			{
-				"name": "Iron Working",
-				"row": 10,
-				"prerequisites": ["Bronze Working"],
-                "uniques": ["[-50]% weight to this choice for AI decisions"],
-				"quote": "'Do not wait to strike til the iron is hot, but make it hot by striking.' - William Butler Yeats"
-			}
-		]
-	},
-	{
-		"columnNumber": 5,
-		"era": "Medieval era",
-		"techCost": 275,
-		"buildingCost": 120,
-		"wonderCost": 300,
-		"techs": [
-			{
-				"name": "Theology",
-				"row": 2,
-				"prerequisites": ["Philosophy", "Drama and Poetry"],
-				"quote": "'Three things are necessary for the salvation of man: to know what he ought to believe; to know what he ought to desire; and to know what he ought to do' - St. Thomas Aquinas"
-			},
-			{
-				"name": "Civil Service",
-				"row": 5,
-				"prerequisites": ["Currency","Horseback Riding","Drama and Poetry"],
-				"uniques": ["Enables Open Borders agreements <Civilopedia link [Tutorials/Open Borders]>","[+100]% weight to this choice for AI decisions"],
-				"quote": "'The only thing that saves us from the bureaucracy is its inefficiency' - Eugene McCarthy"
-			},
-			{
-				"name": "Guilds",
-				"row": 7,
-				"prerequisites": ["Currency"],
-				"uniques": ["Enables conversion of city production to [Gold]"],
-				"quote": "'The merchants and the traders have come; their profits are pre-ordained...' - Sri Guru Granth Sahib"
+				"uniques": [
+					"Unavailable <before discovering [Animal Husbandry]> <before discovering [Priesthood]> <before discovering [Pottery]> <hidden from users>",
+					"Enables Open Borders agreements"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Animal Husbandry...",
+						"link": "Technologies/Animal Husbandry"
+					},
+					{
+						"text": "...or Priesthood",
+						"link": "Technologies/Priesthood"
+					},
+					{
+						"text": "...or Pottery",
+						"link": "Technologies/Pottery"
+					}
+				],
+				"quote": "\"True glory consists in doing what deserves to be written, in writing what deserves to be read.\" - Pliny the Elder"
 			},
 			{
 				"name": "Metal Casting",
+				"cost": 450,
+				"row": 18,
+				"prerequisites": ["Pottery", "Bronze Working"],
+				"quote": "\"And them that take the sword, shall perish by the sword.\" - New Testament, Matthew 26:52"
+			},
+			{
+				"name": "Iron Working",
+				"cost": 200,
+				"row": 7,
+				"prerequisites": ["Bronze Working"],
+				"quote": "\"You should hammer your iron when it is glowing hot.\" - Publilius Syrus"
+			}
+
+		]
+	},
+
+	{
+		"columnNumber": 4,
+		"era": "Classical era",
+		"techs": [
+			{
+				"name": "Mathematics",
+				"cost": 250,
+				"row": 11,
+				"prerequisites": ["Writing"],
+				"uniques": [
+					// Workers produce +50% production from chopping
+				],
+				"quote": "\"If in other sciences we should arrive at certainty without doubt and truth without error, it behooves us to place the foundation of knowledge in mathematics.\" - Roger Bacon"
+			},
+			{
+				"name": "Alphabet",
+				"cost": 300,
+				"row": 10,
+				"prerequisites": ["Writing"],
+				"uniques": [
+					"Enables conversion of city production to [Science]", // lets the player build Research in their cities, which converts 50% of production to research.
+					"Enables Research agreements" // Allows technology trading through diplomacy
+				],
+				"quote": "\"Words have the power to both destroy and heal. When words are both true and kind, they can change our world.\" - Buddha"
+			},
+			{
+				"name": "Monarchy",
+				"cost": 300,
 				"row": 9,
-				"prerequisites": ["Engineering","Iron Working"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'When pieces of bronze or gold or iron break, the metal-smith welds them together again in the fire, and the bond is established.' - Sri Guru Granth Sahib"
+				"uniques": [
+					"Unavailable <before discovering [Monotheism]> <before discovering [Priesthood]> <hidden from users>",
+					"Comment [Enables Hereditary Rule]"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Monotheism...",
+						"link": "Technologies/Monotheism"
+					},
+					{
+						"text": "...or Priesthood",
+						"link": "Technologies/Priesthood"
+					}
+				],
+				"quote": "\"A multitude of rulers is not a good thing, let there be one ruler, one king.\" - Herodotus"
+			},
+			{
+				"name": "Compass",
+				"cost": 400,
+				"row": 12,
+				"prerequisites": ["Sailing", "Iron Working"],
+                "uniques": [
+					"Enables embarkation for land units"
+				],
+				"quote": "\"The wisest men follow their own direction.\" - Euripides"
 			}
 		]
 	},
+
 	{
-		"columnNumber": 6,
-		"era": "Medieval era",
-		"techCost": 485,
-		"buildingCost": 160,
-		"wonderCost": 400,
+		"columnNumber": 5,
+		"era": "Classical era",
 		"techs": [
 			{
-				"name": "Compass",
-				"cost": 375,
+				"name": "Literature",
+				"cost": 200,
+				"row": 13,
+				"prerequisites": ["Alphabet", "Polytheism"],
+				"quote": "\"Some books are to be tasted, others to be swallowed and some few to be chewed and digested.\" - Sir Francis Bacon"
+			},
+			{
+				"name": "Calendar",
+				"cost": 350,
 				"row": 1,
-				"prerequisites": ["Optics","Theology"],
-                "uniques": ["[-50]% weight to this choice for AI decisions"],
-				"quote": "'I find the great thing in this world is not so much where we stand, as in what direction we are moving.' - Oliver Wendell Holmes"
-			},
-			{
-				"name": "Education",
-				"row": 3,
-				"prerequisites": ["Theology","Civil Service"],
+				"prerequisites": ["Sailing", "Mathematics"],
 				"uniques": [
-                    "Enables conversion of city production to [Science]",
-                    "Enables Research agreements <Civilopedia link [Tutorials/Research Agreements]>",
-                    "[+100]% weight to this choice for AI decisions"
-                ],
-				"quote": "'Education is the best provision for old age.' - Aristotle"
+					// Centers the world map
+				],
+				"quote": "\"For everything there is a season and a time for every purpose under heaven.\" - Ecclesiastes"
 			},
 			{
-				"name": "Chivalry",
-				"row": 6,
-				"prerequisites": ["Civil Service","Guilds"],
-                "uniques": ["Enables Defensive Pacts <Civilopedia link [Tutorials/Defensive Pacts]>"],
-                "quote": "'Whoso pulleth out this sword of this stone and anvil, is rightwise king born of all England.' - Malory"
+				"name": "Construction",
+				"cost": 350,
+				"row": 15,
+				"prerequisites": ["Masonry", "Mathematics"],
+				"uniques": [
+					"Roads connect tiles across rivers" // Construction enables Bridge Building
+				],
+				"quote": "\"And on the pedestal these words appear 'My name is Ozymandias, king of kings: Look on my works, ye Mighty and despair!' ' - Percy Bysshe Shelley"
+			},
+			{
+				"name": "Currency",
+				"cost": 400,
+				"row": 14,
+				"prerequisites": ["Mathematics"],
+				"uniques": [
+					"Enables conversion of city production to [Gold]" // It also enables you to build Wealth in cities
+					// TODO: +1 Trade Routes per city
+					// TODO: Enables Gold Trading via Diplomacy
+				],
+				"quote": "\"Everything is worth what its purchaser will pay for it.\" - Publilius Syrus"
 			},
 			{
 				"name": "Machinery",
+				"cost": 700,
+				"row": 16,
+				"prerequisites": ["Metal Casting"],
+				"quote": "\"A god from the machine' - Menander"
+			}
+
+		]
+	},
+
+	{
+		"columnNumber": 6,
+		"era": "Classical era",
+		"techs": [
+			{
+				"name": "Drama",
+				"cost": 300,
+				"row": 4,
+				"prerequisites": ["Alphabet"],
+				"uniques": [
+					"Enables conversion of city production to [Culture]" // Enables the culture slider
+				],
+				"quote": "\"All the world's a stage, And all the men and women merely players: They have their exits and their entrances; And one man in his time plays many parts.\" - William Shakespeare"
+			},
+			{
+				"name": "Engineering",
+				"cost": 1000,
+				"row": 12,
+				"prerequisites": ["Machinery", "Construction"],
+				"uniques": [
+					"Improves movement speed on roads" // +1 Road Movement
+				],
+				"quote": "\"A designer knows he has achieved perfection not when there is nothing left to add, but when there is nothing left to take away.\" - Antoine de Saint-Exupery"
+			},
+			{
+				"name": "Code of Laws",
+				"cost": 350,
+				"row": 5,
+				"prerequisites": ["Writing"],
+				"uniques": [
+					"Unavailable <before discovering [Currency]> <before discovering [Priesthood]> <hidden from users>",
+					"Founds [Confucianism] if not yet founded",
+					"Comment [Enables Caste System]"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Currency...",
+						"link": "Technologies/Currency"
+					},
+					{
+						"text": "...or Priesthood",
+						"link": "Technologies/Priesthood"
+					}
+				],
+				"quote": "\"To bring about the rule of righteousness in the land so that the strong shall not harm the weak.\" - Hammurabi's Code, Prologue"
+			},
+			{
+				"name": "Feudalism",
+				"cost": 700,
 				"row": 8,
-				"prerequisites": ["Guilds","Engineering"],
-				"uniques": ["Improves movement speed on roads"],
-				"quote": "'The press is the best instrument for enlightening the mind of man, and improving him as a rational, moral and social being.' - Thomas Jefferson"
+				"prerequisites": ["Writing", "Monarchy"],
+				"uniques": [
+					"Comment [Enables Serfdom]",
+					"Comment [Enables Vassalage]"
+				],
+				"quote": "\"I will to my lord be true and faithful and love all which he loves and shun all which he shuns.\" - Anglo-Saxon Oath of Fealty"
 			},
 			{
-				"name": "Physics",
-				"row": 9,
-				"prerequisites": ["Metal Casting"],
-				"quote": "'Measure what is measurable, and make measurable what is not so.' - Galileo Galilei"
-			},
-			{
-				"name": "Steel",
-				"row": 10,
-				"prerequisites": ["Metal Casting"],
-                "uniques": ["[-50]% weight to this choice for AI decisions"],
-				"quote": "'John Henry said to his Captain, / 'A man ain't nothin' but a man, / And before I'll let your steam drill beat me down, / I'll die with the hammer in my hand.'' - Anonymous: The Ballad of John Henry, the Steel-Drivin' Man"
+				"name": "Optics",
+				"cost": 600,
+				"row": 11,
+				"prerequisites": ["Compass", "Machinery"],
+				"uniques": [
+					"[+1] Sight <for [Water] units>",
+					"Enables [Embarked] units to enter ocean tiles" // TODO: Civ IV doesn't have Embark. Optimally, we would use Carry [Land] units instead.
+				],
+				"quote": "\"One doesn't discover new lands without losing sight of the shore.\" - Andre Gide"
 			}
 		]
 	},
+
 	{
 		"columnNumber": 7,
-		"era": "Renaissance era",
-		"techCost": 780,
-		"buildingCost": 200,
-		"wonderCost": 500,
+		"era": "Medieval era",
 		"techs": [
 			{
-				"name": "Astronomy",
+				"name": "Music",
+				"cost": 600,
 				"row": 2,
-				"uniques": ["[+1] Movement <for [Embarked] units>","Enables [Embarked] units to enter ocean tiles","[+50]% weight to this choice for AI decisions"],
-				"prerequisites": ["Compass","Education"],
-				"quote": "'Joyfully to the breeze royal Odysseus spread his sail, and with his rudder skillfully he steered.' - Homer"
+				"prerequisites": ["Mathematics"],
+				"uniques": [
+					"Unavailable <before discovering [Literature]> <before discovering [Drama]> <hidden from users>",
+					"Free [Great Artist] appears <if no other Civilization has researched this> <if starting in the [Ancient era]>",
+					"Enables conversion of city production to [Culture]"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Literature...",
+						"link": "Technologies/Literature"
+					},
+					{
+						"text": "...or Drama",
+						"link": "Technologies/Drama"
+					}
+				],
+				"quote": "\"If music be the food of love, play on.\" - William Shakespeare"
 			},
 			{
-				"name": "Acoustics",
+				"name": "Philosophy",
+				"cost": 800,
+				"row": 3,
+				"prerequisites": ["Meditation"],
+				"uniques": [
+					"Unavailable <before discovering [Code of Laws]> <before discovering [Drama]> <hidden from users>",
+					"Founds [Taoism] if not yet founded",
+					"Comment [Enables Pacifism]"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Code of Laws...",
+						"link": "Technologies/Code of Laws"
+					},
+					{
+						"text": "...or Drama",
+						"link": "Technologies/Drama"
+					}
+				],
+				"quote": "\"I have gained this by philosophy: that I do without being commanded what others do only from fear of the law.\" - Aristotle"
+			},
+			{
+				"name": "Civil Service",
+				"cost": 800,
 				"row": 4,
-				"prerequisites": ["Education"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Their rising all at once was as the sound of thunder heard remote' - Milton"
+				"uniques": [
+					"Unavailable <before discovering [Code of Laws]> <before discovering [Feudalism]> <hidden from users>",
+					"Comment [Enables Bureaucracy]"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Code of Laws...",
+						"link": "Technologies/Code of Laws"
+					},
+					{
+						"text": "...or Feudalism",
+						"link": "Technologies/Feudalism"
+					}
+				],
+				"quote": "\"The bureaucracy is expanding to meet the needs of the expanding breaucracy.\" - Oscar Wilde"
+			},
+			{
+				"name": "Theology",
+				"cost": 500,
+				"row": 6,
+				"prerequisites": ["Writing", "Monotheism"],
+				"uniques": [
+					"Founds [Christianity] if not yet founded",
+					"Comment [Enables Theocracy]"
+				],
+				"quote": "\"Two cities have been formed by two loves: the earthly by the love of self, the heavenly by the love of God.\" - St. Augustine"
+			},
+			{
+				"name": "Guilds",
+				"cost": 1000,
+				"row": 14,
+				"prerequisites": ["Feudalism", "Machinery"],
+				"quote": "\"People of the same trade seldom meet together, even for merriment and diversion, but the conversation ends in a conspiracy against the public' - Adam Smith"
+			}
+		]
+	},
+
+	{
+		"columnNumber": 8,
+		"era": "Medieval era",
+		"techs": [
+			{
+				"name": "Divine Right",
+				"cost": 1200,
+				"row": 9,
+				"prerequisites": ["Theology", "Monarchy"],
+				"uniques": [
+					"Founds [Islam] if not yet founded"
+				],
+				"quote": "\"I am the state.\" - Louis XIV"
+			},
+			{
+				"name": "Paper",
+				"cost": 600,
+				"row": 6,
+				"uniques": [
+					// TODO: Enables Map Trading
+					"Unavailable <before discovering [Theology]> <before discovering [Civil Service]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Theology...",
+						"link": "Technologies/Theology"
+					},
+					{
+						"text": "...or Civil Service",
+						"link": "Technologies/Civil Service"
+					}
+				],
+				"quote": "\"I cannot live without books.\" - Thomas Jefferson"
 			},
 			{
 				"name": "Banking",
-				"row": 6,
-				"prerequisites": ["Chivalry", "Education"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Happiness: a good bank account, a good cook and a good digestion' - Jean Jacques Rousseau"
+				"cost": 700,
+				"row": 13,
+				"prerequisites": ["Currency", "Guilds"],
+				"uniques": [
+					"Comment [Enables Mercantilism]"
+				],
+				"quote": "\"Banking establishments are more dangerous than standing armies' - Thomas Jefferson"
+			}
+		]
+	},
+
+	{
+		"columnNumber": 9,
+		"era": "Renaissance era",
+		"techs": [
+			{
+				"name": "Nationalism",
+				"cost": 1800,
+				"row": 2,
+				"prerequisites": ["Civil Service"],
+				"uniques": [
+					"Unavailable <before discovering [Divine Right]> <before discovering [Philosophy]> <hidden from users>",
+					"Comment [Enables Nationhood]"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Divine Right...",
+						"link": "Technologies/Divine Right"
+					},
+					{
+						"text": "...or Philosophy",
+						"link": "Technologies/Philosophy"
+					}
+				],
+				"quote": "\"A man does not have himself killed for a half pence a day or for a petty distinction. You must speak to the soul in order to electrify him..\" - Napoleon Bonaparte"
 			},
 			{
 				"name": "Printing Press",
-				"row": 8,
-				"prerequisites": ["Machinery","Physics","Chivalry"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'It is a newspaper's duty to print the news and raise hell.' - The Chicago Times"
+				"cost": 1600,
+				"row": 17,
+				"prerequisites": ["Machinery", "Paper"],
+				"uniques": [
+					"[+1 Gold] from [Village] tiles [in your cities]",
+					"[+1 Gold] from [Town] tiles [in your cities]"
+				],
+				"quote": "\"What gunpowder did for war, the printing press has done for the mind.\" - Wendell Phillips"
 			},
 			{
-				"name": "Gunpowder",
-				"row": 10,
-				"prerequisites": ["Physics","Steel"],
-                "uniques": ["[-50]% weight to this choice for AI decisions"],
-				"quote": "'The day when two army corps can annihilate each other in one second, all civilized nations, it is to be hoped, will recoil from war and discharge their troops.' - Alfred Nobel"
+				"name": "Education",
+				"cost": 1800,
+				"row": 5,
+				"prerequisites": ["Paper"],
+				"quote": "\"There is no wealth like knowledge, no poverty like ignorance.\" - Ali ibn Abi-Talib"
 			}
 		]
 	},
-	{
-		"columnNumber": 8,
-		"era": "Renaissance era",
-		"techCost": 1150,
-		"buildingCost": 250,
-		"wonderCost": 625,
-		"techs": [
-			{
-				"name": "Navigation",
-				"row": 2,
-				"prerequisites": ["Astronomy"],
-				"quote": "'The winds and the waves are always on the side of the ablest navigators.' - Edward Gibbon"
-			},
-			{
-				"name": "Architecture",
-				"row": 4,
-				"prerequisites": ["Acoustics","Banking"],
-				"quote": "'Architecture begins where engineering ends.' - Walter Gropius"
-			},
-			{
-				"name": "Economics",
-				"row": 6,
-				"prerequisites": ["Banking","Printing Press"],
-                "uniques": ["[+50]% weight to this choice for AI decisions"],
-				"quote": "'Compound interest is the most powerful force in the universe.' - Albert Einstein"
-			},
-			{
-				"name": "Metallurgy",
-				"row": 9,
-				"prerequisites": ["Printing Press","Gunpowder"],
-                "uniques": ["[-50]% weight to this choice for AI decisions"],
-				"quote": "'There never was a good knife made of bad steel.' - Benjamin Franklin"
-			},
-			{
-				"name": "Chemistry",
-				"row": 10,
-				"prerequisites": ["Gunpowder"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Wherever we look, the work of the chemist has raised the level of our civilization and has increased the productive capacity of the nation.' - Calvin Coolidge"
-			}
-		]
-	},
-	{
-		"columnNumber": 9,
-		"era": "Industrial era",
-		"techCost": 1600,
-		"buildingCost": 300,
-		"wonderCost": 750,
-		"techs": [
-			{
-				"name": "Archaeology",
-				"row": 2,
-				"prerequisites": ["Navigation","Architecture"],
-                "uniques": ["[+50]% weight to this choice for AI decisions"],
-				"quote": "'Those who cannot remember the past are condemned to repeat it.' - George Santayana"
-			},
-			{
-				"name": "Scientific Theory",
-				"row": 4,
-				"prerequisites": ["Architecture","Economics"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Every great advance in science has issued from a new audacity of imagination.' - John Dewey"
-			},
-			{
-				"name": "Industrialization",
-				"row": 6,
-				"prerequisites": ["Economics"],
-                "uniques": ["[+50]% weight to this choice for AI decisions"],
-				"quote": "'Industrialization based on machinery, already referred to as a characteristic of our age, is but one aspect of the revolution that is being wrought by technology.' - Emily Greene Balch"
-			},
-			{
-				"name": "Rifling",
-				"row": 7,
-				"prerequisites": ["Economics","Metallurgy"],
-                "uniques": ["[-50]% weight to this choice for AI decisions"],
-				"quote": "'It is well that war is so terrible, or we should grow too fond of it.' - Robert E. Lee"
-			},
-			{
-				"name": "Military Science",
-				"row": 9,
-				"prerequisites": ["Metallurgy","Chemistry"],
-				"quote": "'Wars may be fought with weapons, but they are won by men. It is the spirit of the men who follow and of the man who leads that gains the victory.' - George S. Patton"
-			},
-			{
-				"name": "Fertilizer",
-				"row": 10,
-				"prerequisites": ["Chemistry"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'The nation that destroys its soil destroys itself.' - Franklin Delano Roosevelt"
-			}
-		]
-	},
+
 	{
 		"columnNumber": 10,
-		"era": "Industrial era",
-		"techCost": 2350,
-		"buildingCost": 360,
-		"wonderCost": 900, // Note that this column doesn't actually have any wonders. This just continues the wonderCost = 2.5 * buildingCost pattern from the last few columns.
+		"era": "Renaissance era",
 		"techs": [
 			{
-				"name": "Biology",
-				"row": 2,
-				"prerequisites": ["Archaeology","Scientific Theory"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'If the brain were so simple we could understand it, we would be so simple we couldn't.' - Lyall Watson"
-			},
-			{
-				"name": "Electricity",
+				"name": "Military Tradition",
+				"cost": 2000,
 				"row": 3,
-				"prerequisites": ["Scientific Theory"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Is it a fact - or have I dreamt it - that, by means of electricity, the world of matter has become a great nerve, vibrating thousands of miles in a breathless point of time?' - Nathaniel Hawthorne"
+				"prerequisites": ["Music", "Nationalism"],
+				"uniques": [
+					"Enables Defensive Pacts"
+				],
+				"quote": "\"Victorious warriors win first and then go to war while defeated warriors go to war first and then seek to win.\" - Sun-Tzu"
 			},
 			{
-				"name": "Steam Power",
-				"row": 6,
-				"uniques": ["[+1] Movement <for [Embarked] units>"],
-				"prerequisites": ["Industrialization","Scientific Theory","Rifling"],
-				"quote": "'The nations of the West hope that by means of steam communication all the world will become as one family.' - Townsend Harris"
-			},
-			{
-				"name": "Dynamite",
-				"row": 9,
-				"prerequisites": ["Fertilizer","Military Science"],
-				"quote": "'As soon as men decide that all means are permitted to fight an evil, then their good becomes indistinguishable from the evil that they set out to destroy.' - Christopher Dawson"
-			}
-		]
-	},
-	{
-		"columnNumber": 11,
-		"era": "Modern era",
-		"techCost": 3100,
-		"buildingCost": 500,
-		"wonderCost": 1060,
-		"techs": [
-			{
-				"name": "Refrigeration",
-				"row": 2,
-				"prerequisites": ["Biology", "Electricity"], //todo: offshore platform should need this
-                "uniques": ["[-75]% weight to this choice for AI decisions"],
-				"quote": "'And homeless near a thousand homes I stood, and near a thousand tables pined and wanted food.' - William Wordsworth"
-			},
-			{
-				"name": "Radio",
-				"row": 3,
-				"prerequisites": ["Electricity"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'The whole country was tied together by radio. We all experienced the same heroes and comedians and singers. They were giants.' - Woody Allen"
+				"name": "Constitution",
+				"cost": 2000,
+				"row": 4,
+				"prerequisites": ["Code of Laws", "Nationalism"],
+				"uniques": [
+					"Comment [Enables Representation]"
+				],
+				"quote": "\"No freeman shall be taken, imprisoned, or in any other way destroyed, except by the lawful judgment of his peers.\" - The Magna Carta"
 			},
 			{
 				"name": "Replaceable Parts",
-				"row": 4,
-				"prerequisites": ["Electricity","Steam Power"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Nothing is particularly hard if you divide it into small jobs.' - Henry Ford"
-			},
-			{
-				"name": "Flight",
+				"cost": 1800,
 				"row": 6,
-				"prerequisites": ["Steam Power"],
-				"quote": "'Aeronautics was neither an industry nor a science. It was a miracle.' - Igor Sikorsky"
+				"prerequisites": ["Banking", "Paper"],
+				"uniques": [
+					"[+1 Production] from every [Watermill]",
+					"[+1 Production] from every [Windmill]"
+				],
+				"quote": "\"The whole is more than the sum of its parts.\" - Aristotle"
 			},
 			{
-				"name": "Railroads",
+				"name": "Liberalism",
+				"cost": 1400,
 				"row": 8,
-				"prerequisites": ["Steam Power","Dynamite"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'The introduction of so powerful an agent as steam to a carriage on wheels will make a great change in the situation of man.' - Thomas Jefferson"
+				"prerequisites": ["Education", "Philosophy"],
+				"uniques": [
+					"Free Technology <if no other Civilization has researched this> <if starting in the [Ancient era]>",
+					"Comment [Enables Free Speech]",
+					"Comment [Enables Free Religion]"
+				],
+				"quote": "\"Any society that would give up a little liberty to gain a little security will deserve neither and lose both.\" - Benjamin Franklin"
+			},
+			{
+				"name": "Economics",
+				"cost": 1400,
+				"row": 15,
+				"prerequisites": ["Banking", "Education"],
+				"uniques": [
+					"Comment [Enables Free Market]",
+					"Free [Great Merchant] appears <if no other Civilization has researched this>"
+				],
+				"quote": "\"Compound interest is the most powerful force in the universe.\" - Albert Einstein"
+			},
+			{
+				"name": "Gunpowder",
+				"cost": 1200,
+				"row": 2,
+				"uniques": [
+					"Unavailable <before discovering [Guilds]> <before discovering [Education]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Guilds...",
+						"link": "Technologies/Guilds"
+					},
+					{
+						"text": "...or Education",
+						"link": "Technologies/Education"
+					}
+				],
+				"quote": "\"You can get more of what you want with a kind word and a gun than you can with just a kind word.\" - Al Capone"
 			}
 		]
 	},
+
 	{
-		"columnNumber": 12,
-		"era": "Modern era",
-		"techCost": 4100,
-		"buildingCost": 500,
-		"wonderCost": 1250,
+		"columnNumber": 11,
+		"era": "Renaissance era",
 		"techs": [
 			{
-				"name": "Plastics",
+				"name": "Democracy",
+				"cost": 2800,
+				"row": 16,
+				"prerequisites": ["Printing Press", "Constitution"],
+				"uniques": [
+					"Comment [Enables Emancipation]",
+					"Comment [Enables Universal Suffrage]"
+				],
+				"quote": "\"It has been said that democracy is the worst form of government except all the others that have been tried.\" - Winston Churchill"
+			},
+			{
+				"name": "Rifling",
+				"cost": 2400,
 				"row": 3,
-				"prerequisites": ["Radio","Replaceable Parts"],
-                "uniques": ["[+200]% weight to this choice for AI decisions"],
-				"quote": "'Ben, I want to say one word to you, just one word: plastics.' - Buck Henry and Calder Willingham, The Graduate"
+				"prerequisites": ["Gunpowder", "Replaceable Parts"],
+				"quote": "\"Political power grows out of the barrel of a gun.\" - Mao Zedong"
 			},
 			{
-				"name": "Electronics",
-				"row": 5,
-				"prerequisites": ["Replaceable Parts", "Flight"],
-				"quote": "'There's a basic principle about consumer electronics: it gets more powerful all the time and it gets cheaper all the time.' - Trip Hawkins"
+				"name": "Astronomy",
+				"cost": 2000,
+				"row": 1,
+				"prerequisites": ["Calendar", "Optics"],
+				"uniques": [
+					// Enables trade through ocean tiles was moved to Lighthouse and Harbour
+					// See also: Sailing
+				],
+				"quote": "\"Astronomy compels the soul to look upwards and leads us from this world to another.\" - Plato"
 			},
 			{
-				"name": "Ballistics",
+				"name": "Corporation",
+				"cost": 1600,
+				"row": 4,
+				"prerequisites": ["Economics", "Constitution"],
+				"uniques": [
+					// TODO: +1 Trade Routes per City
+				],
+				"quote": "\"Corporation, n. An ingenious device for obtaining individual profit without individual responsibility.\" - Ambrose Bierce"
+			},
+			{
+				"name": "Chemistry",
+				"cost": 1800,
+				"row": 13,
+				"prerequisites": ["Engineering", "Gunpowder"],
+				"quote": "\"Chemistry means the difference between poverty and starvation and the abundant life.\" - Robert Brent"
+			}
+		]
+	},
+
+	{
+		"columnNumber": 12,
+		"era": "Industrial era",
+		"techs": [
+			{
+				"name": "Steam Power",
+				"cost": 3200,
 				"row": 6,
-				"prerequisites": ["Flight"],
-				"quote": "'Men, like bullets, go farthest when they are smoothest.' - Jean Paul"
+				"prerequisites": ["Chemistry", "Replaceable Parts"],
+				"uniques": [
+					"[-50]% construction time for [Camp] improvements",
+					"[-50]% construction time for [Cottage] improvements",
+					"[-50]% construction time for [Hamlet] improvements",
+					"[-50]% construction time for [Village] improvements",
+					"[-50]% construction time for [Town] improvements",
+					"[-50]% construction time for [Farm] improvements",
+					"[-50]% construction time for [Forest Preserve] improvements",
+					"[-50]% construction time for [Fort] improvements",
+					"[-50]% construction time for [Lumber mill] improvements",
+					"[-50]% construction time for [Mine] improvements",
+					"[-50]% construction time for [Pasture] improvements",
+					"[-50]% construction time for [Plantation] improvements",
+					"[-50]% construction time for [Quarry] improvements",
+					"[-50]% construction time for [Road] improvements",
+					"[-50]% construction time for [Railroad] improvements",
+					"[-50]% construction time for [Watermill] improvements",
+					"[-50]% construction time for [Oil well] improvements",
+					"[-50]% construction time for [Windmill] improvements",
+					"[-50]% construction time for [Winery] improvements",
+					"[-50]% construction time for [Workshop] improvements",
+					"[-50]% construction time for [Windmill] improvements"
+				],
+				"quote": "\"You would make a ship sail against the winds and currents by lighting a bonfire under her deck? I have no time for such nonsense.\" - Napoleon on Robert Fulton's steamship"
+			},
+			{
+				"name": "Scientific Method",
+				"cost": 2400,
+				"row": 17,
+				"prerequisites": ["Printing Press"],
+				"uniques": [
+					"Unavailable <before discovering [Chemistry]> <before discovering [Astronomy]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Chemistry...",
+						"link": "Technologies/Chemistry"
+					},
+					{
+						"text": "...or Astronomy",
+						"link": "Technologies/Astronomy"
+					}
+				],
+				"quote": "\"I do not feel obliged to believe that the same God who has endowed us with sense, reason, and intellect has intended us to forgo their use.\" - Galileo Galilei"
+			},
+			{
+				"name": "Steel",
+				"cost": 2800,
+				"row": 11,
+				"prerequisites": ["Chemistry", "Iron Working"],
+				"quote": "\"Before that steam drill shall beat me down, I'll die with my hammer in my hand.\" - John Henry, The Steel-Driving Man"
+			}
+		]
+	},
+
+	{
+		"columnNumber": 13,
+		"era": "Industrial era",
+		"techs": [
+			{
+				"name": "Assembly Line",
+				"cost": 5000,
+				"row": 2,
+				"prerequisites": ["Steam Power", "Corporation"],
+				"quote": "\"People can have the Model T in any color - so long as it's black.\" - Henry Ford"
+			},
+			{
+				"name": "Communism",
+				"cost": 5000,
+				"row": 1,
+				"prerequisites": ["Scientific Method", "Liberalism"],
+				"uniques": [
+					"Comment [Enables State Property]",
+					"Free [Great Spy] appears <if no other Civilization has researched this> <if starting in the [Ancient era]>"
+				],
+				"quote": "\"When I give food to the poor, they call me a saint. When I ask why the poor have no food, they call me a communist.\" - Dom Helder Camara"
+			},
+			{
+				"name": "Physics",
+				"cost": 4000,
+				"row": 4,
+				"prerequisites": ["Scientific Method", "Astronomy"],
+				"uniques": [
+					"Free [Great Scientist] appears <if no other Civilization has researched this> <if starting in the [Ancient era]>"
+				],
+				"quote": "\"To every action there is always opposed an equal reaction.\" - Isaac Newton"
+			},
+			{
+				"name": "Biology",
+				"cost": 3600,
+				"row": 15,
+				"prerequisites": ["Chemistry", "Scientific Method"],
+				"quote": "\"It is not the strongest of the species that survive but the one most responsive to change.\" - Charles Darwin"
+			},
+			{
+				"name": "Railroad",
+				"cost": 4500,
+				"row": 13,
+				"prerequisites": ["Chemistry", "Scientific Method"],
+				"quote": "\"I fooled you. I fooled you. I got pig iron. I got pig iron. I got all pig iron.\" - Lonnie Donegan, \"Rock Island Line\""
+			}
+		]
+	},
+
+	{
+		"columnNumber": 14,
+		"era": "Modern era",
+		"techs": [
+			{
+				"name": "Flight",
+				"cost": 5000,
+				"row": 4,
+				"prerequisites": ["Physics"],
+				"uniques": [
+					"Only available <after discovering [Combustion]>"
+				],
+				"quote": "\"For once you have tasted flight, you will walk the earth with your eyes turned skywards, for there you have been and there you will long to return.\" - Leonardo da Vinci"
+			},
+			{
+				"name": "Artillery",
+				"cost": 4000,
+				"row": 5,
+				"prerequisites": ["Physics", "Steel", "Rifling"],
+				"quote": "\"Artillery adds dignity to what otherwise would be a vulgar brawl.\" - Frederick the Great"
+			},
+			{
+				"name": "Fascism",
+				"cost": 2400,
+				"row": 1,
+				"prerequisites": ["Assembly Line"],
+				"uniques": [
+					"Only available <after discovering [Nationalism]>",
+					"Comment [Enables Police State]",
+					"Free [Great General] appears <if no other Civilization has researched this> <if starting in the [Ancient era]>"
+				],
+				"quote": "\"The great masses of the people will more easily fall victim to a big lie than to a small one.\" - Adolf Hitler"
+			},
+			{
+				"name": "Electricity",
+				"cost": 4500,
+				"row": 7,
+				"prerequisites": ["Physics"],
+				"quote": "\"We will make electricity so cheap that only the rich will burn candles.\" - Thomas Edison"
+			},
+			{
+				"name": "Medicine",
+				"cost": 4500,
+				"row": 9,
+				"prerequisites": ["Biology", "Optics"],
+				"uniques": [
+					"Comment [Enables Environmentalism]"
+				],
+				"quote": "\"As to diseases, make a habit of two things - to help or at least to do no harm.\" - Hippocrates"
 			},
 			{
 				"name": "Combustion",
-				"row": 8,
-				"prerequisites": ["Railroads"],
-                "uniques": ["[-50]% weight to this choice for AI decisions"],
-				"quote": "'Any man who can drive safely while kissing a pretty girl is simply not giving the kiss the attention it deserves.' - Albert Einstein"
+				"cost": 3600,
+				"row": 17,
+				"prerequisites": ["Railroad"],
+				"quote": "\"Everything in life is somewhere else and you get there in a car.\" - E. B. White"
 			}
 		]
 	},
-	{
-		"columnNumber": 13,
-		"era": "Atomic era",
-		"techCost": 5100,
-		"buildingCost": 500,
-		"wonderCost": 1250,
-		"techs": [
-			{
-				"name": "Pharmaceuticals",
-				"row": 2,
-				"prerequisites": ["Plastics","Refrigeration"],
-				"quote": "'In nothing do men more nearly approach the gods than in giving health to men.' - Cicero"
-			},
-			{
-				"name": "Atomic Theory",
-				"row": 4,
-				"prerequisites": ["Plastics","Electronics"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'The unleashed power of the atom has changed everything save our modes of thinking, and we thus drift toward unparalleled catastrophes.' - Albert Einstein"
-			},
-			{
-				"name": "Radar",
-				"row": 6,
-				"prerequisites": ["Ballistics","Electronics"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'Vision is the art of seeing things invisible.' - Jonathan Swift"
-			},
-			{
-				"name": "Combined Arms",
-				"row": 8,
-				"prerequisites": ["Ballistics","Combustion"],
-				"quote": "'The root of the evil is not the construction of new, more dreadful weapons. It is the spirit of conquest.' - Ludwig von Mises"
-			}
-		]
-	},
-	{
-		"columnNumber": 14,
-		"era": "Atomic era",
-		"techCost": 6400,
-		"buildingCost": 500,
-		"wonderCost": 1250,
-		"techs": [
-			{
-				"name": "Ecology",
-				"row": 2,
-				"prerequisites": ["Atomic Theory","Pharmaceuticals"],
-				"quote": "'Only within the moment of time represented by the present century has one species, man, acquired significant power to alter the nature of his world.' - Rachel Carson"
-			},
-			{
-				"name": "Nuclear Fission",
-				"row": 4,
-				"prerequisites": ["Atomic Theory","Radar"],
-				"quote": "'I am become Death, the destroyer of worlds.' - J. Robert Oppenheimer"
-			},
-			{
-				"name": "Rocketry",
-				"row": 6,
-				"prerequisites": ["Radar"],
-                "uniques": ["[+100]% weight to this choice for AI decisions"],
-				"quote": "'A good rule for rocket experimenters to follow is this: always assume that it will explode.' - Astronautics Magazine, 1937"
-			},
-			{
-				"name": "Computers",
-				"row": 8,
-				"prerequisites": ["Combined Arms","Radar"],
-				"quote": "'Computers are like Old Testament gods: lots of rules and no mercy.' - Joseph Campbell"
-			}
-		]
-	},
+
 	{
 		"columnNumber": 15,
-		"era": "Information era",
-		"techCost": 7700,
-		"buildingCost": 750,
-		"wonderCost": 1250,
+		"era": "Modern era",
 		"techs": [
 			{
-				"name": "Telecommunications",
-				"row": 2,
-				"prerequisites": ["Ecology"],
-				"quote": "'The more we elaborate our means of communication, the less we communicate.' - J.B. Priestly"
-			},
-			{
-				"name": "Mobile Tactics",
+				"name": "Rocketry",
+				"cost": 5000,
 				"row": 3,
-				"prerequisites": ["Ecology","Nuclear Fission"],
-				"quote": "'All men can see these tactics whereby I conquer, but what none can see is the strategy out of which victory is evolved.' - Sun Tzu"
+				"prerequisites": ["Rifling"],
+				"uniques": [
+					"Unavailable <before discovering [Flight]> <before discovering [Artillery]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Flight...",
+						"link": "Technologies/Flight"
+					},
+					{
+						"text": "...or Artillery",
+						"link": "Technologies/Artillery"
+					}
+				],
+				"quote": "\"The Earth is the cradle of the mind, but one cannot eternally live in a cradle.\" - Konstantin E. Tsiolkovsky"
 			},
 			{
-				"name": "Advanced Ballistics",
-				"row": 5,
-				"prerequisites": ["Nuclear Fission","Rocketry"],
-				"quote": "'Our scientific power has outrun our spiritual power, we have guided missiles and misguided men.' – Martin Luther King Jr."
+				"name": "Industrialism",
+				"cost": 6500,
+				"row": 2,
+				"prerequisites": ["Electricity", "Assembly Line"],
+				"quote": "\"There is one rule for the industrialist and that is: Make the best quality of goods possible at the lowest cost possible, paying the highest wages possible.\" - Henry Ford"
 			},
 			{
-				"name": "Satellites",
-				"row": 6,
-				"prerequisites": ["Rocketry"],
-				"uniques": ["Reveals the entire map","[+200]% weight to this choice for AI decisions"],
-				"quote": "'Now, somehow, in some new way, the sky seemed almost alien.' - Lyndon B. Johnson"
-			},
-			{
-				"name": "Robotics",
+				"name": "Fission",
+				"cost": 5500,
 				"row": 7,
-				"prerequisites": ["Rocketry","Computers"],
-				"quote": "'1. A robot may not injure a human being or, through inaction, allow a human being to come to harm. 2. A robot must obey any orders given to it by human beings, except when such orders would conflict with the First Law. 3. A robot must protect its own existence as long as such protection does not conflict with the First or Second Law.' - Isaac Asimov"
+				"prerequisites": ["Electricity"],
+				"quote": "\"If the radiance of a thousand suns were to burst at once into the sky. That would be like the splendor of a mighty one. I have become death the shatterer of worlds.\" - J. Robert Oppenheimer, quoting \"Bhagavad Gita\""
 			},
 			{
-				"name": "Lasers",
-				"row": 8,
-				"prerequisites": ["Computers"],
-                "uniques": ["[-100]% weight to this choice for AI decisions"],
-				"quote": "'The night is far spent, the day is at hand: let us therefore cast off the works of darkness, and let us put on the armor of light.' - The Holy Bible: Romans, 13:12"
+				"name": "Refrigeration",
+				"cost": 4000,
+				"row": 11,
+				"prerequisites": ["Biology", "Electricity"],
+				"uniques": [
+					"[+1] Movement <for [Water] units>"
+				],
+				"quote": "\"Tell me what you eat, and I will tell you what you are.\" - Anthelme Brillat-Savarin"
+			},
+			{
+				"name": "Radio",
+				"cost": 6000,
+				"row": 16,
+				"prerequisites": ["Electricity"],
+				"quote": "\"Then one fine mornin' she puts on a New York Station. You know her life was saved by Rock 'n' Roll.\" - The Velvet Underground, \"Rock and Roll\""
 			}
 		]
 	},
 
 	{
 		"columnNumber": 16,
-		"era": "Information era",
-		"techCost": 8800,
-		"buildingCost": 750,
-		"wonderCost": 1250,
+		"era": "Modern era",
 		"techs": [
 			{
-				"name": "Globalization",
-				"row": 2,
-				"prerequisites": ["Telecommunications"],
-                "uniques": ["[-100]% weight to this choice for AI decisions"],
-				"quote": "'The new electronic interdependence recreates the world in the image of a global village.' - Marshall McLuhan"
-			},
-			{
-				"name": "Particle Physics",
+				"name": "Satellites",
+				"cost": 6000,
 				"row": 3,
-				"prerequisites": ["Telecommunications","Mobile Tactics","Advanced Ballistics"],
-				"quote": "'Every particle of matter is attracted by or gravitates to every other particle of matter with a force inversely proportional to the squares of their distances.' - Isaac Newton"
+				"prerequisites": ["Radio", "Rocketry"],
+				"uniques": [
+					"Reveals the entire map"
+				],
+				"quote": "\"Beep...Beep...Beep...Beep...\" - Sputnik I"
 			},
 			{
-				"name": "Nuclear Fusion",
-				"row": 6,
-				"prerequisites": ["Advanced Ballistics", "Satellites", "Robotics"],
-                "uniques": ["[-100]% weight to this choice for AI decisions"],
-				"quote": "'The release of atomic energy has not created a new problem. It has readily made more urgent the necessity of solving an existing one.' - Albert Einstein"
+				"name": "Plastics",
+				"cost": 7000,
+				"row": 17,
+				"prerequisites": ["Combustion", "Industrialism"],
+				"quote": "\"I just want to say one word to you, just one word: plastics.\" - Calder Willingham, The Graduate"
 			},
 			{
-				"name": "Nanotechnology",
-				"row": 7,
-				"prerequisites": ["Robotics"],
-				"quote": "'The impact of nanotechnology is expected to exceed the impact that the electronics revolution has had on our lives.' - Richard Schwartz"
+				"name": "Computers",
+				"cost": 6500,
+				"row": 1,
+				"prerequisites": ["Radio"],
+				"quote": "\"Never trust a computer you can't throw out the window.\" - Steve Wozniak"
 			},
 			{
-				"name": "Stealth",
-				"row": 8,
-				"prerequisites": ["Robotics", "Lasers"],
-                "uniques": ["[-100]% weight to this choice for AI decisions"],
-				"quote": "'Be extremely subtle, even to the point of formlessness, be extremely mysterious, even to the point of soundlessness. Thereby you can be the director of the opponent's fate.' - Sun Tzu"
+				"name": "Mass Media",
+				"cost": 3600,
+				"row": 16,
+				"prerequisites": ["Radio"],
+				"quote": "\"The only thing worse than being talked about is not being talked about.\" - Oscar Wilde"
 			}
 		]
 	},
+
 	{
 		"columnNumber": 17,
+		"era": "Modern era",
+		"techs": [
+			{
+				"name": "Composites",
+				"cost": 7500,
+				"row": 3,
+				"prerequisites": ["Satellites", "Plastics"],
+				"quote": "\"The whole is greater than the sum of its parts.\" - Aristotle"
+			},
+			{
+				"name": "Fiber Optics",
+				"cost": 7500,
+				"row": 5,
+				"prerequisites": ["Computers"],
+				"uniques": [
+					"Unavailable <before discovering [Plastics]> <before discovering [Satellites]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Plastics...",
+						"link": "Technologies/Plastics"
+					},
+					{
+						"text": "...or Satellites",
+						"link": "Technologies/Satellites"
+					}
+				],
+				"quote": "\"There is a single light of science and to brighten it anywhere is to brighten it everywhere.\" - Isaac Asimov"
+			},
+			{
+				"name": "Ecology",
+				"cost": 5500,
+				"row": 15,
+				"prerequisites": ["Biology"],
+				"uniques": [
+					"Unavailable <before discovering [Plastics]> <before discovering [Fission]> <hidden from users>"
+				],
+				"civilopediaText": [
+					{
+						"text": "Requires Plastics...",
+						"link": "Technologies/Plastics"
+					},
+					{
+						"text": "...or Fission",
+						"link": "Technologies/Fission"
+					}
+				],
+				"quote": "\"We do not inherit the earth from our ancestors, we borrow it from our children' - Native American proverb"
+			},
+			{
+				"name": "Robotics",
+				"cost": 8000,
+				"row": 9,
+				"prerequisites": ["Computers"],
+				"uniques": [
+					"Only available <after discovering [Plastics]>"
+				],
+				"quote": "\"The real problem is not whether machines think but whether men do.\" - B. F. Skinner"
+			}
+		]
+	},
+
+	{
+		"columnNumber": 18,
 		"era": "Future era",
-		"techCost": 9500,
-		"buildingCost": 750,
-		"wonderCost": 1250,
+		"techs": [
+			{
+				"name": "Genetics",
+				"cost": 7000,
+				"row": 1,
+				"prerequisites": ["Refrigeration", "Computers"],
+				"uniques": [
+					"[+3] Health" // +3 Health to all cities
+				],
+				"quote": "\"Soon it will be a sin for parents to have a child that carries the heavy burden of genetic disease.\" - Bob Edwards"
+			},
+			{
+				"name": "Fusion",
+				"cost": 8000,
+				"row": 7,
+				"prerequisites": ["Fission" ,"Fiber Optics"],
+				"uniques": [
+					"Free [Great Engineer] appears <if no other Civilization has researched this>"
+				],
+				"quote": "\"Any sufficiently advanced technology is indistinguishable from magic.\" - Arthur C. Clarke"
+			}
+		]
+	},
+
+	{
+		"columnNumber": 19,
+		"era": "Future era",
 		"techs": [
 			{
 				"name": "Future Tech",
-				"row": 5,
-				"prerequisites": ["Globalization","Particle Physics","Nuclear Fusion","Nanotechnology","Stealth"],
-				"uniques": ["Can be continually researched"],
-				"quote": "'I think we agree, the past is over.' - George W. Bush",
-                "civilopediaText": [{"text": "Who knows what the future holds?"}]
+				"cost": 10000,
+				"row": 3,
+				"prerequisites": ["Composites", "Genetics"],
+				"uniques": [
+					"Can be continually researched",
+					"[+1 Food] [in your cities]",
+					"[+1 Happiness] [in your cities]"
+				],
+				"quote": "\"The future will be better tomorrow.\" - Dan Quayle"
 			}
 		]
 	}
+
 ]

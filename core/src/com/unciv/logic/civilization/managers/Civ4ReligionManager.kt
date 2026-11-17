@@ -97,6 +97,7 @@ class Civ4ReligionManager : IsPartOfGameInfoSerialization {
     }
 
     fun setStateReligion(religionName: String?, applyAnarchy: Boolean = true) {
+        if (religionName != null && civInfo.hasUnique(UniqueType.NoStateReligion)) return
         if (religionName != null && religionName !in getAvailableStateReligions()) return
         if (religionName == stateReligion) return
 
@@ -202,7 +203,7 @@ class Civ4ReligionManager : IsPartOfGameInfoSerialization {
     }
 
     private fun processAiStateReligion() {
-        if (civInfo.isHuman() || stateReligion != null) return
+        if (civInfo.isHuman() || stateReligion != null || civInfo.hasUnique(UniqueType.NoStateReligion)) return
         val counts = HashMap<String, Int>()
         for (city in civInfo.cities) {
             for (religion in city.presentReligions) {

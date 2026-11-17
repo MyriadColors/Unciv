@@ -1131,6 +1131,8 @@ enum class UniqueType(
     ReligionSpreadModifier("[relativeAmount]% passive religion spread chance", UniqueTarget.Building, UniqueTarget.Global),
     StateReligionHappiness("[amount] Happiness in cities with state religion", UniqueTarget.Building, UniqueTarget.Global),
     ShrineGoldForReligion("[amount] Gold for each city following [religionFilter]", UniqueTarget.Building),
+    NoStateReligion("Cannot adopt a State Religion", UniqueTarget.Civic, UniqueTarget.Global),
+    HappinessPerPresentReligion("[amount] Happiness per religion present in the city", UniqueTarget.Civic, UniqueTarget.Building, UniqueTarget.Global),
     AllowRazeHolyCity("Allow raze holy city", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
     AllowUnitStacking("Allows unlimited military units per tile", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
     Civ4StackCombat("Uses Civ IV stack combat", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),

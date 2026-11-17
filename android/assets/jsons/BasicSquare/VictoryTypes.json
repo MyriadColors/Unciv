@@ -1,42 +1,55 @@
 [
     {
         "name": "Scientific",
-        "victoryScreenHeader": "Complete all the spaceship parts to win!",
+        "victoryScreenHeader": "Build and Launch your\nspacecraft and get to\nAlpha Centauri first.",
         "milestones": [
-            "Build [Apollo Program]", "Add all [spaceship parts] in capital"
+            "Build [Apollo Program]",
+            "Build [SS Casing]",
+            "Build [SS Cockpit]",
+            "Build [SS Docking Bay]",
+            "Build [SS Engine]",
+            "Build [SS Life Support]",
+            "Build [SS Stasis Chamber]",
+            "Build [SS Thrusters]",
+            "Build [Spaceship]"
         ],
-        "requiredSpaceshipParts": [
-            "SS Engine", "SS Stasis Chamber", "SS Cockpit", "SS Booster", "SS Booster", "SS Booster"
-        ],
-        "victoryString": "You have achieved victory through mastery of Science! You have conquered the mysteries of nature and led your people on a voyage to a brave new world! Your triumph will be remembered as long as the stars burn in the night sky!",
+        "victoryString": "You have achieved victory through mastery of Science! You have conquered the mysteries of nature and led your people on a voyage to a brave new world!",
         "defeatString": "You have been defeated. Your civilization has been overwhelmed by its many foes. But your people do not despair, for they know that one day you shall return - and lead them forward to victory!"
     },
     {
         "name": "Cultural",
-        "victoryScreenHeader": "Complete 5 policy branches and build the Utopia Project to win!",
-        "milestones": ["Complete [5] Policy branches", "Build [Utopia Project]"],
-        "victoryString": "You have achieved victory through the awesome power of your Culture. Your civilization's greatness - the magnificence of its monuments and the power of its artists - have astounded the world! Poets will honor you as long as beauty brings gladness to a weary heart.",
+        "victoryScreenHeader": "Build all three\nUtopia Projects.",
+        "milestones": [
+            "Build [Utopia Project 1]",
+            "Build [Utopia Project 2]",
+            "Build [Utopia Project 3]"
+        ],
+        "victoryString": "You have achieved victory through the awesome power of your Culture!",
         "defeatString": "You have been defeated. Your civilization has been overwhelmed by its many foes. But your people do not despair, for they know that one day you shall return - and lead them forward to victory!"
     },
     {
         "name": "Domination",
-        "victoryScreenHeader": "Capture all enemy Capitals to win!",
-        "milestones": ["Capture all capitals"],
-        "victoryString": "The world has been convulsed by war. Many great and powerful civilizations have fallen, but you have survived - and emerged victorious! The world will long remember your glorious triumph!",
+        "victoryScreenHeader": "Eliminate all other\ncivilizations.",
+        "milestones": ["Destroy all players"],
+        "victoryString": "The world has been convulsed by war. Many great and powerful civilizations have fallen, but you have survived - and emerged victorious!",
         "defeatString": "You have been defeated. Your civilization has been overwhelmed by its many foes. But your people do not despair, for they know that one day you shall return - and lead them forward to victory!"
     },
     {
         "name": "Diplomatic",
-        "victoryScreenHeader": "Build the UN and be voted world leader to win!",
-        "milestones": ["Anyone should build [United Nations]", "Win diplomatic vote"],
-        "victoryString": "You have triumphed over your foes through the art of diplomacy! Your cunning and wisdom have earned you great friends - and divided and sown confusion among your enemies! Forever will you be remembered as the leader who brought peace to this weary world!",
+        "victoryScreenHeader": "Win a United Nations\nelection as world leader.",
+        "milestones": [
+            "Anyone should build [United Nations]",
+            "Win diplomatic vote"
+        ],
+        "victoryString": "You have triumphed over your foes through the art of diplomacy!",
         "defeatString": "You have been defeated. Your civilization has been overwhelmed by its many foes. But your people do not despair, for they know that one day you shall return - and lead them forward to victory!"
     },
     {
         "name": "Time",
+        "victoryScreenHeader": "Have the highest score\nwhen the time ends.",
         "hiddenInVictoryScreen": true,
         "milestones": ["Have highest score after max turns"],
-        "victoryString": "The world has been convulsed by war. Many great and powerful civilizations have fallen, but you have survived - and emerged victorious! The world will long remember your glorious triumph!",
+        "victoryString": "You have won a Time Victory!",
         "defeatString": "You have been defeated. Your civilization has been overwhelmed by its many foes. But your people do not despair, for they know that one day you shall return - and lead them forward to victory!"
     }
 ]

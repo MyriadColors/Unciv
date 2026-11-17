@@ -62,18 +62,28 @@ class CivicPickerScreen(
         rowTable.defaults().pad(5f)
         rowTable.add("State Religion:".toLabel(fontSize = 18)).padRight(10f)
 
+        val noStateReligion = viewingCiv.hasUnique(com.unciv.models.ruleset.unique.UniqueType.NoStateReligion) ||
+            pendingSelections.values.any { civicName ->
+                viewingCiv.gameInfo.ruleset.civics[civicName]?.uniqueObjects?.any {
+                    it.type == com.unciv.models.ruleset.unique.UniqueType.NoStateReligion
+                } == true
+            }
+        if (noStateReligion) pendingStateReligion = null
+
         val options = listOf<String?>(null) + viewingCiv.civ4Religion.getAvailableStateReligions()
         for (option in options) {
             val label = option ?: "No State Religion"
             val isActive = option == viewingCiv.civ4Religion.stateReligion
             val isPending = option == pendingStateReligion
             val button = (if (isActive) "$label (Active)" else label).toTextButton()
+            val blocked = option != null && noStateReligion
             when {
+                blocked -> button.color = Color.GRAY
                 isPending -> button.color = colorFromRGB(37, 150, 190)
                 isActive -> button.color = Color.GREEN
             }
             button.onClick {
-                if (canChangeState) {
+                if (canChangeState && !blocked) {
                     pendingStateReligion = option
                     rebuildLayout()
                 }

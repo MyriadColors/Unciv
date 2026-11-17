@@ -30,6 +30,8 @@ class CivicsAnarchyTests {
     }
 
     private fun setupTestCivics() {
+        testGame.ruleset.civicCategories.clear()
+        testGame.ruleset.civics.clear()
         val govCategory = CivicCategory().apply {
             name = "Government"
             defaultCivic = "Despotism"

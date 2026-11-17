@@ -91,6 +91,9 @@ class CivicManager : IsPartOfGameInfoSerialization {
         if (changedCount == 0) return 0
 
         recalculateCivicUniques()
+        if (civInfo.isCiv4ReligionEnabled() && civInfo.hasUnique(UniqueType.NoStateReligion) && civInfo.civ4Religion.stateReligion != null) {
+            civInfo.civ4Religion.setStateReligion(null, applyAnarchy = false)
+        }
         val anarchy = getAnarchyTurnsForChanges(changedCount)
         civInfo.anarchyTurns += anarchy
         civInfo.cache.updateCivResources()
