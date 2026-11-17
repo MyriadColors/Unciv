@@ -3,6 +3,14 @@ import com.google.common.io.Files
 import com.unciv.build.AndroidImagePacker
 import com.unciv.build.BuildConfig
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.net.URI
+import java.net.http.HttpClient
+import java.net.http.HttpRequest
+import java.net.http.HttpResponse
+import java.time.Instant
+import java.time.ZoneOffset
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 plugins {
     id("kotlin")
@@ -61,8 +69,9 @@ val discordDir = file("discord_rpc")
 val deployFolder = file("../deploy")
 
 tasks.register("texturePacker") {
+    val androidPath = rootProject.file("android").path
     doFirst {
-        AndroidImagePacker.packImages(rootProject.file("android").path)
+        AndroidImagePacker.packImages(androidPath)
     }
 }
 
@@ -118,18 +127,40 @@ private val packrDownloadUrl = "https://github.com/libgdx/packr/releases/downloa
 private val packrLocalName = "packr-all-4.0.0.jar"
 private val cacheDirectory = ".jre-cache" // relative to desktop, the place for downloaded archives
 
-private fun downloadIfOutdated(url: String, dest: File) {
-    dest.parentFile?.mkdirs()
-    ant.invokeMethod("get", mapOf(
-        "src" to url,
-        "dest" to dest.absolutePath,
-        "usetimestamp" to true,
-        "verbose" to true
-    ))
-}
+private object PackrHelpers {
+    fun downloadIfOutdated(url: String, dest: File) {
+        dest.parentFile?.mkdirs()
+        val client = HttpClient.newBuilder()
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build()
+        val reqBuilder = HttpRequest.newBuilder(URI.create(url)).GET()
+        if (dest.exists()) {
+            val modified = ZonedDateTime.ofInstant(
+                Instant.ofEpochMilli(dest.lastModified()),
+                ZoneOffset.UTC
+            )
+            reqBuilder.header("If-Modified-Since", DateTimeFormatter.RFC_1123_DATE_TIME.format(modified))
+        }
+        val tmp = File(dest.parentFile, "${dest.name}.part")
+        val response = client.send(reqBuilder.build(), HttpResponse.BodyHandlers.ofFile(tmp.toPath()))
+        if (response.statusCode() == 304) {
+            tmp.delete()
+            return
+        }
+        if (response.statusCode() !in 200..299) {
+            tmp.delete()
+            throw GradleException("Failed to download $url: HTTP ${response.statusCode()}")
+        }
+        if (dest.exists() && !dest.delete()) {
+            throw GradleException("Could not replace ${dest.path}")
+        }
+        if (!tmp.renameTo(dest)) {
+            throw GradleException("Could not move ${tmp.path} to ${dest.path}")
+        }
+    }
 
 //  https://gist.github.com/seanf/58b76e278f4b7ec0a2920d8e5870eed6
-private fun runCommand(workingDir: File, vararg args: String) {
+    fun runCommand(workingDir: File, vararg args: String) {
     val command = args.joinToString(" ")
     val outputFile = File.createTempFile("packr-", ".log")
     try {
@@ -159,6 +190,7 @@ private fun runCommand(workingDir: File, vararg args: String) {
         outputFile.delete()
     }
 }
+}
 
 for (platform in Platform.entries) {
     val outputDir = layout.buildDirectory.dir("packr/${platform.packrName}").get().asFile
@@ -170,6 +202,13 @@ for (platform in Platform.entries) {
         val jarFile = file("$rootDir/desktop/build/libs/${BuildConfig.appName}.jar")
         val packrJarFile = file("$cacheDirectory/$packrLocalName")
         val jreArchiveFile = file("$cacheDirectory/${platform.jdkFile}")
+        val downloadUrl = packrDownloadUrl
+        val platformDownloadUrl = platform.downloadUrl
+        val platformName = platform.packrName
+        val platformVmArgs = platform.vmArgs
+        val rootDirFile = rootDir
+        val mainClass = mainClassName
+        val iconFile = file("$rootDir/extraImages/Icons/Unciv.ico")
 
         doFirst {
             // This task assumes that 'dist' has already been called - does not 'gradle depend' on it
@@ -177,8 +216,8 @@ for (platform in Platform.entries) {
             // Note we only guard for existence without checking staleness, which would be complex
             if (!jarFile.exists())
                 throw GradleException("${jarFile.path} not found — run 'desktop:dist' before packr tasks")
-            downloadIfOutdated(packrDownloadUrl, packrJarFile)
-            downloadIfOutdated(platform.downloadUrl, jreArchiveFile)
+            PackrHelpers.downloadIfOutdated(downloadUrl, packrJarFile)
+            PackrHelpers.downloadIfOutdated(platformDownloadUrl, jreArchiveFile)
         }
 
         doLast {
@@ -190,15 +229,15 @@ for (platform in Platform.entries) {
                     throw GradleException("Could not fully clear $outputDir — check for locked or read-only files")
             }
 
-            runCommand(rootDir,
+            PackrHelpers.runCommand(rootDirFile,
                 "java",
                 "-jar", packrJarFile.path,
-                "--platform", platform.packrName,
+                "--platform", platformName,
                 "--jdk", jreArchiveFile.path,
                 "--executable", "Unciv",
                 "--classpath", jarFile.path,
-                "--mainclass", mainClassName,
-                "--vmargs", *platform.vmArgs, "Xmx4G", "Dunciv.packr=true",
+                "--mainclass", mainClass,
+                "--vmargs", *platformVmArgs, "Xmx4G", "Dunciv.packr=true",
                 "--output", outputDir.path
             )
 
@@ -207,7 +246,7 @@ for (platform in Platform.entries) {
             // - Linux needs e.g. the desktop file refer to it depending on distro, and the packr release doesn't manage one
             // - Mac: packr's --icon parameter is for mac only, but needs icns format
             // Leaving it in, to allow clever users to fix that themselves
-            Files.copy(File("$rootDir/extraImages/Icons/Unciv.ico"), File(outputDir, "Unciv.ico"))
+            Files.copy(iconFile, File(outputDir, "Unciv.ico"))
         }
 
     }
