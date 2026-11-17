@@ -157,6 +157,16 @@ class CityStatsTable(private val cityScreen: CityScreen) : Table() {
         turnsToPopString += " (${cityView.getFoodStored()}${Fonts.food}/${cityView.getFoodToNextPopulation()}${Fonts.food})"
 
         lowerTable.add(unassignedPopLabel).row()
+        if (cityView.isCityHealthEnabled()) {
+            val health = cityView.getHealthBreakdown()
+            val healthText = if (health.excessUnhealthiness > 0) {
+                "Health: [${health.health}] / [${health.unhealthiness}] (-[${health.excessUnhealthiness}] Food)".tr()
+            } else {
+                "Health: [${health.health}] / [${health.unhealthiness}]".tr()
+            }
+            val healthColor = if (health.netHealth >= 0) Color.GREEN else Color.SALMON
+            lowerTable.add(healthText.toLabel(fontColor = healthColor)).row()
+        }
         lowerTable.add(turnsToExpansionString.toLabel()).row()
         lowerTable.add(turnsToPopString.toLabel()).row()
 

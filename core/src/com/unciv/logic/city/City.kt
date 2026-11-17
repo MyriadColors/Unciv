@@ -381,6 +381,86 @@ class City : IsPartOfGameInfoSerialization, INamed {
     @Readonly
     fun getCityDefenseBonus(): Int = (getMaxCityDefenseBonus() - defenseDamageTaken).coerceAtLeast(0)
 
+    data class CityHealthBreakdown(
+        val health: Int,
+        val unhealthiness: Int,
+        val healthSources: Map<String, Int>,
+        val unhealthinessSources: Map<String, Int>
+    ) {
+        val netHealth: Int get() = health - unhealthiness
+        val excessUnhealthiness: Int get() = (unhealthiness - health).coerceAtLeast(0)
+    }
+
+    @Readonly
+    fun getHealthBreakdown(): CityHealthBreakdown {
+        val healthSources = LinkedHashMap<String, Int>()
+        val unhealthinessSources = LinkedHashMap<String, Int>()
+
+        fun addSource(sourceName: String, amount: Int) {
+            if (amount > 0) {
+                healthSources[sourceName] = (healthSources[sourceName] ?: 0) + amount
+            } else if (amount < 0) {
+                unhealthinessSources[sourceName] = (unhealthinessSources[sourceName] ?: 0) + (-amount)
+            }
+        }
+
+        if (getCenterTile().isAdjacentTo(Constants.freshWater, civ)) {
+            addSource("Fresh Water", 2)
+        }
+
+        var forestCount = 0
+        var dirtyTerrainCount = 0
+        for (tile in tilesInRange) {
+            for (feature in tile.terrainFeatures) {
+                if (feature == "Forest") forestCount++
+                else if (feature == "Flood plains" || feature == "Jungle") dirtyTerrainCount++
+            }
+        }
+        val forestHealth = (forestCount * 0.5f).toInt()
+        if (forestHealth > 0) addSource("Forests", forestHealth)
+
+        val terrainUnhealthiness = (dirtyTerrainCount * 0.4f).toInt()
+        if (terrainUnhealthiness > 0) addSource("Terrain features", -terrainUnhealthiness)
+
+        if (population.population > 0) {
+            addSource("Population", -population.population)
+        }
+
+        val ruleset = getRuleset()
+        for (resource in ruleset.tileResources.values) {
+            if (getAvailableResourceAmount(resource) <= 0) continue
+            for (unique in resource.getMatchingUniques(UniqueType.CityHealth, state)) {
+                addSource(resource.name, unique.params[0].toInt())
+            }
+        }
+
+        val ignoreBuildingUnhealthiness = getMatchingUniques(UniqueType.NoBuildingUnhealthiness).any()
+        for (building in cityConstructions.getBuiltBuildings()) {
+            for (unique in building.getMatchingUniques(UniqueType.CityHealth, state)) {
+                val amount = unique.params[0].toInt()
+                if (amount < 0 && ignoreBuildingUnhealthiness) continue
+                addSource(building.name, amount)
+            }
+        }
+
+        for (unique in civ.nation.getMatchingUniques(UniqueType.CityHealth, state))
+            addSource("Trait / Nation", unique.params[0].toInt())
+        for (unique in civ.policies.policyUniques.getMatchingUniques(UniqueType.CityHealth, state))
+            addSource("Policies", unique.params[0].toInt())
+        for (unique in civ.civics.civicUniques.getMatchingUniques(UniqueType.CityHealth, state))
+            addSource("Civics", unique.params[0].toInt())
+        for (unique in civ.tech.techUniques.getMatchingUniques(UniqueType.CityHealth, state))
+            addSource("Technologies", unique.params[0].toInt())
+        for (unique in civ.getEra().getMatchingUniques(UniqueType.CityHealth, state))
+            addSource("Era", unique.params[0].toInt())
+        for (unique in civ.gameInfo.getGlobalUniques().getMatchingUniques(UniqueType.CityHealth, state))
+            addSource("Base / Difficulty", unique.params[0].toInt())
+
+        val totalHealth = healthSources.values.sum()
+        val totalUnhealthiness = unhealthinessSources.values.sum()
+        return CityHealthBreakdown(totalHealth, totalUnhealthiness, healthSources, unhealthinessSources)
+    }
+
     /** Gets max air units that can remain in the city untransported */
     @Readonly fun getMaxAirUnits(): Int = civ.gameInfo.ruleset.modOptions.constants.cityAirUnitCapacity +
         getMatchingUniques(UniqueType.CarryExtraAirUnits)

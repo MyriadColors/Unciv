@@ -580,6 +580,13 @@ class CityStats(val city: City) {
         val foodEaten = calcFoodEaten()
         newFinalStatList["Population"]!!.food -= foodEaten
 
+        if (city.civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.CityHealthMode)) {
+            val excessUnhealthiness = city.getHealthBreakdown().excessUnhealthiness
+            if (excessUnhealthiness > 0) {
+                newFinalStatList["Unhealthiness"] = Stats(food = -excessUnhealthiness.toFloat())
+            }
+        }
+
         var totalFood = newFinalStatList.values.map { it.food }.sum()
 
         // Apply growth modifier only when positive food

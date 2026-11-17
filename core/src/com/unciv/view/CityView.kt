@@ -84,6 +84,8 @@ class CityView(city: City,
     // Stats
     @Readonly fun getCurrentCityStats(): Stats = city.cityStats.currentCityStats
     @Readonly fun getHappinessList(): Map<String, Float> = city.cityStats.happinessList
+    @Readonly fun isCityHealthEnabled(): Boolean = city.civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.CityHealthMode)
+    @Readonly fun getHealthBreakdown(): City.CityHealthBreakdown = city.getHealthBreakdown()
     @Readonly fun getBaseStatTree(): StatTreeNode = city.cityStats.baseStatTree
     @Readonly fun getStatPercentBonusTree(): StatTreeNode = city.cityStats.statPercentBonusTree
     @Readonly fun getFinalStatList(): Map<String, Stats> = city.cityStats.finalStatList
