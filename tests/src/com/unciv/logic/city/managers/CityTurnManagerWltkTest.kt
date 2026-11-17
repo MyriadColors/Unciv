@@ -41,13 +41,13 @@ class CityTurnManagerWltkTest {
 
     @Test
     fun `starting WLTKD clears pending ResourceDemand`() {
-        // City-center Salt needs Mining researched to count as extracted
+        // City-center Silver needs Mining researched to count as extracted
         civ.tech.addTechnology("Mining")
-        city.getCenterTile().setTileResource("Salt")
+        city.getCenterTile().setTileResource("Silver")
         city.getCenterTile().resourceAmount = 1
         civ.cache.updateCivResources()
 
-        city.demandedResource = "Salt"
+        city.demandedResource = "Silver"
         city.setFlag(CityFlags.ResourceDemand, 10)
         assertFalse(city.hasFlag(CityFlags.WeLoveTheKing))
 
@@ -55,6 +55,6 @@ class CityTurnManagerWltkTest {
 
         assertTrue(city.hasFlag(CityFlags.WeLoveTheKing))
         assertFalse(city.hasFlag(CityFlags.ResourceDemand))
-        assertEquals("Salt", city.demandedResource)
+        assertEquals("Silver", city.demandedResource)
     }
 }

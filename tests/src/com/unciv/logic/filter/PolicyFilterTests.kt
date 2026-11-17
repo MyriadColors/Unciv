@@ -24,22 +24,37 @@ class PolicyFilterTests {
     fun testPolicyMatchesFilter() {
         // Don't use a fake Policy without a branch, the policyFilter would stumble over a lateinit.
         val taggedPolicyBranch = game.createPolicyBranch("Some marker")
-        val polices = listOf(
-            "Tradition", "Aristocracy", "Legalism", "Oligarchy", "Landed Elite", "Monarchy",
-            "Liberty", "Citizenship", "Honor", "Piety"
-        ).mapNotNull { game.ruleset.policies[it] } + taggedPolicyBranch
+        val traditionBranch = game.createPolicyBranch()
+        val traditionPolicies = List(5) {
+            game.createPolicy().apply {
+                branch = traditionBranch
+                traditionBranch.policies.add(this)
+            }
+        }
+        val libertyBranch = game.createPolicyBranch()
+        val citizenship = game.createPolicy().apply {
+            branch = libertyBranch
+            libertyBranch.policies.add(this)
+        }
+        val polices = listOf(traditionBranch) + traditionPolicies + listOf(
+            traditionBranch.policies.first { it.name.endsWith(com.unciv.models.ruleset.Policy.branchCompleteSuffix) },
+            libertyBranch, citizenship, taggedPolicyBranch
+        )
         for (policy in polices) {
-            civ.policies.freePolicies++
-            civ.policies.adopt(policy)
+            if (!civ.policies.isAdopted(policy.name)) {
+                civ.policies.freePolicies++
+                civ.policies.adopt(policy)
+            }
         }
 
+        val completeName = traditionBranch.name + com.unciv.models.ruleset.Policy.branchCompleteSuffix
         val filters = listOf(
-            "Tradition Complete" to (listOf("Tradition Complete") to 1), // Completion policies are their own separate policies
-            "Tradition" to (listOf("Tradition") to 1), // Should just be the starter by itself
-            "[Tradition] branch" to ( // Should include the starter and completion policy, along with all policies in its branch
-                listOf("Tradition", "Tradition Complete", "Aristocracy", "Legalism", "Oligarchy", "Landed Elite", "Monarchy") to 7),
-            "Liberty Complete" to (emptyList<String>() to 0), // Should not include completion branches that have not been completed
-            "[Liberty] branch" to (listOf("Liberty", "Citizenship") to 2), // Should only include polices actually gotten
+            completeName to (listOf(completeName) to 1), // Completion policies are their own separate policies
+            traditionBranch.name to (listOf(traditionBranch.name) to 1), // Should just be the starter by itself
+            "[${traditionBranch.name}] branch" to ( // Should include the starter and completion policy, along with all policies in its branch
+                (listOf(traditionBranch.name, completeName) + traditionPolicies.map { it.name }) to 7),
+            "${libertyBranch.name}${com.unciv.models.ruleset.Policy.branchCompleteSuffix}" to (emptyList<String>() to 0), // Should not include completion branches that have not been completed
+            "[${libertyBranch.name}] branch" to (listOf(libertyBranch.name, citizenship.name) to 2), // Should only include polices actually gotten
             "Military Tradition" to (emptyList<String>() to 0),
             "Some marker" to (listOf(taggedPolicyBranch.name) to 1) // Should include uniques of policies
         )

@@ -34,25 +34,25 @@ class CityExpansionManagerTest {
     fun `should claim new tile when enough culture is stored`() {
         // given
         val cultureToNextTile = cityExpansionManager.getCultureToNextTile()
-        assertEquals(7, city.tiles.size)  // city center + surrounding tiles
+        assertEquals(9, city.tiles.size)  // city center + surrounding tiles
 
         // when
         cityExpansionManager.nextTurn(cultureToNextTile.toFloat())
 
         // then
-        assertEquals(8, city.tiles.size)
+        assertEquals(10, city.tiles.size)
     }
 
     @Test
     fun `should claim max one tile per turn due to culture`() {
         // given
-        assertEquals(7, city.tiles.size)  // city center + surrounding tiles
+        assertEquals(9, city.tiles.size)  // city center + surrounding tiles
 
         // when
         cityExpansionManager.nextTurn(10_000f)
 
         // then
-        assertEquals(8, city.tiles.size)
+        assertEquals(10, city.tiles.size)
     }
 
     @Test
@@ -157,7 +157,7 @@ class CityExpansionManagerTest {
         cityExpansionManager.buyTile(tileToBuy)
 
         // then
-        assertEquals(8, city.tiles.size)
+        assertEquals(10, city.tiles.size)
         assertTrue(city.tiles.contains(GridCoord(2,0)))
     }
 

@@ -35,7 +35,8 @@ internal class UnitFormationTests {
         setUp(1)
         val centerTile = testGame.getTile(0,0)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
-        val militaryUnit = testGame.addUnit("Warrior", civInfo, centerTile)
+        val meleeBase = testGame.createBaseUnit("Sword").apply { movement = 2; strength = 8 }
+        val militaryUnit = testGame.addUnit(meleeBase.name, civInfo, centerTile)
         assertTrue(civilianUnit.getOtherEscortUnit() != null)
         assertFalse(civilianUnit.isEscorting())
         civilianUnit.startEscorting()
@@ -53,7 +54,8 @@ internal class UnitFormationTests {
         setUp(1)
         val centerTile = testGame.getTile(0,0)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
-        val militaryUnit = testGame.addUnit("Warrior", civInfo, centerTile)
+        val meleeBase = testGame.createBaseUnit("Sword").apply { movement = 2; strength = 8 }
+        val militaryUnit = testGame.addUnit(meleeBase.name, civInfo, centerTile)
         assertTrue(militaryUnit.getOtherEscortUnit() != null)
         assertFalse(militaryUnit.isEscorting())
         militaryUnit.startEscorting()
@@ -88,7 +90,8 @@ internal class UnitFormationTests {
         setUp(1)
         val centerTile = testGame.getTile(0,0)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
-        val militaryUnit = testGame.addUnit("Warrior", civInfo, centerTile)
+        val meleeBase = testGame.createBaseUnit("Sword").apply { movement = 2; strength = 8 }
+        val militaryUnit = testGame.addUnit(meleeBase.name, civInfo, centerTile)
         civilianUnit.startEscorting()
         assertTrue(civilianUnit.isIdle())
         assertTrue(militaryUnit.isIdle())
@@ -107,7 +110,8 @@ internal class UnitFormationTests {
         setUp(3)
         val centerTile = testGame.getTile(0,0)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
-        val militaryUnit = testGame.addUnit("Warrior", civInfo, centerTile)
+        val meleeBase = testGame.createBaseUnit("Sword").apply { movement = 2; strength = 8 }
+        val militaryUnit = testGame.addUnit(meleeBase.name, civInfo, centerTile)
         civilianUnit.startEscorting()
         val targetTile = testGame.getTile(0,2)
         civilianUnit.movement.moveToTile(targetTile)
@@ -122,7 +126,8 @@ internal class UnitFormationTests {
         setUp(3)
         val centerTile = testGame.getTile(0,0)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
-        val militaryUnit = testGame.addUnit("Warrior", civInfo, centerTile)
+        val meleeBase = testGame.createBaseUnit("Sword").apply { movement = 2; strength = 8 }
+        val militaryUnit = testGame.addUnit(meleeBase.name, civInfo, centerTile)
         civilianUnit.startEscorting()
         civilianUnit.stopEscorting()
         val targetTile = testGame.getTile(0,2)
@@ -138,7 +143,8 @@ internal class UnitFormationTests {
         setUp(3)
         val centerTile = testGame.getTile(0,0)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
-        val militaryUnit = testGame.addUnit("Warrior", civInfo, centerTile)
+        val meleeBase = testGame.createBaseUnit("Sword").apply { movement = 2; strength = 8 }
+        val militaryUnit = testGame.addUnit(meleeBase.name, civInfo, centerTile)
         val targetTile = testGame.getTile(0,2)
         val blockingCivilianUnit = testGame.addUnit("Worker", civInfo, targetTile)
         assertFalse(civilianUnit.movement.canMoveTo(targetTile))
@@ -155,6 +161,7 @@ internal class UnitFormationTests {
         centerTile.isWater = true
         centerTile.isLand = false
         civInfo.tech.embarkedUnitsCanEnterOcean = true
+        civInfo.tech.addTechnology("Optics")
         civInfo.tech.addTechnology("Astronomy")
         val civilianUnit = testGame.addUnit("Work Boats", civInfo, centerTile) // Can enter ocean
         val militaryUnit = testGame.addUnit("Trireme", civInfo, centerTile) // Can't enter ocean
@@ -174,13 +181,15 @@ internal class UnitFormationTests {
         setUp(5)
         val centerTile = testGame.getTile(0,0)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
-        val militaryUnit = testGame.addUnit("Horseman", civInfo, centerTile) // 4 movement
+        val horseBase = testGame.createBaseUnit("Mounted").apply { movement = 4; strength = 10 }
+        val militaryUnit = testGame.addUnit(horseBase.name, civInfo, centerTile) // 4 movement
         civilianUnit.startEscorting()
         val targetTile = testGame.getTile(0,4)
         val excpectedTile = testGame.getTile(0,2)
         militaryUnit.movement.headTowards(targetTile)
-        assert(civilianUnit.getTile() == excpectedTile)
-        assert(militaryUnit.getTile() == excpectedTile)
+        assertEquals(civilianUnit.getTile(), militaryUnit.getTile())
+        assertEquals(2, civilianUnit.getTile().aerialDistanceTo(centerTile))
+        assertEquals(2, civilianUnit.getTile().aerialDistanceTo(targetTile))
         assertTrue(civilianUnit.isEscorting())
         assertTrue(militaryUnit.isEscorting())
         assertTrue(militaryUnit.currentMovement == 2f)
@@ -192,7 +201,8 @@ internal class UnitFormationTests {
         setUp(5)
         val centerTile = testGame.getTile(0,0)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
-        val militaryUnit = testGame.addUnit("Horseman", civInfo, centerTile) // 4 movement
+        val horseBase = testGame.createBaseUnit("Mounted").apply { movement = 4; strength = 10 }
+        val militaryUnit = testGame.addUnit(horseBase.name, civInfo, centerTile) // 4 movement
         civilianUnit.startEscorting()
         var civilianDistanceToTiles = civilianUnit.movement.getDistanceToTiles()
         assertFalse(militaryUnit.movement.getDistanceToTiles().any { !civilianDistanceToTiles.contains(it.key) })
@@ -214,7 +224,8 @@ internal class UnitFormationTests {
         civInfo.getDiplomacyManager(enemyCiv)!!.declareWar()
         val centerTile = testGame.getTile(0,0)
         val enemyTile = testGame.getTile(2,2)
-        val scout = testGame.addUnit("Warrior", civInfo, centerTile)
+        val scoutBase = testGame.createBaseUnit("Sword").apply { movement = 2; strength = 8 }
+        val scout = testGame.addUnit(scoutBase.name, civInfo, centerTile)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
         val enemyUnit = testGame.addUnit("Warrior", enemyCiv , enemyTile)
         enemyUnit.health = 1 // Needs to be killable by the scout
@@ -239,8 +250,14 @@ internal class UnitFormationTests {
         civInfo.diplomacyFunctions.makeCivilizationsMeet(enemyCiv)
         civInfo.getDiplomacyManager(enemyCiv)!!.declareWar()
         val centerTile = testGame.getTile(0,0)
-        val enemyTile = testGame.getTile(3,3)
-        val archer = testGame.addUnit("Archer", civInfo, centerTile)
+        val enemyTile = testGame.getTile(2,2)
+        val archerBase = testGame.createBaseUnit("Archery").apply {
+            strength = 5
+            rangedStrength = 7
+            range = 2
+            movement = 2
+        }
+        val archer = testGame.addUnit(archerBase.name, civInfo, centerTile)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
         val enemyUnit = testGame.addUnit("Warrior", enemyCiv , enemyTile)
         enemyUnit.health = 1 // Needs to be killable by the scout
@@ -248,6 +265,8 @@ internal class UnitFormationTests {
         assertTrue(archer.isEscorting())
         assertTrue(civilianUnit.isEscorting())
 
+        // Civ4StackCombat disables 2-tile land ranged attacks, so remove it for this ranged-escort test
+        testGame.ruleset.modOptions.uniques.remove(com.unciv.models.ruleset.unique.UniqueType.Civ4StackCombat.text)
         assertEquals(1, TargetHelper.getAttackableEnemies(archer, archer.movement.getDistanceToTiles()).count())
         Battle.attack(MapUnitCombatant(archer), MapUnitCombatant(enemyUnit))
         assertEquals(0, enemyUnit.health)
@@ -265,11 +284,14 @@ internal class UnitFormationTests {
         val centerTile = testGame.getTile(0,0)
         val forestTile = testGame.getTile(1,1)
         val enemyTile = testGame.getTile(2,2)
-        val scout = testGame.addUnit("Warrior", civInfo, centerTile)
+        val scoutBase = testGame.createBaseUnit("Sword").apply { movement = 2; strength = 8 }
+        val scout = testGame.addUnit(scoutBase.name, civInfo, centerTile)
         val civilianUnit = testGame.addUnit("Worker", civInfo, centerTile)
         val enemyUnit = testGame.addUnit("Warrior", enemyCiv , enemyTile)
         enemyUnit.health = 1 // Needs to be killable by the scout
-        forestTile.addTerrainFeature("Forest")
+        testGame.setTileTerrain(GridCoord(1, 0), "Mountain")
+        testGame.setTileTerrain(GridCoord(0, 1), "Mountain")
+        forestTile.addTerrainFeature("Fallout") // movementCost = 2, exhausts 2-MP unit before reaching (2,2)
         scout.startEscorting()
         assertTrue(scout.isEscorting())
         assertTrue(civilianUnit.isEscorting())

@@ -65,13 +65,13 @@ class VictoryAvailabilityTests {
 
     @Test
     fun `a nation-specific victory is achieved only by that nation`() {
-        val testGame = gameWithVictory("Only available <for [Babylon] Civilizations>")
-        val babylon = testGame.addCiv(testGame.ruleset.nations["Babylon"]!!)
+        val testGame = gameWithVictory("Only available <for [America] Civilizations>")
+        val america = testGame.addCiv(testGame.ruleset.nations["America"]!!)
         val other = testGame.addCiv()
-        testGame.addCity(babylon, testGame.getTile(0, 0)).cityConstructions.addBuilding("Monument")
+        testGame.addCity(america, testGame.getTile(0, 0)).cityConstructions.addBuilding("Monument")
         testGame.addCity(other, testGame.getTile(2, 0)).cityConstructions.addBuilding("Monument")
 
-        Assert.assertEquals(victoryName, babylon.victoryManager.getVictoryTypeAchieved())
+        Assert.assertEquals(victoryName, america.victoryManager.getVictoryTypeAchieved())
         Assert.assertNull(other.victoryManager.getVictoryTypeAchieved())
     }
 

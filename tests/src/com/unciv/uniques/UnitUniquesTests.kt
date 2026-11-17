@@ -59,31 +59,34 @@ class UnitUniquesTests {
         // Do this early so the uniqueObjects lazy is still un-triggered
         val requireUnique = UniqueType.ConsumesResources.text.fillPlaceholders("3", "Iron")
         // Get a clone with lazies un-tripped
-        val oldImprovement = game.ruleset.tileImprovements["Manufactory"]!!
+        val oldImprovement = game.ruleset.tileImprovements["Academy"]!!
         val improvement = json().run { fromJson(TileImprovement::class.java, toJson(oldImprovement)) }
         improvement.uniques.add(requireUnique)
-        Assert.assertFalse("Test preparation failed to add ConsumesResources to Manufactory",
+        Assert.assertFalse("Test preparation failed to add ConsumesResources to Academy",
             improvement.uniqueObjects.none { it.type == UniqueType.ConsumesResources })
-        game.ruleset.tileImprovements["Manufactory"] = improvement
+        game.ruleset.tileImprovements["Academy"] = improvement
 
         game.makeHexagonalMap(1)
         val civ = game.addCiv(isPlayer = true)
         val centerTile = game.getTile(GridCoord.Zero)
         val capital = game.addCity(civ, centerTile)
 
-        // Place an Engineer and see if he could create a Manufactory
+        // Place a unit that can construct an Academy and see if it could create one
         val unitTile = game.getTile(GridCoord(1,0))
-        val unit = game.addUnit("Great Engineer", civ, unitTile)
+        val scientistBase = game.createBaseUnit("Civilian", "Can instantly construct a [Academy] improvement <by consuming this unit>").apply {
+            movement = 2
+        }
+        val unit = game.addUnit(scientistBase.name, civ, unitTile)
         unit.currentMovement = unit.baseUnit.movement.toFloat()  // Required!
         val actionsWithoutIron = try {
             UnitActionsFromUniques.getImprovementConstructionActionsFromGeneralUnique(unit, unitTile)
         } catch (ex: Throwable) {
             // Give that IndexOutOfBoundsException a nicer name
             Assert.fail("getImprovementConstructionActions throws Exception ${ex.javaClass.simpleName}")
-            game.ruleset.tileImprovements["Manufactory"] = oldImprovement
+            game.ruleset.tileImprovements["Academy"] = oldImprovement
             return
         }.filter { it.action != null }
-        Assert.assertTrue("Great Engineer should NOT be able to create a Manufactory modded to require Iron with 0 Iron",
+        Assert.assertTrue("Great Scientist should NOT be able to create an Academy modded to require Iron with 0 Iron",
             actionsWithoutIron.none())
 
         // Supply Iron
@@ -98,12 +101,12 @@ class UnitUniquesTests {
         val ironAvailable = civ.getResourceAmount("Iron")
         Assert.assertTrue("Test preparation failed to add Iron to Civ resources", ironAvailable >= 3)
 
-        // See if that same Engineer could create a Manufactory NOW
+        // See if that same Scientist could create an Academy NOW
         val actionsWithIron = UnitActionsFromUniques.getImprovementConstructionActionsFromGeneralUnique(unit, unitTile)
             .filter { it.action != null }
-        Assert.assertFalse("Great Engineer SHOULD be able to create a Manufactory modded to require Iron once Iron is available",
+        Assert.assertFalse("Great Scientist SHOULD be able to create an Academy modded to require Iron once Iron is available",
             actionsWithIron.none())
-        game.ruleset.tileImprovements["Manufactory"] = oldImprovement
+        game.ruleset.tileImprovements["Academy"] = oldImprovement
     }
 
     @Test
@@ -111,9 +114,12 @@ class UnitUniquesTests {
         val civ = game.addCiv(isPlayer = true)
         val centerTile = game.getTile(GridCoord.Zero)
 
-        // Hardcoded names mean test *must* run under G&K ruleset, not Vanilla, which the TestGame class ensures
         val general = game.addUnit("Great General", civ, centerTile)
-        val boostingUnit = game.addUnit("Hakkapeliitta", civ, centerTile)
+        val boosterBase = game.createBaseUnit("Mounted", "Transfer Movement to [Great General]").apply {
+            movement = 4
+            strength = 10
+        }
+        val boostingUnit = game.addUnit(boosterBase.name, civ, centerTile)
         boostingUnit.baseUnit.promotions.forEach { boostingUnit.promotions.addPromotion(it, true) }
         boostingUnit.updateUniques()
 
@@ -218,7 +224,7 @@ class UnitUniquesTests {
         tile.setTransients()
         val civ = game.addCiv()
         val transformedBaseUnit = game.createBaseUnit(
-            "Melee",
+            "Sword",
             "Can carry [2] [Aircraft] units"
         ).apply {
             movement = 2
@@ -271,7 +277,10 @@ class UnitUniquesTests {
         )
 
         // then
-        UniqueTriggerActivation.triggerUnique(merchantOfVenice.getUniques().first(), merchantOfVenice)
+        UniqueTriggerActivation.triggerUnique(
+            merchantOfVenice.getMatchingUniques(UniqueType.OneTimeUnitTakeOverCityState).first(),
+            merchantOfVenice
+        )
         Assert.assertTrue(cityStateCapital.civ == mainCiv)
     }
 }

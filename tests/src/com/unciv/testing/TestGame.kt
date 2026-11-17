@@ -294,7 +294,9 @@ class TestGame(vararg addGlobalUniques: String, forUITesting: Boolean = false) {
      *  - Use [createPolicyBranch] to create a wrapping branch and a consistent state that supports testing filters.
      */
     fun createPolicy(vararg uniques: String) =
-        createRulesetObject(ruleset.policies, *uniques) { Policy() }
+        createRulesetObject(ruleset.policies, *uniques) {
+            Policy().apply { requires = arrayListOf() }
+        }
 
     /**
      *  Creates a new PolicyBranch, optionally including [policy] as member Policy,
@@ -302,16 +304,23 @@ class TestGame(vararg addGlobalUniques: String, forUITesting: Boolean = false) {
      *  @see createPolicy
      */
     fun createPolicyBranch(vararg uniques: String, policy: Policy? = null): PolicyBranch {
-        val branch = createRulesetObject(ruleset.policyBranches, *uniques) { PolicyBranch() }
+        val branch = createRulesetObject(ruleset.policyBranches, *uniques) {
+            PolicyBranch().apply {
+                era = ruleset.eras.keys.firstOrNull() ?: ""
+                requires = arrayListOf()
+            }
+        }
         branch.branch = branch
         ruleset.policies[branch.name] = branch
         if (policy != null) {
             policy.branch = branch
+            if (policy.requires == null) policy.requires = arrayListOf()
             branch.policies.add(policy)
         }
         val complete = Policy()
         complete.name = branch.name + Policy.branchCompleteSuffix
         complete.branch = branch
+        complete.requires = arrayListOf()
         branch.policies.add(complete)
         ruleset.policies[complete.name] = complete
         return branch

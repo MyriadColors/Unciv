@@ -35,11 +35,11 @@ class TileFilterTests {
         runTestParcours("Tile matches filter", { test: String ->
             game.tileMap.tileList.count { it.matchesFilter(test, civ) }
         },
-            "All", 37,
-            "worked", 8,
-            "Coastal", 6,
+            "All", 49,
+            "worked", 9,
+            "Coastal", 10,
             "Coast", 2,
-            "Land", 35,
+            "Land", 47,
             "Farm", 0,
         )
     }

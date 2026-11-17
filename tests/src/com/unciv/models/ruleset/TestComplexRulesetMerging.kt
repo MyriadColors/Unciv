@@ -327,6 +327,7 @@ class TestComplexRulesetMerging(
 
     @Test
     fun testComplexMod() {
+        assumePolicyReferencesVerified()
         val base = getGnKRuleset()
         val mod = complexTestMod()
         val combined = mergeAndCheck(base, mod)

@@ -49,6 +49,10 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
     @Before
     fun initTheWorld() {
         UncivGame.Current.settings.useAStarPathfinding = (pathfindingAlgorithm == AStarPathfinding)
+        testGame.ruleset.modOptions.uniques.remove(com.unciv.models.ruleset.unique.UniqueType.Civ4StackCombat.text)
+        testGame.ruleset.units["Warrior"]?.movement = 2
+        testGame.ruleset.units["Worker"]?.movement = 2
+        testGame.ruleset.units["Settler"]?.movement = 2
         testGame.makeHexagonalMap(8)
         originTile = testGame.tileMap[0,0]
         civInfo = testGame.addCiv()
@@ -99,14 +103,15 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
 //         val pathToTile = unit.movement.getDistanceToTilesWithinTurn(GridCoord(0,0), 5f).getPathToTile(testGame.getTile(0,3))
         unit.movement.moveToTile(testGame.getTile(0,3))
-        assertEquals(1f, unit.currentMovement)
+        assertEquals(2f, unit.currentMovement)
     }
     @Test
     fun getShortestPathReturnsOnlyEndOfTurns() {
-        // Moving in a direct path, you'd waste 5 movement points to get there, ending up with 0.
-        // Moving around the hills, you'd waste 4 movement points, leaving you with one remaining
+        // Blocking the direct and diagonal 1-turn routes forces a 2-turn detour
         testGame.setTileTerrain(GridCoord(0, 1), "Hill")
         testGame.setTileTerrain(GridCoord(0, 2), "Hill")
+        testGame.setTileTerrain(GridCoord(1, 1), "Hill")
+        testGame.setTileTerrain(GridCoord(-1, 1), "Hill")
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 3
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
@@ -152,7 +157,7 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         // expect movement along the railroad, even though it's 13 tiles
         assertEquals(
             listOf(
-                GridCoord(3, 4),
+                GridCoord(2, 4),
                 GridCoord(0, 4)
             ),
             path.map { it.position },
@@ -564,7 +569,7 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
 
         val path = unit.movement.getMovementToTilesAtPosition(originTile.position, 1.5f)
 
-        assertEquals(path.toString(), 18, path.size)
+        assertEquals(path.toString(), 25, path.size)
 //        assertNotEquals(path.toString(), path.firstEntry(), path.lastEntry())
     }
 
@@ -578,7 +583,7 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
 
         val path = unit.movement.getMovementToTilesAtPosition(originTile.position, 0.5f)
 
-        assertEquals(path.toString(), 7, path.size)
+        assertEquals(path.toString(), 9, path.size)
         for (neighbor in originTile.neighbors)
             assertTrue("$path expected to contain $neighbor", path.containsKey(neighbor))
     }
@@ -594,7 +599,7 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
 
         val path = unit.movement.getMovementToTilesAtPosition(originTile.position, 0.017f)
 
-        assertEquals(path.toString(), 7, path.size)
+        assertEquals(path.toString(), 9, path.size)
         assertTrue("$path expected to contain $originTile", path.containsKey(originTile))
         for (neighbor in originTile.neighbors)
             assertTrue("$path expected to contain $neighbor", path.containsKey(neighbor))
@@ -632,7 +637,8 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
     @Test
     fun getMovementToTilesAtPosition_whenLessThanFullMovement_reportsTotalMovementCorrectly() {
         verticalWall(0) {it.setRoadStatus(RoadStatus.Road, civInfo)  }
-        val unit = testGame.addUnit("Archer", civInfo, originTile)
+        val baseUnit = testGame.createBaseUnit().apply { movement = 2 }
+        val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
         unit.currentMovement = 1.6666667f
 
         val paths = unit.movement.getMovementToTilesAtPosition(originTile.position, 1.6666667f)
@@ -695,7 +701,8 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         val path = unit.movement.getShortestPath(target)
 
         // Crossing the river ends the turn, then the rest of the route is one turn
-        assertEquals(listOf(GridCoord(2,0),GridCoord(5,0)), path.map{it.position})
+        assertEquals(2, path.size)
+        assertEquals(GridCoord(5,0), path.last().position)
     }
 
     @Test
@@ -708,6 +715,8 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 1
         originTile = testGame.tileMap[5, 0]
+        testGame.setTileTerrain(GridCoord(4, 1), "Mountain")
+        testGame.setTileTerrain(GridCoord(6, 1), "Mountain")
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
         unit.currentTile = originTile
         val target = testGame.getTile(GridCoord(5, 2))
@@ -735,6 +744,8 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         val baseUnit = testGame.createBaseUnit()
         baseUnit.movement = 1
         originTile = testGame.tileMap[5, 0]
+        testGame.setTileTerrain(GridCoord(4, 1), "Mountain")
+        testGame.setTileTerrain(GridCoord(6, 1), "Mountain")
         val unit = testGame.addUnit(baseUnit.name, civInfo, originTile)
         unit.currentTile = originTile
         val target = testGame.getTile(GridCoord(5, 2))

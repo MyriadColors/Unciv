@@ -53,6 +53,10 @@ class UnitMovementTests(private val pathfindingAlgorithm: PathfindingAlgorithm) 
     @Before
     fun initTheWorld() {
         UncivGame.Current.settings.useAStarPathfinding = (pathfindingAlgorithm == AStarPathfinding)
+        testGame.ruleset.modOptions.uniques.remove(UniqueType.Civ4StackCombat.text)
+        testGame.ruleset.units["Warrior"]?.movement = 2
+        testGame.ruleset.units["Worker"]?.movement = 2
+        testGame.ruleset.units["Settler"]?.movement = 2
         testGame.makeHexagonalMap(2)
         tile = testGame.tileMap[0,0]
         civInfo = testGame.addCiv()
@@ -137,6 +141,13 @@ class UnitMovementTests(private val pathfindingAlgorithm: PathfindingAlgorithm) 
 
     @Test
     fun canNOTEnterNaturalWonder() {
+        testGame.ruleset.terrains["Mount Fuji"] = com.unciv.models.ruleset.tile.Terrain().apply {
+            name = "Mount Fuji"
+            type = com.unciv.models.ruleset.tile.TerrainType.NaturalWonder
+            impassable = true
+            uniques.add("Impassable")
+            setTransients()
+        }
         tile.baseTerrain = Constants.plains
         tile.naturalWonder = "Mount Fuji"
         tile.setTransients()
@@ -609,6 +620,7 @@ class UnitMovementTests(private val pathfindingAlgorithm: PathfindingAlgorithm) 
         carrier.health = 30
         val payload = listOf(
             testGame.addUnit("Fighter", civInfo, water),
+            testGame.addUnit("Fighter", civInfo, water),
             testGame.addUnit("Fighter", civInfo, water)
         )
         val idsBefore = civInfo.units.getCivUnits().map { it.id }.sorted().toList()
@@ -661,6 +673,7 @@ class UnitMovementTests(private val pathfindingAlgorithm: PathfindingAlgorithm) 
         }
         val carrier = testGame.addUnit("Carrier", civInfo, water)
         val payload = listOf(
+            testGame.addUnit("Fighter", civInfo, water),
             testGame.addUnit("Fighter", civInfo, water),
             testGame.addUnit("Fighter", civInfo, water)
         )

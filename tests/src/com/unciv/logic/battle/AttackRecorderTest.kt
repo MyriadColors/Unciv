@@ -240,14 +240,16 @@ class AttackRecorderTest {
         val recorder = recorder()
         dealDamage(recorder, attacker, 4)
 
-        attacker.upgrade.performUpgrade(attacker.upgrade.getUpgrades().first { it.upgradedUnit.name == "Composite Bowman" }, isFree = true)
+        attackingCiv.tech.addTechnology("Archery", showNotification = false)
+        attackingCiv.tech.addTechnology("Feudalism", showNotification = false)
+        attacker.upgrade.performUpgrade(attacker.upgrade.getUpgrades().first { it.upgradedUnit.name == "Longbowman" }, isFree = true)
         val successor = attackingCiv.units.getUnitById(attacker.id)!!
-        successor.instanceName = "New composite bowmen"
+        successor.instanceName = "New longbowmen"
         successor.takeDamage(9) // No callback replaces the recorder's old unit reference.
         val record = recorder.finishForTesting().attacker!!
 
         assertNotSame(attacker, successor)
-        assertEquals("Composite Bowman", successor.name)
+        assertEquals("Longbowman", successor.name)
         assertEquals(attacker.id, record.unitID)
         assertEquals("Archer", record.name)
         assertEquals("Original archers", record.instanceName)

@@ -115,7 +115,7 @@ class CityMovingTests {
     fun moveTheirCityToUsWhenTheyHaveResources() {
         val theirCapital = testGame.addCity(enemy, testGame.tileMap[2,0])
 
-        theirCapital.getCenterTile().setTileResource("Salt")
+        theirCapital.getCenterTile().setTileResource("Silver")
         theirCapital.getCenterTile().resourceAmount = 1
 
         val resourceTile = testGame.tileMap[0,1]
@@ -127,7 +127,7 @@ class CityMovingTests {
         theirCapital.moveToCiv(civInfo)
         Assert.assertTrue(theirCapital.isCapital())
         Assert.assertTrue(theirCapital.civ == civInfo)
-        Assert.assertTrue(civInfo.hasResource("Salt"))
+        Assert.assertTrue(civInfo.hasResource("Silver"))
         Assert.assertEquals(civInfo.getResourceAmount("Iron"), 3)
     }
 }

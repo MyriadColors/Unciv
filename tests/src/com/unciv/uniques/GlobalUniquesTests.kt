@@ -225,10 +225,14 @@ class GlobalUniquesTests {
     fun statsFromPolicies() {
         game.makeHexagonalMap(3)
         val civInfo = game.addCiv("[+30 Science] per [2] social policies adopted")
-        val policiesToAdopt = listOf("Tradition", "Aristocracy", "Legalism")
+        val branch = game.createPolicyBranch()
+        val policiesToAdopt = listOf(
+            game.createPolicy().apply { this.branch = branch },
+            game.createPolicy().apply { this.branch = branch },
+            game.createPolicy().apply { this.branch = branch }
+        )
         civInfo.policies.freePolicies = 3
-        for (policyName in policiesToAdopt) {
-            val policy = game.ruleset.policies[policyName]!!
+        for (policy in policiesToAdopt) {
             civInfo.policies.adopt(policy)
         }
         Assert.assertTrue(civInfo.stats.getStatMapForNextTurn()["Policies"]!!.science == 30f)
@@ -241,18 +245,23 @@ class GlobalUniquesTests {
         val city = game.addCity(civ, tile, true)
 
         // Policy
-        Assert.assertFalse(civ.policies.isAdopted("Legalism"))
-        city.cityConstructions.addBuilding(game.createBuilding("Adopt [Legalism]"))
-        Assert.assertTrue(civ.policies.isAdopted("Legalism"))
+        val policy = game.createPolicy()
+        game.createPolicyBranch(policy = policy)
+        Assert.assertFalse(civ.policies.isAdopted(policy.name))
+        city.cityConstructions.addBuilding(game.createBuilding("Adopt [${policy.name}]"))
+        Assert.assertTrue(civ.policies.isAdopted(policy.name))
 
-        // Belief
-        Assert.assertFalse(civ.religionManager.religion?.hasBelief("Dance of the Aurora") ?: false)
-        city.cityConstructions.addBuilding(game.createBuilding("Adopt [Dance of the Aurora]")) // Expected to not work, since we require a Religion
-        Assert.assertFalse(civ.religionManager.religion?.hasBelief("Dance of the Aurora") ?: false)
-        game.addReligion(civ) // With the Religion, we should be able to adopt the belief
-        Assert.assertFalse(civ.religionManager.religion?.hasBelief("Dance of the Aurora") ?: false)
-        city.cityConstructions.addBuilding(game.createBuilding("Adopt [Dance of the Aurora]"))
-        Assert.assertTrue(civ.religionManager.religion?.hasBelief("Dance of the Aurora") ?: false)
+        // Belief (Civ V only; BasicSquare uses Civ IV state religions with no beliefs)
+        if (civ.gameInfo.ruleset.beliefs.isNotEmpty()) {
+            val belief = game.createBelief()
+            Assert.assertFalse(civ.religionManager.religion?.hasBelief(belief.name) ?: false)
+            city.cityConstructions.addBuilding(game.createBuilding("Adopt [${belief.name}]")) // Expected to not work, since we require a Religion
+            Assert.assertFalse(civ.religionManager.religion?.hasBelief(belief.name) ?: false)
+            game.addReligion(civ) // With the Religion, we should be able to adopt the belief
+            Assert.assertFalse(civ.religionManager.religion?.hasBelief(belief.name) ?: false)
+            city.cityConstructions.addBuilding(game.createBuilding("Adopt [${belief.name}]"))
+            Assert.assertTrue(civ.religionManager.religion?.hasBelief(belief.name) ?: false)
+        }
     }
 
     @Test
@@ -457,6 +466,7 @@ class GlobalUniquesTests {
     fun nullifiesStat() {
         game.makeHexagonalMap(1)
         val civInfo = game.addCiv()
+        civInfo.tech.goldPercentConvertedToScience = 0f
         val tile = game.getTile(GridCoord.Zero)
         val city = game.addCity(civInfo, tile, true, 1)
 
@@ -471,6 +481,7 @@ class GlobalUniquesTests {
     fun nullifiesGrowth() {
         game.makeHexagonalMap(1)
         val civInfo = game.addCiv()
+        civInfo.tech.goldPercentConvertedToScience = 0f
         val tile = game.getTile(GridCoord.Zero)
         val city = game.addCity(civInfo, tile, true, 1)
 
@@ -563,6 +574,8 @@ class GlobalUniquesTests {
     fun growthPercentBonusTest() {
         val civInfo = game.addCiv()
         val city = game.addCity(civInfo, game.getTile(GridCoord.Zero), true)
+        // Offset Civ IV CityHealthMode unhealthiness so net food is purely 2 (center) - 2 (pop) = 0
+        city.cityConstructions.addBuilding(game.createBuilding("[+5] Health"))
         // City has 2 food from center -2 from pop, so total of 0
         val building = game.createBuilding("[+100]% growth [in all cities]", "[+2 Food]")
         city.cityConstructions.addBuilding(building)
@@ -609,7 +622,7 @@ class GlobalUniquesTests {
 
         city.cityStats.update()
         println(city.cityStats.happinessList)
-        Assert.assertTrue(abs(city.cityStats.happinessList["Cities"]!! - -6f) < epsilon) // Float rounding errors
+        Assert.assertTrue(abs(city.cityStats.happinessList["Cities"]!! - -1.5f) < epsilon) // Float rounding errors
     }
 
     @Test
@@ -619,7 +632,7 @@ class GlobalUniquesTests {
 
         city.cityStats.update()
         println(city.cityStats.happinessList)
-        Assert.assertTrue(abs(city.cityStats.happinessList["Population"]!! - -2f) < epsilon)
+        Assert.assertTrue(abs(city.cityStats.happinessList["Population"]!! - -0.5f) < epsilon)
 
         val building = game.createBuilding("[-50]% Unhappiness from [Specialists] [in all cities]")
         val specialist = game.createSpecialist()
@@ -629,7 +642,7 @@ class GlobalUniquesTests {
 
         city.cityStats.update()
         println(city.cityStats.happinessList)
-        Assert.assertTrue(abs(city.cityStats.happinessList["Population"]!! - -1f) < epsilon)
+        Assert.assertTrue(abs(city.cityStats.happinessList["Population"]!! - -0.25f) < epsilon)
     }
 
 
@@ -647,19 +660,19 @@ class GlobalUniquesTests {
             "<on [Settler] difficulty>" to 0,
             "<on [Chieftain] difficulty>" to 0,
             "<on [Prince] difficulty>" to 1, // TestGame is Prince
-            "<on [King] difficulty>" to 0,
+            "<on [Monarch] difficulty>" to 0,
             "<on [Emperor] difficulty>" to 0,
             "<on [Settler] difficulty or higher>" to 1,
             "<on [Chieftain] difficulty or higher>" to 1,
             "<on [Prince] difficulty or higher>" to 1,
-            "<on [King] difficulty or higher>" to 0,
+            "<on [Monarch] difficulty or higher>" to 0,
             "<on [Emperor] difficulty or higher>" to 0,
             "<on [Immortal] difficulty or higher>" to 0,
             "<on [Deity] difficulty or higher>" to 0,
             "<on [Settler] difficulty or lower>" to 0,
             "<on [Chieftain] difficulty or lower>" to 0,
             "<on [Prince] difficulty or lower>" to 1,
-            "<on [King] difficulty or lower>" to 1,
+            "<on [Monarch] difficulty or lower>" to 1,
             "<on [Emperor] difficulty or lower>" to 1,
             "<on [Immortal] difficulty or lower>" to 1,
             "<on [Deity] difficulty or lower>" to 1,
@@ -681,25 +694,33 @@ class GlobalUniquesTests {
     fun conditionalFirstCivToAdopt() {
         val civInfo = game.addCiv()
         val city = game.addCity(civInfo, game.getTile(GridCoord.Zero), true)
+        val adoptedPolicy = game.createPolicy()
+        val unadoptedPolicy = game.createPolicy()
+        game.createPolicyBranch(policy = adoptedPolicy)
+        game.createPolicyBranch(policy = unadoptedPolicy)
+        val adoptedBelief = game.createBelief()
+        val unadoptedBelief = game.createBelief()
         // Policy
         civInfo.policies.run {
             freePolicies++
-            adopt(getPolicyByName("Tradition"))
+            adopt(adoptedPolicy)
         }
         // Belief
         game.addReligion(civInfo)
         civInfo.religionManager.religion?.run {
-            addBelief("Ancestor Worship")
+            addBelief(adoptedBelief.name)
             addBelief("Not A Belief")
         }
-        val tests = listOf(
-            "<if no Civilization has adopted [Oligarchy]>" to 1,
-            "<if no Civilization has adopted [Tradition]>" to 0,
-            "<if no Civilization has adopted [God of Craftsmen]>" to 1,
-            "<if no Civilization has adopted [Not A Policy]>" to 1,
-            "<if no Civilization has adopted [Ancestor Worship]>" to 0,
-            "<if no Civilization has adopted [Not A Belief]>" to 1,
-        )
+        val tests = buildList {
+            add("<if no Civilization has adopted [${unadoptedPolicy.name}]>" to 1)
+            add("<if no Civilization has adopted [${adoptedPolicy.name}]>" to 0)
+            add("<if no Civilization has adopted [Not A Policy]>" to 1)
+            if (!civInfo.gameInfo.ruleset.modOptions.uniques.contains("Uses Civ IV Religion")) {
+                add("<if no Civilization has adopted [${unadoptedBelief.name}]>" to 1)
+                add("<if no Civilization has adopted [${adoptedBelief.name}]>" to 0)
+                add("<if no Civilization has adopted [Not A Belief]>" to 1)
+            }
+        }
         Assert.assertEquals(civInfo.gold, 0)
         for ((test, expected) in tests) {
             val building = game.createBuilding("Gain [1] [Gold] $test")
@@ -736,10 +757,10 @@ class GlobalUniquesTests {
         val civInfo = game.addCiv()
         val tile = game.getTile(GridCoord.Zero)
         val city = game.addCity(civInfo, tile, true)
-        Assert.assertEquals(7, city.getTiles().count())
+        Assert.assertEquals(9, city.getTiles().count())
         val building = game.createBuilding("Gain control over [8] tiles [in this city]")
         city.cityConstructions.addBuilding(building)
-        Assert.assertEquals(15, city.getTiles().count())
+        Assert.assertEquals(17, city.getTiles().count())
     }
 
     // endregion
@@ -774,6 +795,14 @@ class GlobalUniquesTests {
         UniqueTriggerActivation.triggerUnique(revealEntireMapUnique, civ)
 
     private fun placeNaturalWonder(position: GridCoord, wonderName: String): Tile {
+        if (game.ruleset.terrains[wonderName] == null) {
+            game.ruleset.terrains[wonderName] = com.unciv.models.ruleset.tile.Terrain().apply {
+                name = wonderName
+                type = com.unciv.models.ruleset.tile.TerrainType.NaturalWonder
+                uniques.add("Impassable")
+                setTransients()
+            }
+        }
         val tile = game.getTile(position)
         tile.naturalWonder = wonderName
         tile.setTerrainTransients()
@@ -995,8 +1024,8 @@ class GlobalUniquesTests {
             "Gain [5] Influence per turn with City-States you could demand tribute from"
         )
 
-        game.addUnit("Giant Death Robot", normalCiv, game.getTile(-2, 0))
-        game.addUnit("Giant Death Robot", bullyCiv, game.getTile(2, 0))
+        game.addUnit("Modern Armor", normalCiv, game.getTile(-2, 0))
+        game.addUnit("Modern Armor", bullyCiv, game.getTile(2, 0))
 
         val normalDM = cityState.getDiplomacyManager(normalCiv)
         val bullyDM = cityState.getDiplomacyManager(bullyCiv)

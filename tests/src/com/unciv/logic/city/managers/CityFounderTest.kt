@@ -144,7 +144,7 @@ class CityFounderTest {
 
         // then
         assertFalse(city.isWorked(city.getCenterTile())) // no pop required
-        assertEquals(2.0f, city.cityStats.statsFromTiles.production)
+        assertEquals(1.0f, city.cityStats.statsFromTiles.production)
     }
 
     @Test
@@ -162,7 +162,7 @@ class CityFounderTest {
         val city = cityFounder.foundCity(civ, GridCoord.Zero)
 
         // then
-        assertEquals(7, city.tiles.size) // 6 surrounding + 1 due to city center itself
+        assertEquals(9, city.tiles.size) // 8 surrounding + 1 due to city center itself
     }
 
     @Test

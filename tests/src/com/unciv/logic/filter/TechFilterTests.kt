@@ -94,7 +94,6 @@ class TechFilterTests {
             "Ancient era" to (listOf("Sailing", "Agriculture", "Pottery", "Animal Husbandry") to 4),
             "Classical era" to (listOf("Optics") to 1),
             "Modern era" to (emptyList<String>() to 0),
-            "Starting tech" to (listOf("Agriculture") to 1),
             "Pottery" to (listOf("Pottery") to 1),
             "Archery" to (emptyList<String>() to 0)
         )

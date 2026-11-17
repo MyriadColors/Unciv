@@ -76,13 +76,13 @@ class AttackEventTest {
         assertTrue(attackingCiv.civID in undetected.civIdsKnowingAttackSource)
 
         testGame.addDefaultMeleeUnitWithUniques(defendingCiv, testGame.getTile(-1, 0),
-            "Can see invisible [Melee] units")
+            "Can see invisible [Sword] units")
         defendingCiv.viewableTiles = setOf(source, target)
         val wrongDetector = AttackEvent(MapUnitCombatant(attacker), target)
         assertFalse(defendingCiv.civID in wrongDetector.civIdsKnowingAttackSource)
 
         testGame.addDefaultMeleeUnitWithUniques(defendingCiv, testGame.getTile(0, 1),
-            "Can see invisible [Ranged] units")
+            "Can see invisible [Archery] units")
         defendingCiv.viewableTiles = setOf(source, target)
         val detected = AttackEvent(MapUnitCombatant(attacker), target)
         assertTrue(defendingCiv.civID in detected.civIdsKnowingAttackSource)

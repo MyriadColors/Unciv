@@ -41,6 +41,41 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
     @Before
     fun setUp() {
         UncivGame.Current.settings.useAStarPathfinding = (pathfindingAlgorithm == AStarPathfinding)
+        testGame.ruleset.modOptions.uniques.remove(UniqueType.Civ4StackCombat.text)
+        testGame.ruleset.modOptions.uniques.remove(UniqueType.AllowRazeCapital.text)
+        testGame.ruleset.units["Nuclear Missile"]?.apply {
+            uniques.remove("Blast radius [12]")
+            uniques.add("Blast radius [2]")
+        }
+        testGame.ruleset.units["Warrior"] = com.unciv.models.ruleset.unit.BaseUnit().apply {
+            name = "Warrior"
+            unitType = "Sword"
+            strength = 8
+            movement = 2
+            cost = 15
+            setRuleset(testGame.ruleset)
+        }
+        testGame.ruleset.units["Archer"] = com.unciv.models.ruleset.unit.BaseUnit().apply {
+            name = "Archer"
+            unitType = "Archery"
+            strength = 5
+            rangedStrength = 7
+            range = 2
+            movement = 2
+            cost = 25
+            setRuleset(testGame.ruleset)
+        }
+        testGame.ruleset.units["Atomic Bomb"] = com.unciv.models.ruleset.unit.BaseUnit().apply {
+            name = "Atomic Bomb"
+            unitType = "Missile"
+            range = 10
+            rangedStrength = 100
+            movement = 2
+            uniques.add("Nuclear weapon of Strength [1]")
+            uniques.add("Blast radius [2]")
+            uniques.add("Self-destructs when attacking")
+            setRuleset(testGame.ruleset)
+        }
         testGame.makeHexagonalMap(4)
         attackerCiv = testGame.addCiv()
         defenderCiv = testGame.addCiv()
@@ -135,7 +170,7 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
     fun `should earn XP when fighting barbarian and below XP cap`() {
         // given
         val barbarianCiv = testGame.addBarbarianCiv()
-        val barbarianUnit = testGame.addUnit("Brute", barbarianCiv, testGame.getTile(0,1))
+        val barbarianUnit = testGame.addUnit("Warrior", barbarianCiv, testGame.getTile(0,1))
 
         // when
         Battle.attack(MapUnitCombatant(barbarianUnit), MapUnitCombatant(defaultDefenderUnit))
@@ -149,7 +184,7 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
     fun `should not earn XP when fighting barbarian if exceeding XP cap`() {
         // given
         val barbarianCiv = testGame.addBarbarianCiv()
-        val barbarianUnit = testGame.addUnit("Brute", barbarianCiv, testGame.getTile(0,1))
+        val barbarianUnit = testGame.addUnit("Warrior", barbarianCiv, testGame.getTile(0,1))
         defaultDefenderUnit.promotions.XP = 35
 
         // when
@@ -240,7 +275,7 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
     fun `should not earn Great General from combat against barbarians`() {
         // given
         val barbarianCiv = testGame.addBarbarianCiv()
-        val barbarianUnit = testGame.addUnit("Brute", barbarianCiv, testGame.getTile(0,1))
+        val barbarianUnit = testGame.addUnit("Warrior", barbarianCiv, testGame.getTile(0,1))
 
         // when
         Battle.attack(MapUnitCombatant(defaultAttackerUnit), MapUnitCombatant(barbarianUnit))
@@ -386,6 +421,7 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         // given
         val thirdCiv = testGame.addCiv()
         testGame.addUnit("Warrior", thirdCiv, testGame.getTile(0,-3))  // need unit or civ is considered defeated
+        testGame.addUnit("Warrior", defenderCiv, testGame.getTile(0,-2))  // keep defenderCiv alive to receive nuke diplomacy modifier
 
         testGame.addCity(attackerCiv, testGame.getTile(0,1))
         val attackerUnit = testGame.addUnit("Atomic Bomb", attackerCiv, testGame.getTile(0,1))
@@ -425,8 +461,8 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         val thirdCivUnit = testGame.addUnit("Warrior", thirdCiv, testGame.getTile(0,2))
         val defenderUnit = testGame.addUnit("Warrior", defenderCiv, testGame.getTile(0,1))
 
-        testGame.addCity(attackerCiv, testGame.getTile(0,1))
-        val attackerUnit = testGame.addUnit("Atomic Bomb", attackerCiv, testGame.getTile(0,1))
+        testGame.addCity(attackerCiv, testGame.getTile(-2,0))
+        val attackerUnit = testGame.addUnit("Atomic Bomb", attackerCiv, testGame.getTile(-2,0))
 
         // when
         Battle.attackOrNuke(MapUnitCombatant(attackerUnit), AttackableTile(attackerUnit.getTile(), defaultDefenderUnit.currentTile, 0f, null))
@@ -571,7 +607,7 @@ class BattleTest(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         val attackerUnit = testGame.addDefaultMeleeUnitWithUniques(attackerCiv, testGame.getTile(0,1), "Before engaging in combat performs an extra ranged attack with [50]% of melee combat strength")
         attackerUnit.promotions.XP = 28
         val barbarianCiv = testGame.addBarbarianCiv()
-        val barbarianUnit = testGame.addUnit("Brute", barbarianCiv, testGame.getTile(0,2))
+        val barbarianUnit = testGame.addUnit("Warrior", barbarianCiv, testGame.getTile(0,2))
 
         // when
         val damageDealt = Battle.attack(MapUnitCombatant(attackerUnit), MapUnitCombatant(barbarianUnit))

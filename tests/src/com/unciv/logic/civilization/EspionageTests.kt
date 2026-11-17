@@ -37,7 +37,8 @@ class EspionageTests {
         val city = civB.addCity(GridCoord(1,1))
         spy.moveTo(city)
         assertEquals(1.0, spy.getEfficiencyModifier(), 0.1)
-        city.cityConstructions.addBuilding("Constabulary")
+        val constabulary = testGame.createBuilding("[-25]% enemy spy effectiveness [in this city]")
+        city.cityConstructions.addBuilding(constabulary)
         assertEquals(0.75, spy.getEfficiencyModifier(), 0.1)
     }
 
@@ -47,10 +48,9 @@ class EspionageTests {
         val spy = espionageManagerA.addSpy()
         val city = civB.addCity(GridCoord(1,1))
         spy.moveTo(city)
-        city.cityConstructions.addBuilding("Constabulary")
-        city.cityConstructions.addBuilding("Police Station")
-        city.cityConstructions.addBuilding("National Intelligence Agency")
-        city.cityConstructions.addBuilding("Great Firewall")
+        repeat(5) {
+            city.cityConstructions.addBuilding(testGame.createBuilding("[-25]% enemy spy effectiveness [in this city]"))
+        }
         assertTrue(spy.getEfficiencyModifier() >= 0)
     }
 

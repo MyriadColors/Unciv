@@ -201,7 +201,7 @@ class ResourceTests {
         city.cityConstructions.addBuilding("Monument")
         val building = game.createBuilding("[300]% of [Culture] from every [Monument] in the city added to [Iron]")
         city.cityConstructions.addBuilding(building)
-        assertEquals(6, city.getAvailableResourceAmount("Iron")) // 2 Culture * 3
+        assertEquals(3, city.getAvailableResourceAmount("Iron")) // 1 Culture * 3
     }
 
     @Test
@@ -219,7 +219,8 @@ class ResourceTests {
     @Test
     fun `should reduce resources due to buildings`() {
         // given
-        city.cityConstructions.addBuilding("Factory")
+        val coalBuilding = game.createBuilding().apply { requiredResource = "Coal" }
+        city.cityConstructions.addBuilding(coalBuilding)
 
         // when
         val resources = civInfo.detailedCivResources

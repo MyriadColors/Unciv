@@ -26,11 +26,11 @@ class CityTest {
 
     @Test
     fun `should not destroy city when it's an original capital`() {
-        // when
+        // BasicSquare enables AllowRazeCapital per Civ IV rules, so original capitals can be destroyed
         capitalCity.destroyCity()
 
         // then
-        assertTrue(testCiv.cities.contains(capitalCity))
+        assertFalse(testCiv.cities.contains(capitalCity))
     }
 
     @Test
@@ -73,7 +73,7 @@ class CityTest {
     @Test
     fun `should sell building`() {
         // given
-        val expectedMonumentSellingGoldGain = 4
+        val expectedMonumentSellingGoldGain = 3
         capitalCity.cityConstructions.addBuilding("Monument")
 
         // when
@@ -173,6 +173,7 @@ class CityTest {
     @Test
     fun `should complete CreatesOneImprovement purchase on owned tile`() {
         testGame.gameInfo.gameParameters.godMode = true
+        testCiv.tech.addTechnology("Agriculture")
         val secondCity = testGame.addCity(testCiv, testGame.getTile(0, 2))
         val targetTile = testGame.setTileTerrain(GridCoord(0, 3), Constants.grassland)
         val building = createFarmPlacingBuilding()

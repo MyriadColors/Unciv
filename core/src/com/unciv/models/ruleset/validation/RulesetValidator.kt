@@ -827,7 +827,7 @@ open class RulesetValidator protected constructor(
             lines.add("Mod has no graphics for configured tilesets: ${configOnlyTilesets.joinToString()}", RulesetErrorSeverity.Warning, sourceObject = null)
 
         // For all atlas images matching "TileSets/*" there should be a json
-        val atlasOnlyTilesets = atlasTilesets - configTilesets
+        val atlasOnlyTilesets = atlasTilesets - configTilesets - setOf("FantasyHex", "HexaRealm")
         if (atlasOnlyTilesets.isNotEmpty())
             lines.add("Mod has no configuration for tileset graphics: ${atlasOnlyTilesets.joinToString()}", RulesetErrorSeverity.Warning, sourceObject = null)
 

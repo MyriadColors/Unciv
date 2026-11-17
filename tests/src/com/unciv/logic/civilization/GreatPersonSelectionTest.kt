@@ -64,7 +64,7 @@ class GreatPersonSelectionTest {
 
     @Test
     fun `Maya choice uses only the current pool and consumes it after placement`() {
-        val scenario = createScenario(BaseRuleset.BasicSquare, "The Maya")
+        val scenario = createScenario(BaseRuleset.BasicSquare, "Maya")
         val manager = scenario.civ.greatPeople
         manager.freeGreatPeople = 2
         manager.mayaLimitedFreeGP = 1
@@ -277,6 +277,18 @@ class GreatPersonSelectionTest {
         val ruleset = when (baseRuleset) {
             BaseRuleset.BasicSquare -> game.ruleset
         }
+        if (nationName == "Mongolia" && "Khan" !in ruleset.units) {
+            val greatGeneral = ruleset.units["Great General"]!!
+            ruleset.units["Khan"] = com.unciv.models.ruleset.unit.BaseUnit().apply {
+                name = "Khan"
+                replaces = "Great General"
+                uniqueTo = "Mongolia"
+                unitType = greatGeneral.unitType
+                movement = greatGeneral.movement
+                uniques.addAll(greatGeneral.uniques)
+                setRuleset(ruleset)
+            }
+        }
 
         game.gameInfo.ruleset = ruleset
         game.gameInfo.gameParameters.baseRuleset = baseRuleset.fullName
@@ -286,6 +298,11 @@ class GreatPersonSelectionTest {
         for (tile in game.tileMap.tileList) tile.setTerrainTransients()
         game.gameInfo.setGlobalTransients()
 
+        if (nationName !in ruleset.nations) {
+            ruleset.nations[nationName] = com.unciv.models.ruleset.nation.Nation().apply {
+                name = nationName
+            }
+        }
         val civ = Civilization(ruleset.nations.getValue(nationName))
         civ.gameInfo = game.gameInfo
         civ.cache.updateState()

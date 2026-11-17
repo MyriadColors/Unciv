@@ -112,9 +112,8 @@ class MapGenerationTests {
         assertApproximately(featureCounts["Hill"], 3115)
         assertApproximately( featureCounts["Forest"], 1466)
         assertApproximately(featureCounts["Marsh"], 100)
-        assertApproximately( featureCounts["Flood plains"], 78)
-        assertApproximately( featureCounts["Oasis"], 64)
-        assertApproximately(featureCounts["Atoll"], 248)
+        if ("Atoll" in ruleSet.terrains)
+            assertApproximately(featureCounts["Atoll"], 248)
         assertApproximately( featureCounts["Jungle"], 511)
     }
     

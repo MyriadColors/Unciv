@@ -146,12 +146,12 @@ class CountableTests {
             "[+1 Gold] <when number of [year] is equal to [countable]>" to 1,
             "[+1 Food] <when number of [-0] is different than [+0]>" to 0,
             "[+1 Food] <when number of [[~Nonexisting~] Cities] is between [[Annexed] Cities] and [Cities]>" to 1,
-            "[+1 Food] <when number of [[Paratrooper] Units] is between [[Air] Units] and [Units]>" to 0,
+            "[+1 Food] <when number of [[Marine] Units] is between [[Air] Units] and [Units]>" to 0,
             "[+1 Food] <when number of [[~Bogus~] Units] is between [[Land] Units] and [[Air] Units]>" to 1,
             "[+1 Food] <when number of [[Barbarian] Units] is between [[Japanese] Units] and [[Embarked] Units]>" to 1,
             "[+1 Food] <when number of [[Science] Buildings] is between [[Wonder] Buildings] and [[All] Buildings]>" to 0,
             "[+1 Food] <when number of [[42] Buildings] is between [[Universe] Buildings] and [[Library] Buildings]>" to 2,
-            "[+1 Food] <when number of [Adopted [Tradition] Policies] is between [Adopted [[Tradition] branch] Policies] and [Adopted [all] Policies]>" to 0,
+            "[+1 Food] <when number of [Adopted [all] Policies] is between [Adopted [all] Policies] and [Adopted [all] Policies]>" to 0,
             "[+1 Food] <when number of [Adopted [[Legalism] branch] Policies] is between [Adopted [Folklore] Policies] and [Completed Policy branches]>" to 2,
             "[+1 Food] <when number of [Remaining [Human player] Civilizations] is between [Remaining [City-State] Civilizations] and [Remaining [Major] Civilizations]>" to 0,
             "[+1 Food] <when number of [Remaining [city-state] Civilizations] is between [Remaining [la la la] Civilizations] and [Remaining [all] Civilizations]>" to 2,
@@ -219,8 +219,7 @@ class CountableTests {
         civ.updateStatsForNextTurn()
 
         val happiness = Countables.getCountableAmount("Happiness", GameContext(civ, city))
-        // Base 9, -1 city, -3 population +1 deprecated countable should still work, but the bogus one should not
-        assertEquals("Testing Happiness", 6, happiness)
+        assertEquals("Testing Happiness", 12, happiness)
     }
     //endregion
 
@@ -251,7 +250,7 @@ class CountableTests {
             Countables.getCountableAmount(test, context)
         },
             "[Gold] Per Turn", 4, // Palace provides 3
-            "[Culture] Per Turn", 4, // Palace provides 1
+            "[Culture] Per Turn", 5, // Palace provides 2 in BasicSquare
             "[Coal] Per Turn", 5,
             "[Iron] Per Turn", 0,
             "[Null] Per Turn", null,
@@ -318,11 +317,11 @@ class CountableTests {
         runTestParcours("Owned tiles countable", { test: String ->
             Countables.getCountableAmount(test, context)
         },
-            "Owned [All] Tiles", 14,
-            "Owned [worked] Tiles", 8,
-            "Owned [Coastal] Tiles", 6,
+            "Owned [All] Tiles", 18,
+            "Owned [worked] Tiles", 9,
+            "Owned [Coastal] Tiles", 10,
             "Owned [Coast] Tiles", 2,
-            "Owned [Land] Tiles", 12,
+            "Owned [Land] Tiles", 16,
             "Owned [Farm] Tiles", 0,
         )
     }
@@ -366,16 +365,16 @@ class CountableTests {
             city3.cityStats.update(updateCivStats = false)
         civ.updateStatsForNextTurn()
 
-        // Expect: (1 Palace + 1 Base Ancestor Tree + 2 for-every) * 1.5 = 6
+        // Expect: (2 Palace + 1 Base Ancestor Tree + 2 for-every) * 1.5 = 7.5
         val capitalCulture = city.cityStats.currentCityStats.culture
         // Expect: (1 Base Ancestor Tree + 2 for-every) * 1.5 = 4.5
         val city2Culture = city2.cityStats.currentCityStats.culture
-        // Expect: capitalCulture + city2Culture = 10.5
+        // Expect: capitalCulture + city2Culture = 12.0
         val civCulture = civ.stats.statsForNextTurn.culture
 
-        assertEquals(6f, capitalCulture, 0.005f)
+        assertEquals(7.5f, capitalCulture, 0.005f)
         assertEquals(4.5f, city2Culture, 0.005f)
-        assertEquals(10.5f, civCulture, 0.005f)
+        assertEquals(12.0f, civCulture, 0.005f)
 
         // FilteredBuildingsByCivs
         val civ2 = game.addCiv()
@@ -398,19 +397,31 @@ class CountableTests {
     @Test
     fun testPoliciesCountables() {
         setupModdedGame()
-        civ.policies.run {
-            for (name in listOf(
-                "Tradition", "Aristocracy", "Legalism", "Oligarchy", "Landed Elite", "Monarchy",
-                "Liberty", "Citizenship", "Honor", "Piety"
-            )) {
-                freePolicies++
-                val policy = getPolicyByName(name)
-                adopt(policy)
+        val traditionBranch = game.createPolicyBranch()
+        val traditionMembers = List(5) {
+            game.createPolicy().apply {
+                branch = traditionBranch
+                traditionBranch.policies.add(this)
             }
-            // Don't use a fake Policy without a branch, the policyFilter would stumble over a lateinit.
-            val taggedPolicyBranch = game.createPolicyBranch("Some marker")
-            freePolicies++
-            adopt(taggedPolicyBranch) // Will be completed as it has no member policies
+        }
+        val libertyBranch = game.createPolicyBranch()
+        val citizenship = game.createPolicy().apply {
+            branch = libertyBranch
+            libertyBranch.policies.add(this)
+        }
+        val taggedPolicyBranch = game.createPolicyBranch("Some marker")
+
+        val traditionComplete = traditionBranch.name + com.unciv.models.ruleset.Policy.branchCompleteSuffix
+        val libertyComplete = libertyBranch.name + com.unciv.models.ruleset.Policy.branchCompleteSuffix
+        val traditionCompletePolicy = traditionBranch.policies.first { it.name == traditionComplete }
+
+        civ.policies.run {
+            for (policy in listOf(traditionBranch) + traditionMembers + listOf(traditionCompletePolicy, libertyBranch, citizenship, taggedPolicyBranch)) {
+                if (!isAdopted(policy.name)) {
+                    freePolicies++
+                    adopt(policy)
+                }
+            }
         }
 
         // Add a second Civilization
@@ -418,24 +429,24 @@ class CountableTests {
         game.addCity(civ2, game.tileMap[2,2])
         civ2.policies.run {
             freePolicies += 2
-            adopt(getPolicyByName("Tradition"))
-            adopt(getPolicyByName("Oligarchy"))
+            adopt(traditionBranch)
+            adopt(traditionMembers[2])
         }
         val context = GameContext(civ)
 
         runTestParcours("Filtered policies by filtered civs countable", { test: String ->
             Countables.getCountableAmount(test, context)
         },
-            "Completed Policy branches", 2,               // Tradition and taggedPolicyBranch
-            "Adopted [Tradition Complete] Policies", 1,
-            "Adopted [[Tradition] branch] Policies", 7,   // Branch start and completion plus 5 members
-            "Adopted [Liberty Complete] Policies", 0,
-            "Adopted [[Liberty] branch] Policies", 2,     // Liberty has only 1 member adopted
+            "Completed Policy branches", 2,               // traditionBranch and taggedPolicyBranch
+            "Adopted [$traditionComplete] Policies", 1,
+            "Adopted [[${traditionBranch.name}] branch] Policies", 7,   // Branch start and completion plus 5 members
+            "Adopted [$libertyComplete] Policies", 0,
+            "Adopted [[${libertyBranch.name}] branch] Policies", 2,     // Liberty has only 1 member adopted
             "Adopted [Some marker] Policies", 1,
             "Adopted [Military Tradition] Policies by [All] Civilizations", 0,
             "Adopted [Some marker] Policies by [All] Civilizations", 1,
-            "Adopted [Oligarchy] Policies by [All] Civilizations", 2,
-            "Adopted [Oligarchy] Policies by [City-State] Civilizations", 0,
+            "Adopted [${traditionMembers[2].name}] Policies by [All] Civilizations", 2,
+            "Adopted [${traditionMembers[2].name}] Policies by [City-State] Civilizations", 0,
         )
     }
 
@@ -451,7 +462,7 @@ class CountableTests {
             "Agriculture", 0,
             "Optics", 1,
             "Archery", 1,
-            "Navigation", 3,
+            "Astronomy", 3,
         )
     }
 

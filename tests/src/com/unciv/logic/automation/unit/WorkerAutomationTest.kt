@@ -295,9 +295,9 @@ internal class WorkerAutomationTest {
             // Make sure that we want to build a road between the cities
             city.population.addPopulation( 10)
             // Need to make sure that we have gold per turn to want to build the roads
-            city.cityConstructions.addBuilding("Stock Exchange")
-            city.cityConstructions.addBuilding("Stock Exchange")
-            city.cityConstructions.addBuilding("Stock Exchange")
+            city.cityConstructions.addBuilding("Bank")
+            city.cityConstructions.addBuilding("Bank")
+            city.cityConstructions.addBuilding("Bank")
         }
         val worker = testGame.addUnit("Worker", civInfo, city1.getCenterTile())
         for(i in 0..24) {

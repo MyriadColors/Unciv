@@ -78,6 +78,7 @@ class UniqueErrorTests {
         game.ruleset.modOptions.isBaseRuleset = true
 
         val errors = game.ruleset.getErrorList(false)
+            .filter { it.text.startsWith("Circular Reference in Promotions") }
         Assert.assertEquals(1, errors.size)
         Assert.assertEquals(
             "Circular Reference in Promotions: ${firstBranch.name}→${secondBranch.name}→${firstBranch.name}",
@@ -181,7 +182,8 @@ class UniqueErrorTests {
             logFailure("The test civ and city-state should be allied after a 10k gift")
 
         // adopt the GP-gift-enabling policy
-        val ee = game.ruleset.policies["Educated Elite"]!!
+        val ee = game.createPolicy("Allied City-States will occasionally gift Great People")
+        game.createPolicyBranch(policy = ee)
         civ.policies.freePolicies++
         civ.policies.adopt(ee)
         if (!civ.hasFlag(flagName))

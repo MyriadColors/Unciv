@@ -22,8 +22,7 @@ class FreeBuildingTests {
     @Test
     fun `should only give cheapest stat building in set amount of cities`() {
         val civ = testGame.addCiv("Provides the cheapest [Culture] building in your first [4] cities for free")
-        for (tech in testGame.ruleset.technologies.keys)
-            civ.tech.addTechnology(tech)
+        civ.tech.addTechnology("Mysticism")
         val capitalCity = testGame.addCity(civ, testGame.getTile(1,1))
         val city2 = testGame.addCity(civ, testGame.getTile(1,2))
         val city3 = testGame.addCity(civ, testGame.getTile(2,2))
@@ -38,8 +37,7 @@ class FreeBuildingTests {
     @Test
     fun `should only give 1 stat building`() {
         val civ = testGame.addCiv("Provides the cheapest [Culture] building in your first [4] cities for free")
-        for (tech in testGame.ruleset.technologies.keys)
-            civ.tech.addTechnology(tech)
+        civ.tech.addTechnology("Mysticism")
         val capitalCity = testGame.addCity(civ, testGame.getTile(1,1))
 
         Assert.assertTrue(capitalCity.cityConstructions.isBuilt("Monument"))

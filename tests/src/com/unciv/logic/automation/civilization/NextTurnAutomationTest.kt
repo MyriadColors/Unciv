@@ -6,6 +6,7 @@ import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.models.metadata.GameSettings.PathfindingAlgorithm
 import com.unciv.models.metadata.GameSettings.PathfindingAlgorithm.AStarPathfinding
+import com.unciv.models.ruleset.unique.UniqueType
 import com.unciv.testing.TestGame
 import com.unciv.testing.TestRunnerFactory
 import org.junit.Assert.assertEquals
@@ -45,9 +46,10 @@ class NextTurnAutomationTest(private val algorithm: PathfindingAlgorithm) {
 
     @Test
     fun `automateSettlerEscorting replaces low hp escort`() {
+        val warriorBase = testGame.createBaseUnit().apply { movement = 2; strength = 8 }
         val settler = testGame.addUnit("Settler", civInfo, testGame.tileMap[0,2])
-        val highHpWarrior = testGame.addUnit("Warrior", civInfo, testGame.tileMap[0,1])
-        val lowHpWarrior = testGame.addUnit("Warrior", civInfo, testGame.tileMap[0,2])
+        val highHpWarrior = testGame.addUnit(warriorBase.name, civInfo, testGame.tileMap[0,1])
+        val lowHpWarrior = testGame.addUnit(warriorBase.name, civInfo, testGame.tileMap[0,2])
         lowHpWarrior.takeDamage(90)
         lowHpWarrior.startEscorting()
         assertTrue(settler.isEscorting())
@@ -70,10 +72,11 @@ class NextTurnAutomationTest(private val algorithm: PathfindingAlgorithm) {
         // calls escortedUnit.movement.canMoveTo(includeOtherEscortUnit = false) 
         // and escortedUnit.movement.canUnitSwapToReachableTile(checkEscorted = false)
         // but AStar assumes includeOtherEscortUnit always true.
+        val warriorBase = testGame.createBaseUnit().apply { movement = 2; strength = 8 }
         val settler1 = testGame.addUnit("Settler", civInfo, testGame.tileMap[0,2])
         val settler2 = testGame.addUnit("Settler", civInfo, testGame.tileMap[0,1])
-        val highHpWarrior = testGame.addUnit("Warrior", civInfo, testGame.tileMap[0,1])
-        val lowHpWarrior = testGame.addUnit("Warrior", civInfo, testGame.tileMap[0,2])
+        val highHpWarrior = testGame.addUnit(warriorBase.name, civInfo, testGame.tileMap[0,1])
+        val lowHpWarrior = testGame.addUnit(warriorBase.name, civInfo, testGame.tileMap[0,2])
         lowHpWarrior.takeDamage(90)
         lowHpWarrior.startEscorting()
         settler2.currentMovement = 0f
@@ -135,7 +138,8 @@ class NextTurnAutomationTest(private val algorithm: PathfindingAlgorithm) {
     @Test
     fun `settler transferred to barbarians during the pass is not automated`() {
         val barbarians = testGame.addBarbarianCiv()
-        val spaceship = testGame.addUnit("SS Engine", civInfo, testGame.getTile(2, 0))
+        val spaceshipBase = testGame.createBaseUnit("Civilian").apply { movement = 2; uniques.add(UniqueType.SpaceshipPart.text) }
+        val spaceship = testGame.addUnit(spaceshipBase.name, civInfo, testGame.getTile(2, 0))
         spaceship.currentMovement = 0f
         val settler = testGame.addUnit("Settler", civInfo, testGame.getTile(3, 0))
         val settlerTile = settler.currentTile

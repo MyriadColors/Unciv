@@ -40,10 +40,14 @@ class VisibilityTests {
         assertTrue(viewableTiles.contains(forest))
     }
 
+    private fun setBlockingRow(x: Int, vararg features: String) {
+        for (y in -1..1) testGame.setTileTerrainAndFeatures(GridCoord(x, y), Constants.grassland, *features)
+    }
+
     @Test
     fun cannotSeePlainsOverForest() {
         val grassland = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.forest)
+        setBlockingRow(1, Constants.forest)
         val plains = testGame.setTileTerrain(GridCoord(2,0), Constants.plains)
 
         val viewableTiles = grassland.getViewableTilesList(2)
@@ -54,7 +58,7 @@ class VisibilityTests {
     @Test
     fun cannotSeeForestOverForest() {
         val grassland = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.forest)
+        setBlockingRow(1, Constants.forest)
         val plains = testGame.setTileTerrainAndFeatures(GridCoord(2,0), Constants.plains, Constants.forest)
         val viewableTiles = grassland.getViewableTilesList(2)
 
@@ -74,7 +78,7 @@ class VisibilityTests {
     @Test
     fun cannotSeePlainsOverHill() {
         val grassland = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.hill)
+        setBlockingRow(1, Constants.hill)
         val plains = testGame.setTileTerrain(GridCoord(2,0), Constants.plains)
         val viewableTiles = grassland.getViewableTilesList(2)
 
@@ -84,7 +88,7 @@ class VisibilityTests {
     @Test
     fun cannotSeeHillOverHill() {
         val grassland = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.hill)
+        setBlockingRow(1, Constants.hill)
         val hill = testGame.setTileTerrainAndFeatures(GridCoord(2,0), Constants.grassland, Constants.hill)
         val viewableTiles = grassland.getViewableTilesList(2)
 
@@ -95,7 +99,7 @@ class VisibilityTests {
     @Test
     fun cannotSeeHillOverForest() {
         val grassland = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.forest)
+        setBlockingRow(1, Constants.forest)
         val hill = testGame.setTileTerrainAndFeatures(GridCoord(2,0), Constants.grassland, Constants.hill)
         val viewableTiles = grassland.getViewableTilesList(2)
 
@@ -105,7 +109,7 @@ class VisibilityTests {
     @Test
     fun cannotSeeForestOverHill() {
         val grassland = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.hill)
+        setBlockingRow(1, Constants.hill)
         val hill = testGame.setTileTerrainAndFeatures(GridCoord(2,0), Constants.grassland, Constants.forest)
         val viewableTiles = grassland.getViewableTilesList(2)
 
@@ -135,7 +139,7 @@ class VisibilityTests {
     @Test
     fun cannotSeeMountainOverHillForest() {
         val grassland = testGame.setTileTerrainAndFeatures(GridCoord.Zero, Constants.grassland, Constants.hill)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.hill, Constants.forest)
+        setBlockingRow(1, Constants.hill, Constants.forest)
         val mountain = testGame.setTileTerrain(GridCoord(2,0), Constants.mountain)
         val viewableTiles = grassland.getViewableTilesList(4)
 
@@ -170,7 +174,7 @@ class VisibilityTests {
     @Test
     fun canSeeElevation3TilesEvenWithInvisibleIntermediate() {
         val source = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.hill)
+        setBlockingRow(1, Constants.hill)
         val intermediate = testGame.setTileTerrainAndFeatures(GridCoord(2,0), Constants.grassland, Constants.hill)
         val beyondSight = testGame.setTileTerrainAndFeatures(GridCoord(3,0), Constants.grassland, Constants.hill, Constants.forest)
 
@@ -183,8 +187,8 @@ class VisibilityTests {
     @Test
     fun cannotSeeHiddenElevation3Tiles() {
         val source = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrain(GridCoord(1,0), Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(2,0), Constants.grassland, Constants.forest)
+        setBlockingRow(1, Constants.forest)
+        setBlockingRow(2, Constants.forest)
         val beyondSight = testGame.setTileTerrainAndFeatures(GridCoord(3,0), Constants.grassland, Constants.hill)
 
         val viewableTiles = source.getViewableTilesList(2)
@@ -195,7 +199,7 @@ class VisibilityTests {
     @Test
     fun canSeeButNotAttackHillForestOverHill() {
         val grassland = testGame.setTileTerrain(GridCoord.Zero, Constants.grassland)
-        testGame.setTileTerrainAndFeatures(GridCoord(1,0), Constants.grassland, Constants.hill)
+        setBlockingRow(1, Constants.hill)
         val hillForest = testGame.setTileTerrainAndFeatures(GridCoord(2,0), Constants.grassland, Constants.hill, Constants.forest)
         val viewableTiles = grassland.getViewableTilesList(2)
 

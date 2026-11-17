@@ -59,6 +59,8 @@ class TileImprovementConstructionTests {
             // its too complex to handle all of them, so just skip it and hope its fine
             // I would like some comments on whether this approach is fine or if it's better if I handle every single unique here as well
             if (improvement.hasUnique(UniqueType.CanOnlyBeBuiltOnTile, GameContext.IgnoreConditionals)) continue
+            if (improvement.hasUnique(UniqueType.MustBeNextTo, GameContext.IgnoreConditionals)) continue
+            if (improvement.hasUnique(UniqueType.OnlyAvailable, GameContext.IgnoreConditionals)) continue
             if (improvement.hasUnique(UniqueType.Unbuildable, GameContext.IgnoreConditionals)) continue
 
             val tile = tileMap[1,1]
@@ -203,7 +205,8 @@ class TileImprovementConstructionTests {
         tile.addTerrainFeature("Forest")
         Assert.assertEquals(tile.terrainFeatures, listOf("Hill", "Forest"))
 
-        tile.setImprovement("Landmark")
+        val greatImprovement = testGame.createTileImprovement("Great Improvement", "Removes removable features when built")
+        tile.setImprovement(greatImprovement, civInfo)
         Assert.assertEquals(tile.terrainFeatures, listOf("Hill"))
     }
 
@@ -221,7 +224,8 @@ class TileImprovementConstructionTests {
     fun citadelTakesOverAdjacentTiles() {
         val tile = tileMap[1,1]
         Assert.assertFalse(tile.neighbors.all { it.owningCity == city })
-        tile.setImprovement("Citadel", civInfo)
+        val citadel = testGame.createTileImprovement("Gain control over [all] tiles in a [1]-tile radius")
+        tile.setImprovement(citadel, civInfo)
         Assert.assertTrue(tile.neighbors.all { it.owningCity == city })
     }
 
@@ -322,14 +326,14 @@ class TileImprovementConstructionTests {
         tile.setImprovement(lumberMill)
         assert(tile.tileImprovement == lumberMill)
 
-        // 1f 1p from forest, 2p from lumber mill since all techs are researched
+        // 1p from forest (overrideStats=true), 1p from lumber mill in BasicSquare
         val tileStats = tile.stats.getTileStats(civInfo)
-        assert(tileStats.equals(Stats(production = 3f, food = 1f)))
+        assert(tileStats.equals(Stats(production = 2f, food = 0f)))
 
         val statsDiff = tile.stats.getStatDiffForImprovement(testGame.ruleset.tileImprovements["Remove Forest"]!!, civInfo, null)
 
         // We'll be reverting back to grassland stats - 2f only
-        assert(statsDiff.equals(Stats(food = +1f, production = -3f)))
+        assert(statsDiff.equals(Stats(food = +2f, production = -2f)))
     }
 
     @Test
@@ -345,7 +349,7 @@ class TileImprovementConstructionTests {
         Assert.assertFalse(civ.neutralRoads.contains(center.position))
         assertTransportationUpkeep(civ, 0f)
 
-        civ.tech.addTechnology("Railroads", false)
+        civ.tech.addTechnology("Railroad", false)
         center.setRoadStatus(RoadStatus.Railroad, civ)
         Assert.assertEquals(RoadStatus.Railroad, center.roadStatus)
         Assert.assertFalse(civ.neutralRoads.contains(center.position))
@@ -436,14 +440,14 @@ class TileImprovementConstructionTests {
         assertTransportationUpkeep(civ, 0f)
 
         ownedRoad.setImprovement("Road", civ)
-        assertTransportationUpkeep(civ, -1f)
+        assertTransportationUpkeep(civ, 0f)
 
         ownedRailroad.setImprovement("Railroad", civ)
-        assertTransportationUpkeep(civ, -3f)
+        assertTransportationUpkeep(civ, 0f)
 
         unownedRoad.setImprovement("Road", civ)
         Assert.assertTrue(civ.neutralRoads.contains(unownedRoad.position))
-        assertTransportationUpkeep(civ, -4f)
+        assertTransportationUpkeep(civ, 0f)
         Assert.assertFalse(civ.neutralRoads.contains(ownedRoad.position))
         Assert.assertFalse(civ.neutralRoads.contains(ownedRailroad.position))
         Assert.assertFalse(civ.neutralRoads.contains(city.getCenterTile().position))

@@ -18,11 +18,7 @@ import kotlin.random.Random
 class ExploredRegionTests {
     private val mapParameters = MapParameters()
 
-    /** Hex at longitude/latitude. Hexes only exist where long+lat is even, so an odd sum bumps [long] by one. */
-    private fun hex(long: Int, lat: Int): GridCoord {
-        val l = if (((long + lat) and 1) == 0) long else long + 1
-        return GridCoord.of((lat + l) / 2, (lat - l) / 2)
-    }
+    private fun hex(long: Int, lat: Int): GridCoord = GridCoord.of(long, lat)
 
     private fun withNewRegion(block: ExploredRegion.() -> Unit) {
         ExploredRegion().apply {

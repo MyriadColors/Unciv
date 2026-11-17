@@ -364,7 +364,7 @@ class DiplomacyManagerTests {
         testGame.addCity(a, testGame.getTile(GridCoord.Zero), initialPopulation = 10)
         testGame.addCity(b, testGame.getTile(GridCoord(1,0)), initialPopulation = 20)
 
-        val expectedSciencePerTurnCivA = 13 // 10 pop, 3 palace. Smaller than 23 science per turn of civ B (20 pop, 3 palace)
+        val expectedSciencePerTurnCivA = 15 // 10 pop + Civ IV Palace science. Smaller than civ B (20 pop)
         val turns = 10
 
         // when

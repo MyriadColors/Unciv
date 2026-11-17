@@ -98,7 +98,7 @@ class ExpressionTests {
 
         val input = listOf(
             "√[[Your] Cities]" to 1.0,
-            "[Owned [worked] Tiles] / [Owned [unimproved] Tiles] * 100" to 100.0 / 6, // city center counts as improved
+            "[Owned [worked] Tiles] / [Owned [unimproved] Tiles] * 100" to 100.0 / 8, // city center counts as improved; 8 surrounding unimproved tiles on square grid
         )
 
         var fails = 0

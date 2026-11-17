@@ -57,6 +57,10 @@ class CityCivFilterTests {
 
         val religion = game.addReligion(civ)
         city.religion.addPressure(religion.name, 1000)
+        if (civ.gameInfo.ruleset.modOptions.uniques.contains("Uses Civ IV Religion")) {
+            city.presentReligions.add(religion.name)
+            civ.civ4Religion.setStateReligion(religion.name, applyAnarchy = false)
+        }
         Assert.assertTrue(city.matchesFilter("in cities following our religion", civ))
         Assert.assertTrue(conditional.conditionalsApply(city.state))
     }

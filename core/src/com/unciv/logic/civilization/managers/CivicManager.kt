@@ -104,6 +104,7 @@ class CivicManager : IsPartOfGameInfoSerialization {
 
     @Readonly
     fun getCivicUpkeep(): Int {
+        if (!::civInfo.isInitialized) return 0
         if (!civInfo.gameInfo.ruleset.modOptions.hasUnique(UniqueType.CivicsMode)) return 0
         val numCities = civInfo.cities.size
         if (numCities == 0) return 0

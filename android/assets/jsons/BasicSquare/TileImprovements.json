@@ -549,6 +549,22 @@
 		]
 	},
 
+	{
+		"name": "Repair",
+		"terrainsCanBeBuiltOn": ["Land"],
+		"turnsToBuild": 2,
+		"shortcutKey": "E",
+		"uniques": ["Unbuildable", "Excluded from map editor"],
+		"civilopediaText": [{"text": "Repairs a pillaged Improvement or Route"}]
+	},
+
+	{
+		"name": "City ruins",
+		"terrainsCanBeBuiltOn": ["Land"],
+		"uniques": ["Unpillagable", "Unbuildable"],
+		"civilopediaText": [{"text": "A bleak reminder of the destruction wreaked by War"}]
+	},
+
     {
         "name": "City center",
         "terrainsCanBeBuiltOn": ["Land"],

@@ -21,10 +21,12 @@ class HaveCountableMilestoneTests {
     fun `milestones of a countable victory can be completed in any order`() {
         val testGame = TestGame()
         testGame.makeHexagonalMap(2)
+        val policy = testGame.createPolicy()
+        testGame.createPolicyBranch(policy = policy)
         val victory = victoryWithMilestones(
             "Have at least [1] [Owned [Farm] Tiles]",
             "Build [Granary]",
-            "Have at least [1] [Adopted [Tradition] Policies]"
+            "Have at least [1] [Adopted [${policy.name}] Policies]"
         )
         testGame.ruleset.victories[victory.name] = victory
         testGame.gameInfo.gameParameters.victoryTypes = arrayListOf(victory.name)
@@ -37,7 +39,7 @@ class HaveCountableMilestoneTests {
 
         // Out of the order they are declared in: the policy first, then the building, then the farm
         civ.policies.freePolicies = 1
-        civ.policies.adopt(testGame.ruleset.policies["Tradition"]!!, branchCompletion = false)
+        civ.policies.adopt(policy, branchCompletion = false)
         Assert.assertTrue(policyMilestone.hasBeenCompletedBy(civ))
         city.cityConstructions.addBuilding("Granary")
         Assert.assertNull("Not won yet - the farm is missing", civ.victoryManager.getVictoryTypeAchieved())

@@ -182,7 +182,8 @@ class ThreatManagerTests {
         val centerTile = testGame.getTile(0,0)
         testGame.addUnit("Warrior", civ, centerTile)
         testGame.addUnit("Warrior", enemyCiv, testGame.getTile(3,0))
-        testGame.addUnit("Archer", enemyCiv, testGame.getTile(-3,0))
+        val rangedUnit = testGame.createBaseUnit().apply { movement = 2; range = 2; rangedStrength = 7; strength = 5 }
+        testGame.addUnit(rangedUnit.name, enemyCiv, testGame.getTile(-3,0))
         val dangerousTiles = ThreatManager.getDangerousTiles(cache, gameView.getMapUnitView(centerTile.firstMilitaryUnit()!!), 3)
         assertEquals(null, testGame.getTile(3,0).getTilesInDistance(1).firstOrNull {tile -> !dangerousTiles.contains(view(tile))})
         assertEquals(null, testGame.getTile(-3,0).getTilesInDistance(2).firstOrNull {tile -> !dangerousTiles.contains(view(tile))})

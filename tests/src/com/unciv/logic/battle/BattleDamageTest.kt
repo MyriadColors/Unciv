@@ -119,7 +119,8 @@ class BattleDamageTest {
         // given
         defaultAttackerTile.militaryUnits.clear() // otherwise we'll also get a flanking bonus
         val attackerTile = testGame.getTile(GridCoord.Zero)
-        val attackerUnit = testGame.addUnit("Horseman", attackerCiv, attackerTile)
+        val unitWithResource = testGame.createBaseUnit("Sword", "Consumes [1] [Horses]").apply { strength = 10 }
+        val attackerUnit = testGame.addUnit(unitWithResource.name, attackerCiv, attackerTile)
 
         // when
         val attackModifiers = BattleDamage.getAttackModifiers(MapUnitCombatant(attackerUnit), MapUnitCombatant(defaultDefenderUnit), attackerTile)

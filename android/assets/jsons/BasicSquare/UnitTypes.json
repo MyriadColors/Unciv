@@ -97,7 +97,7 @@
     "name": "Fighter",
     "movementType": "Air",
 	"uniques": [
-		//"Aircraft",
+		"Aircraft",
 		"[+4] Sight",
 		"Can see over obstacles",
 		"Can perform Air Sweep",
@@ -108,7 +108,7 @@
     "name": "Bomber",
     "movementType": "Air",
 	"uniques": [
-		//"Aircraft"
+		"Aircraft",
 		"[This Unit] heals [25] HP <upon being promoted> <hidden from users>"
 	]
   },
@@ -130,6 +130,10 @@
 		"Cannot be intercepted",
 		"[This Unit] heals [25] HP <upon being promoted> <hidden from users>"
 	]
+  },
+  {
+	"name": "Aircraft Carrier",
+	"movementType": "Water"
   },
   {
 	"name": "Animal",

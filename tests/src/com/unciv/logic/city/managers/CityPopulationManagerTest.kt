@@ -149,7 +149,7 @@ class CityPopulationManagerTest {
 
         // then
         assertEquals(2, city.population.population)
-        assertEquals(0, city.population.foodStored)
+        assertEquals(1, city.population.foodStored)
     }
 
     @Test
@@ -162,7 +162,7 @@ class CityPopulationManagerTest {
 
         // then
         assertEquals(2, city.population.population)
-        assertEquals(3, city.population.foodStored)
+        assertEquals(4, city.population.foodStored)
     }
 
     @Test
@@ -177,7 +177,7 @@ class CityPopulationManagerTest {
 
         // then
         assertEquals(2, city.population.population)
-        assertEquals(7, city.population.foodStored)
+        assertEquals(8, city.population.foodStored)
     }
 
     @Test
@@ -250,6 +250,11 @@ class CityPopulationManagerTest {
         city.setCityFocus(CityFocus.GoldFocus)
         city.clearWorkedTiles()
         val anchorTile3 = city.tileMap[GridCoord(-1,0)]
+        for (coord in city.tiles) {
+            if (coord != city.location && coord != anchorTile3.position) {
+                testGame.setTileTerrain(coord, "Desert")
+            }
+        }
         city.workTile(anchorTile3)
         city.lockTile(anchorTile3) // force the first pop to work on a specific tile to avoid being reassigned
         val specialistBuilding = testGame.createBuilding()
