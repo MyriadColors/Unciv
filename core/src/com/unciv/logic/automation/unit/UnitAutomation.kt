@@ -326,9 +326,9 @@ object UnitAutomation {
             val tileDistanceToClosestEnemy = ThreatManager.getDistanceToClosestEnemyUnit(civ, cache, retreatTile, 4, false)
             if (ourDistanceToClosestEnemy >= tileDistanceToClosestEnemy) continue
 
-            val otherUnit = retreatTile.militaryUnit
-            if (otherUnit == null) {
-                // See if we can retreat to the tile
+            val otherUnit = retreatTile.firstMilitaryUnit()
+            if (otherUnit == null || unitView.canMoveTo(retreatTile)) {
+                // See if we can retreat to the tile (or stack onto it if stacking is enabled)
                 if (!unitView.canMoveTo(retreatTile)) continue
                 unitView.tryMoveToTile(retreatTile)
                 return true
@@ -552,7 +552,7 @@ object UnitAutomation {
                 it.isCivilian() &&
                         (it.hasUnique(UniqueType.FoundCity) || it.getMatchingUniques(UniqueType.GreatPerson).any())
                         && !it.hasUnique(UniqueType.StrengthBonusInRadius) // Exlude great generals, as they move independently after all military units
-                        && (tile == unitView.getTile() || tile.militaryUnit == null && unitView.canMoveTo(tile))
+                        && (tile == unitView.getTile() || tile.militaryUnits.isEmpty() && unitView.canMoveTo(tile))
                         && distanceToTiles.containsKey(tile)
             } ?: return false
         unitView.tryHeadTowards(settlerOrGreatPersonToAccompany.getTile())
@@ -638,7 +638,7 @@ object UnitAutomation {
         if (unitView.getBaseUnit().isWaterUnit) return false // Water units don't count for Garrison bonus
         val citiesWithoutGarrison = unitView.civ().cities().filter {
             val centerTile = it.getCenterTile()
-            centerTile.militaryUnit == null
+            centerTile.militaryUnits.isEmpty()
                     && unitView.canMoveTo(centerTile)
         }
 

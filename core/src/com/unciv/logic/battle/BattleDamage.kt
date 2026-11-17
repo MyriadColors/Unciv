@@ -150,9 +150,11 @@ object BattleDamage {
 
             if (attacker.isMelee()) {
                 val numberOfOtherAttackersSurroundingDefender = defender.getTile().neighbors.count {
-                    it.militaryUnit != null && it.militaryUnit != attacker.unit
-                            && it.militaryUnit!!.civ == attacker.getCivInfo()
-                            && MapUnitCombatant(it.militaryUnit!!).isMelee()
+                    it.militaryUnits.any { u ->
+                        u != attacker.unit
+                            && u.civ == attacker.getCivInfo()
+                            && MapUnitCombatant(u).isMelee()
+                    }
                 }
                 if (numberOfOtherAttackersSurroundingDefender > 0) {
                     var flankingBonus = BattleConstants.BASE_FLANKING_BONUS

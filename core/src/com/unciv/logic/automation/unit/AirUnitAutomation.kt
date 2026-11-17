@@ -202,7 +202,7 @@ object AirUnitAutomation {
             val owningCity = targetTile.owningCity()
             if (targetTile.isCityCenter()
                 && !(city!!.getHealth() <= 50
-                    && targetTile.getNeighbors().any { it.militaryUnit?.civ() == civ })) // Prefer not to nuke cities that we are about to take
+                    && targetTile.getNeighbors().any { it.militaryUnits.any { u -> u.civ() == civ } })) // Prefer not to nuke cities that we are about to take
                 explosionValue += evaluateCivValue(city.owningCiv(), -100000, 250)
             else if (owningCity != null) {
                 val owningCiv = owningCity.owningCiv()

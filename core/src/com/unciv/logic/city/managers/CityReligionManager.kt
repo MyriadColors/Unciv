@@ -324,8 +324,8 @@ class CityReligionManager : IsPartOfGameInfoSerialization {
     @Readonly
     fun isProtectedByInquisitor(fromReligion: String? = null): Boolean {
         for (tile in city.getCenterTile().getTilesInDistance(1)) {
-            for (unit in listOf(tile.civilianUnit, tile.militaryUnit)) {
-                if (unit?.religion != null
+            for (unit in tile.getUnits()) {
+                if (unit.religion != null
                     && (fromReligion == null || unit.religion != fromReligion)
                     && unit.hasUnique(UniqueType.PreventSpreadingReligion)
                 ) return true

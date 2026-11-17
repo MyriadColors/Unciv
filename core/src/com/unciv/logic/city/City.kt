@@ -217,7 +217,8 @@ class City : IsPartOfGameInfoSerialization, INamed {
         return toReturn
     }
 
-    @Readonly fun canBombard() = getBombardRange() > 0 && !attackedThisTurn && !isInResistance()
+    @Readonly fun canBombard() = !civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat)
+        && getBombardRange() > 0 && !attackedThisTurn && !isInResistance()
     @Readonly fun getCenterTile(): Tile = centerTile
     @Readonly fun getCenterTileOrNull(): Tile? = if (::centerTile.isInitialized) centerTile else null
     @Readonly fun getTiles(): Sequence<Tile> = tiles.asSequence().map { tileMap[it] }
@@ -273,7 +274,7 @@ class City : IsPartOfGameInfoSerialization, INamed {
     @Readonly fun isGarrisoned() = getGarrison() != null
     @Readonly
     fun getGarrison(): MapUnit? =
-            getCenterTile().militaryUnit?.takeIf {
+            getCenterTile().militaryUnits.firstOrNull {
                 it.civ == this.civ && it.canGarrison()
             }
 
@@ -569,7 +570,9 @@ class City : IsPartOfGameInfoSerialization, INamed {
         return when {
             construction.isCivilian() -> tile.civilianUnit == null
             construction.isAirUnit() -> true // Dealt with in MapUnit.getRejectionReasons
-            else -> tile.militaryUnit == null
+            civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.AllowUnitStacking) ->
+                tile.militaryUnits.all { it.civ == civ }
+            else -> !tile.hasMilitaryUnit()
         }
     }
 

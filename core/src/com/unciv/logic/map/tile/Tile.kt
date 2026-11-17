@@ -41,7 +41,7 @@ import kotlin.random.Random
 
 class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     //region Serialized fields
-    var militaryUnit: MapUnit? = null
+    var militaryUnits = ArrayList<MapUnit>(0)
     var civilianUnit: MapUnit? = null
     var airUnits = ArrayList<MapUnit>(0)
 
@@ -237,7 +237,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         toReturn.isWater = isWater
         toReturn.isOcean = isOcean
         if (addUnits) {
-            if (militaryUnit != null) toReturn.militaryUnit = militaryUnit!!.clone()
+            toReturn.militaryUnits = ArrayList(militaryUnits.map { it.clone() })
             if (civilianUnit != null) toReturn.civilianUnit = civilianUnit!!.clone()
             toReturn.airUnits = ArrayList(airUnits.map { it.clone() })
         }
@@ -277,11 +277,11 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     @Readonly
     fun getUnits(): Sequence<MapUnit> {
         // common case - do not allocate memory for a new sequence
-        if (militaryUnit == null && civilianUnit == null && airUnits.isEmpty())
+        if (militaryUnits.isEmpty() && civilianUnit == null && airUnits.isEmpty())
             return emptySequence()
 
         return sequence {
-            if (militaryUnit != null) yield(militaryUnit!!)
+            if (militaryUnits.isNotEmpty()) yieldAll(militaryUnits)
             if (civilianUnit != null) yield(civilianUnit!!)
             if (airUnits.isNotEmpty()) yieldAll(airUnits)
         }
@@ -290,11 +290,15 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     /** This is for performance reasons of canPassThrough() - faster than getUnits().firstOrNull() */
     @Readonly
     fun getFirstUnit(): MapUnit? {
-        if (militaryUnit != null) return militaryUnit!!
+        if (militaryUnits.isNotEmpty()) return militaryUnits.first()
         if (civilianUnit != null) return civilianUnit!!
         if (airUnits.isNotEmpty()) return airUnits.first()
         return null
     }
+
+    @Readonly fun hasMilitaryUnit(): Boolean = militaryUnits.isNotEmpty()
+
+    @Readonly fun firstMilitaryUnit(): MapUnit? = militaryUnits.firstOrNull()
 
     @Readonly fun getCity(): City? = owningCity
 
@@ -465,7 +469,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     @Readonly
     fun isBlockaded(): Boolean {
         val owner = getOwner() ?: return false
-        val unit = militaryUnit
+        val unit = militaryUnits.firstOrNull()
 
         if (unit != null) {
             return when {
@@ -480,11 +484,11 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         // For water tiles need also to check neighbors:
         // enemy military naval units blockade all adjacent water tiles.
         for (neighbor in neighbors.filter { it.isWater }) {
-            val neighborUnit = neighbor.militaryUnit ?: continue
-
-            // Embarked units do not blockade adjacent tiles
-            if (neighborUnit.civ.isAtWarWith(owner) && !neighborUnit.isEmbarked())
-                return true
+            for (neighborUnit in neighbor.militaryUnits) {
+                // Embarked units do not blockade adjacent tiles
+                if (neighborUnit.civ.isAtWarWith(owner) && !neighborUnit.isEmbarked())
+                    return true
+            }
         }
         return false
     }
@@ -1019,7 +1023,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         when {
             airUnits.contains(mapUnit) -> airUnits.remove(mapUnit)
             civilianUnit == mapUnit -> civilianUnit = null
-            militaryUnit == mapUnit -> militaryUnit = null
+            militaryUnits.contains(mapUnit) -> militaryUnits.remove(mapUnit)
         }
     }
 
@@ -1263,7 +1267,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         if (roadStatus !== RoadStatus.None && !isCityCenter()) lineList += roadStatus.name
         if (improvement != null) lineList += improvement!!
         if (civilianUnit != null) lineList += civilianUnit!!.name + " - " + civilianUnit!!.civ.civID
-        if (militaryUnit != null) lineList += militaryUnit!!.name + " - " + militaryUnit!!.civ.civID
+        for (unit in militaryUnits) lineList += unit.name + " - " + unit.civ.civID
         if (this::baseTerrainObject.isInitialized && isImpassible()) lineList += Constants.impassable
         return lineList.joinToString()
     }

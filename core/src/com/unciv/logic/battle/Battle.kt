@@ -8,6 +8,7 @@ import com.unciv.logic.automation.civilization.NextTurnAutomation
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.*
 import com.unciv.logic.map.GridCoord
+import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.UnitActionType
 import com.unciv.models.ruleset.unique.GameContext
@@ -99,7 +100,7 @@ object Battle {
             Nuke.NUKE(attacker, attackableTile.tileToAttack)
             DamageDealt.None
         } else {
-            attack(attacker, getMapCombatantOfTile(attackableTile.tileToAttack)!!)
+            attack(attacker, getMapCombatantOfTile(attackableTile.tileToAttack, attacker)!!)
         }
     }
 
@@ -123,6 +124,16 @@ object Battle {
         } else interceptDamage = DamageDealt.None
 
         if (hasWithdrawnFromMelee(attacker, defender, attackedTile)) return DamageDealt.None
+
+        val civ4StackCombat = attackedTile.tileMap.gameInfo.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat)
+        if (civ4StackCombat && defender is CityCombatant && attackedTile.militaryUnits.isEmpty()
+            && attacker is MapUnitCombatant && !attacker.isRanged()) {
+            defender.city.health = 1
+            handleCityDefeated(defender, attacker)
+            postBattleMoveToAttackedTile(attacker, defender, attackedTile)
+            reduceAttackerMovementPointsAndAttacks(attacker, defender, attackedTile)
+            return DamageDealt.None
+        }
 
         val isAlreadyDefeatedCity = defender is CityCombatant && defender.isDefeated()
 
@@ -695,7 +706,7 @@ object Battle {
 
         city.hasJustBeenConquered = true
         city.getCenterTile().apply {
-            if (militaryUnit != null) militaryUnit!!.destroy()
+            for (unit in militaryUnits.toList()) unit.destroy()
             if (civilianUnit != null) BattleUnitCapture.captureCivilianUnit(attacker, MapUnitCombatant(civilianUnit!!), checkDefeat = false)
             for (airUnit in airUnits.toList()) airUnit.destroy()
         }
@@ -759,9 +770,40 @@ object Battle {
     }
     
     @Readonly
-    fun getMapCombatantOfTile(tile: Tile): ICombatant? {
-        if (tile.isCityCenter()) return CityCombatant(tile.getCity()!!)
-        if (tile.militaryUnit != null) return MapUnitCombatant(tile.militaryUnit!!)
+    fun getBestDefender(tile: Tile, attacker: ICombatant? = null): MapUnit? {
+        if (tile.militaryUnits.isEmpty()) return null
+        if (!tile.tileMap.gameInfo.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat))
+            return tile.firstMilitaryUnit()
+        var bestUnit: MapUnit? = null
+        var bestScore = -1f
+        var bestHealth = -1
+        for (unit in tile.militaryUnits) {
+            val score = if (attacker != null) {
+                val defender = MapUnitCombatant(unit)
+                BattleDamage.getDefendingStrength(attacker, defender, attacker.getTile()) * (unit.health / 100f)
+            } else {
+                unit.baseUnit.strength * (unit.health / 100f)
+            }
+            if (bestUnit == null || score > bestScore || (score == bestScore && unit.health > bestHealth)) {
+                bestUnit = unit
+                bestScore = score
+                bestHealth = unit.health
+            }
+        }
+        return bestUnit
+    }
+
+    @Readonly
+    fun getMapCombatantOfTile(tile: Tile, attacker: ICombatant? = null): ICombatant? {
+        val civ4StackCombat = tile.tileMap.gameInfo.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat)
+        if (tile.isCityCenter()) {
+            if (civ4StackCombat && tile.militaryUnits.isNotEmpty()) {
+                return MapUnitCombatant(getBestDefender(tile, attacker)!!)
+            }
+            return CityCombatant(tile.getCity()!!)
+        }
+        val bestDefender = getBestDefender(tile, attacker)
+        if (bestDefender != null) return MapUnitCombatant(bestDefender)
         if (tile.civilianUnit != null) return MapUnitCombatant(tile.civilianUnit!!)
         return null
     }

@@ -181,7 +181,7 @@ class AttackRecorderTest {
 
         assertEquals(60, otherUnit.health)
         assertSame(otherUnit, otherCiv.units.getUnitById(otherUnit.id))
-        assertSame(otherUnit, otherGame.getTile(0, 0).militaryUnit)
+        assertSame(otherUnit, otherGame.getTile(0, 0).firstMilitaryUnit())
         dealDamage(recorder, attacker, 2)
         val event = recorder.finishForTesting()
         assertEquals(2, event.attacker!!.damageReceived)

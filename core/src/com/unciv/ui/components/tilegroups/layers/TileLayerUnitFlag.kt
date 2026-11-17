@@ -50,6 +50,16 @@ class TileLayerUnitFlag(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup
                 table.x = newIcon.width - table.width*0.45f
             }
 
+            // Display stack count badge when multiple military units share the tile
+            val militaryUnitsCount = if (slot == 1) unit.getTile().militaryUnits.size else 0
+            if (militaryUnitsCount > 1) {
+                val stackTable = getStackCountTable(unit, militaryUnitsCount)
+                newIcon.addActor(stackTable)
+                stackTable.toBack()
+                stackTable.y = newIcon.height / 2 - stackTable.height / 2
+                stackTable.x = -stackTable.width * 0.55f
+            }
+
             // Fade out action indicator for own non-idle units
             if (unit.civ() == viewingCiv && !unit.isIdle() && UncivGame.Current.settings.unitIconOpacity == 1f)
                 newIcon.actionGroup?.color?.a = 0.5f
@@ -88,6 +98,22 @@ class TileLayerUnitFlag(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup
         return airUnitTable
     }
 
+    private fun getStackCountTable(unit: ForeignMapUnitView, stackCount: Int): Table {
+        val iconColor = unit.civ().getOuterColor()
+        val bgColor = unit.civ().getInnerColor()
+
+        val stackTable = Table()
+        stackTable.background = BaseScreen.skinStrings.getUiBackground(
+            path = "WorldScreen/AirUnitTable",
+            "", bgColor
+        )
+        stackTable.pad(0f).defaults().pad(0f)
+        stackTable.setSize(22f, 12f)
+        stackTable.add("x$stackCount".toLabel(iconColor, 10, alignment = Align.center)).expand().center()
+
+        return stackTable
+    }
+
     fun selectFlag(unitView: ForeignMapUnitView) {
         getIcon(unitView)?.selectUnit()
     }
@@ -112,7 +138,7 @@ class TileLayerUnitFlag(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup
         val isMilitaryShown = isViewable
 
         civilianUnitIcon = newUnitIcon(0, tileGroup.tileView.civilianUnit, isCivilianShown, viewingCiv)
-        militaryUnitIcon = newUnitIcon(1, tileGroup.tileView.militaryUnit, isMilitaryShown, viewingCiv)
+        militaryUnitIcon = newUnitIcon(1, tileGroup.tileView.firstMilitaryUnit(), isMilitaryShown, viewingCiv)
     }
 
     override fun doUpdate(viewingCiv: CivView?) {

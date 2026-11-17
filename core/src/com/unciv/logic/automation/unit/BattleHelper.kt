@@ -28,7 +28,7 @@ object BattleHelper {
 
         if (enemyTileToAttack != null) {
             val tileToAttack = enemyTileToAttack.getTileToAttack()
-            if (tileToAttack.militaryUnit == null && unitView.getBaseUnit().isRanged()
+            if (tileToAttack.militaryUnits.isEmpty() && unitView.getBaseUnit().isRanged()
                 && unitView.canMoveTo(tileToAttack)
                 && distanceToTiles.containsKey(tileToAttack)) { // Since the 'getAttackableEnemies' could return a tile we attack at range but cannot reach
                 // Ranged units should move to caputre a civilian unit instead of attacking it
@@ -108,7 +108,7 @@ object BattleHelper {
             if (attacker.unitHealth - battleDamage * 2 <= 0 && !attacker.hasUnique(UniqueType.SelfDestructs)) {
                 // The more fiendly units around the city, the more willing we should be to just attack the city
                 val friendlyUnitsAroundCity = city.getCenterTile().getExploredTilesInDistance(3)
-                    .count { it.militaryUnit?.civ() == attacker.civ() }
+                    .count { it.militaryUnits.any { u -> u.civ() == attacker.civ() } }
                 // If we have more than 4 other units around the city, go for it
                 if (friendlyUnitsAroundCity < 5) {
                     val attackerHealthModifier = 1.0 + 1.0 / friendlyUnitsAroundCity
@@ -129,7 +129,7 @@ object BattleHelper {
         // Add value based on number of units around the city
         val defendingCityCiv = city.owningCiv()
         for (tile in city.getCenterTile().getExploredTilesInDistance(2)) {
-            val militaryUnit = tile.militaryUnit ?: continue
+            val militaryUnit = tile.firstMilitaryUnit() ?: continue
             if (militaryUnit.civ().isAtWarWith(attacker.civ()))
                 attackValue -= 5
             if (militaryUnit.civ().isAtWarWith(defendingCityCiv))
@@ -149,7 +149,7 @@ object BattleHelper {
         var attackValue = Int.MIN_VALUE
         // Prioritize attacking military
         val tileToAttack = attackTile.getTileToAttack()
-        val militaryUnit = tileToAttack.militaryUnit
+        val militaryUnit = tileToAttack.firstMilitaryUnit()
         val civilianUnit = tileToAttack.civilianUnit
         if (militaryUnit != null) {
             attackValue = 200 - militaryUnit.unitHealth + // continuously prioritise lower-health units

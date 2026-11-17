@@ -39,8 +39,10 @@ object TargetHelper {
             }
 
             // Nukes ignore line of sight when checking range, and don't require a visible enemy on the target tile
+            val civ4StackCombat = unit.civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat)
             val tilesInAttackRange =
-                if (unit.baseUnit.isMelee()) reachableTile.neighbors
+                if (unit.baseUnit.isMelee() || (civ4StackCombat && !unit.baseUnit.isAirUnit() && !unit.isNuclearWeapon()))
+                    reachableTile.neighbors
                 else if (unit.baseUnit.isAirUnit() || unit.isNuclearWeapon() || unit.hasUnique(UniqueType.IndirectFire, checkCivInfoUniques = true))
                     reachableTile.getTilesInDistance(rangeOfAttack)
                 else reachableTile.tileMap.getViewableTiles(reachableTile.position, rangeOfAttack, true).asSequence()
@@ -161,8 +163,11 @@ object TargetHelper {
 
     /** Get a list of visible tiles which have something attackable */
     @Readonly
-    fun getBombardableTiles(city: City): Sequence<Tile> =
-            city.getCenterTile().getTilesInDistance(city.getBombardRange())
-                    .filter { it.isVisible(city.civ) && containsAttackableEnemy(it, CityCombatant(city)) }
+    fun getBombardableTiles(city: City): Sequence<Tile> {
+        if (city.civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat))
+            return emptySequence()
+        return city.getCenterTile().getTilesInDistance(city.getBombardRange())
+            .filter { it.isVisible(city.civ) && containsAttackableEnemy(it, CityCombatant(city)) }
+    }
 
 }

@@ -397,7 +397,7 @@ class UnitMovement(val unit: MapUnit) {
         val escortedUnit = if (checkEscorted && unit.isEscorting()) unit.getOtherEscortUnit() else null // Only isEscorting has the actual flag check
         fun MapUnit.getMatchInReachableTile() =
             if (isCivilian()) reachableTile.civilianUnit
-            else reachableTile.militaryUnit
+            else reachableTile.firstMilitaryUnit()
         val otherUnit =
             unit.getMatchInReachableTile()
             ?: escortedUnit?.getMatchInReachableTile()
@@ -652,7 +652,7 @@ class UnitMovement(val unit: MapUnit) {
             if (unit.isCivilian())
                 destination.civilianUnit
             else
-                destination.militaryUnit
+                destination.firstMilitaryUnit()
             )?: return // The precondition guarantees that there is an eligible same-type unit at the destination
         otherUnit.stopEscorting()
         val ourOldPosition = unit.getTile()
@@ -695,9 +695,9 @@ class UnitMovement(val unit: MapUnit) {
 
     private fun swapMoveEscortPair(destination: Tile) {
         val escortedUnit = unit.getOtherEscortUnit() ?: return
-        val destinationWasEscortingUnit = destination.militaryUnit?.takeIf { it.isEscorting() }
+        val destinationWasEscortingUnit = destination.firstMilitaryUnit()?.takeIf { it.isEscorting() }
         unit.stopEscorting() // If a moveToTile comes first - it would try to keep the escort and fail
-        fun MapUnit.needsSwapTo() = (if (isCivilian()) destination.civilianUnit else destination.militaryUnit) != null
+        fun MapUnit.needsSwapTo() = (if (isCivilian()) destination.civilianUnit else destination.firstMilitaryUnit()) != null
         fun MapUnit.swapOrMoveToDestination() =
             if (needsSwapTo()) movement.swapMoveToTile(destination)
             else movement.moveToTile(destination)
@@ -752,12 +752,15 @@ class UnitMovement(val unit: MapUnit) {
             && !unit.getOtherEscortUnit()!!.movement.canMoveTo(tile, assumeCanPassThrough, allowSwap, includeOtherEscortUnit = false))
             return CannotMoveToReason.EscortCannotMove
 
+        val allowStacking = unit.civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.AllowUnitStacking)
         val tileIsEmpty = if (unit.isCivilian())
             (tile.civilianUnit == null || (allowSwap && tile.civilianUnit!!.owner == unit.owner))
-                && (tile.militaryUnit == null || tile.militaryUnit!!.owner == unit.owner)
+                && tile.militaryUnits.all { it.owner == unit.owner }
         else
         // can skip checking for airUnit since not a city
-            (tile.militaryUnit == null || (allowSwap && tile.militaryUnit!!.owner == unit.owner))
+            (tile.militaryUnits.isEmpty()
+                || (allowStacking && tile.militaryUnits.all { it.owner == unit.owner })
+                || (allowSwap && tile.militaryUnits.size == 1 && tile.militaryUnits.first().owner == unit.owner))
                 && (tile.civilianUnit == null || tile.civilianUnit!!.owner == unit.owner || unit.civ.isAtWarWith(tile.civilianUnit!!.civ))
 
         if (!tileIsEmpty) return CannotMoveToReason.TileIsNotEmpty
@@ -803,7 +806,7 @@ class UnitMovement(val unit: MapUnit) {
     /** Military or civilian unit standing on [tile] that a swap would move away. */
     @Readonly
     private fun unitLeavingOnSwap(tile: Tile): MapUnit? {
-        val departing = if (unit.isCivilian()) tile.civilianUnit else tile.militaryUnit
+        val departing = if (unit.isCivilian()) tile.civilianUnit else tile.firstMilitaryUnit()
         if (departing == null || departing == unit) return null
         if (departing.owner != unit.owner) return null
         return departing
@@ -841,8 +844,7 @@ class UnitMovement(val unit: MapUnit) {
                 return null // if city is free - no problem, get in
         } // let's check whether it enters city on carrier now...
 
-        if (tile.militaryUnit != null) {
-            val unitAtDestination = tile.militaryUnit!!
+        for (unitAtDestination in tile.militaryUnits) {
             if (unitAtDestination.canTransport(unit)) return null
         }
         return CannotMoveToReason.NoAirUnitTransport

@@ -123,7 +123,7 @@ class NextTurnAutomationTest(private val algorithm: PathfindingAlgorithm) {
         assertTrue("victim was destroyed during the pass", victim.isDestroyed)
         assertTrue("destruction was the earlier unit's promotion effect", victim.promotions.promotions.contains(doom.name))
         assertFalse("destroyed unit was not promoted on its own turn", victim.promotions.promotions.contains(lead.name))
-        assertTrue(victimTile.militaryUnit !== victim)
+        assertTrue(victimTile.firstMilitaryUnit() !== victim)
         assertTrue("bystander was still promoted", bystander.promotions.promotions.contains(lead.name))
         assertFalse(bystander.isDestroyed)
         assertTrue(

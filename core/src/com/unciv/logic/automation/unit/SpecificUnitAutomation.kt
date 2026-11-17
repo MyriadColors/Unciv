@@ -45,7 +45,7 @@ object SpecificUnitAutomation {
         val civ = general.civ()
         val militaryUnitTilesInDistance = general.getDistanceToTiles().keys
             .filter { tile ->
-                tile.militaryUnit?.civ() == civ
+                tile.militaryUnits.any { u -> u.civ() == civ }
                     && (tile.civilianUnit == null || tile.civilianUnit == general)
             }
 
@@ -56,8 +56,8 @@ object SpecificUnitAutomation {
 
         val militaryUnitTile = militaryUnitTilesInDistance.maxByOrNull { unitTile ->
             val nearbyTiles = unitTile.getExploredTilesInDistance(2).toList()
-            (2 * nearbyTiles.count { it.militaryUnit?.civ() == civ }
-                - nearbyTiles.count { it.militaryUnit?.civ() != civ }
+            (2 * nearbyTiles.count { it.militaryUnits.any { u -> u.civ() == civ } }
+                - nearbyTiles.count { it.militaryUnits.any { u -> u.civ() != civ } }
                 - if (closestReachableEnemyCityTile != null) 3 * unitTile.aerialDistanceTo(closestReachableEnemyCityTile) else 0)
             // Scoring here is found to help AI defeat former AI,
             // a more robust scoring may be necessary to avoid leaving generals en-prise,
@@ -273,7 +273,7 @@ object SpecificUnitAutomation {
                     }
                 }
                 // Don't move until you're accompanied by a military unit if there are enemies nearby.
-                if (unit.getTile().militaryUnit == null && enemyUnitsNearby) return true
+                if (unit.getTile().militaryUnits.isEmpty() && enemyUnitsNearby) return true
                 unit.tryHeadTowards(city.getCenterTile())
                 return true
             }

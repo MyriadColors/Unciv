@@ -220,9 +220,9 @@ object Automation {
                 
             isMissingNavalUnitsForCityDefence = numberOfOurConnectedCities > numberOfOurNavalMeleeUnits
 
-            removeShips = findWaterConnectedCitiesAndEnemies.getReachedTiles().none {
-                        (it.isCityCenter() && it.getOwner() != city.civ)
-                                || (it.militaryUnit != null && it.militaryUnit!!.civ != city.civ)
+            removeShips = findWaterConnectedCitiesAndEnemies.getReachedTiles().none { tile ->
+                        (tile.isCityCenter() && tile.getOwner() != city.civ)
+                                || tile.militaryUnits.any { it.civ != city.civ }
                     } // there is absolutely no reason for you to make water units on this body of water.
         }
 
@@ -244,7 +244,7 @@ object Automation {
 
         val chosenUnit: BaseUnit
         if (!city.civ.isAtWar()
-                && city.civ.cities.any { it.getCenterTile().militaryUnit == null }
+                && city.civ.cities.any { !it.getCenterTile().hasMilitaryUnit() }
                 && militaryUnits.any { it.isRanged() } // this is for city defence so get a ranged unit if we can
         ) {
             chosenUnit = militaryUnits

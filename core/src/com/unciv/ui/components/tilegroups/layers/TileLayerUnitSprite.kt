@@ -80,7 +80,7 @@ class TileLayerUnitSprite(tileGroup: TileGroup, size: Float) : TileLayer(tileGro
         val isMilitarySlotShown = isPixelUnitsEnabled && isViewable
 
         civilianSlot = updateSlot(civilianSlot, tileGroup.tileView.civilianUnit, isShown = isCivilianSlotShown)
-        militarySlot = updateSlot(militarySlot, tileGroup.tileView.militaryUnit, isShown = isMilitarySlotShown)
+        militarySlot = updateSlot(militarySlot, tileGroup.tileView.firstMilitaryUnit(), isShown = isMilitarySlotShown)
     }
 
     override fun determineVisibility() {

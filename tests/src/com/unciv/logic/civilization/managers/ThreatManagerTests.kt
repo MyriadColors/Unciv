@@ -94,13 +94,13 @@ class ThreatManagerTests {
         val centerTile = testGame.getTile(0,0)
         testGame.addUnit("Warrior", enemyCiv, testGame.getTile(3,0))
         assertEquals(3, ThreatManager.getDistanceToClosestEnemyUnit(civView, cache, view(centerTile), 5))
-        testGame.getTile(3,0).militaryUnit!!.removeFromTile()
+        testGame.getTile(3,0).firstMilitaryUnit()!!.removeFromTile()
         testGame.addUnit("Warrior", enemyCiv, testGame.getTile(4,0))
         testGame.addUnit("Warrior", enemyCiv, testGame.getTile(4,1))
         assertEquals(4, ThreatManager.getDistanceToClosestEnemyUnit(civView, cache, view(centerTile), 5))
-        testGame.getTile(4,0).militaryUnit!!.removeFromTile()
+        testGame.getTile(4,0).firstMilitaryUnit()!!.removeFromTile()
         assertEquals(4, ThreatManager.getDistanceToClosestEnemyUnit(civView, cache, view(centerTile), 5, false))
-        testGame.getTile(4,1).militaryUnit!!.removeFromTile()
+        testGame.getTile(4,1).firstMilitaryUnit()!!.removeFromTile()
         assertEquals(5, ThreatManager.getDistanceToClosestEnemyUnit(civView, cache, view(centerTile), 5, false))
     }
 
@@ -183,7 +183,7 @@ class ThreatManagerTests {
         testGame.addUnit("Warrior", civ, centerTile)
         testGame.addUnit("Warrior", enemyCiv, testGame.getTile(3,0))
         testGame.addUnit("Archer", enemyCiv, testGame.getTile(-3,0))
-        val dangerousTiles = ThreatManager.getDangerousTiles(cache, gameView.getMapUnitView(centerTile.militaryUnit!!), 3)
+        val dangerousTiles = ThreatManager.getDangerousTiles(cache, gameView.getMapUnitView(centerTile.firstMilitaryUnit()!!), 3)
         assertEquals(null, testGame.getTile(3,0).getTilesInDistance(1).firstOrNull {tile -> !dangerousTiles.contains(view(tile))})
         assertEquals(null, testGame.getTile(-3,0).getTilesInDistance(2).firstOrNull {tile -> !dangerousTiles.contains(view(tile))})
     }

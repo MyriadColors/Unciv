@@ -200,10 +200,11 @@ object MovementCost {
                 if (neighbor.aerialDistanceTo(to) == 1
                     && unit.civ.isAtWarWith(neighbor.getOwner()!!))
                         return true
-            } else if (neighbor.militaryUnit != null) {
-                if (neighbor.aerialDistanceTo(to) == 1
-                    && (neighbor.militaryUnit!!.type.isWaterUnit() || (unit.type.isLandUnit() && !neighbor.militaryUnit!!.isEmbarked()))
-                    && unit.civ.isAtWarWith(neighbor.militaryUnit!!.civ))
+            } else if (neighbor.militaryUnits.isNotEmpty()) {
+                if (neighbor.aerialDistanceTo(to) == 1 && neighbor.militaryUnits.any {
+                        (it.type.isWaterUnit() || (unit.type.isLandUnit() && !it.isEmbarked()))
+                            && unit.civ.isAtWarWith(it.civ)
+                    })
                         return true
             }
         }

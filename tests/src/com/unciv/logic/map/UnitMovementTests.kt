@@ -365,7 +365,7 @@ class UnitMovementTests(private val pathfindingAlgorithm: PathfindingAlgorithm) 
         assertSame(civInfo, worker.civ)
         assertSame(testGame.tileMap[1, 2], worker.currentTile)
         assertSame(worker.currentTile, unit.currentTile)
-        assertSame(unit, unit.currentTile.militaryUnit)
+        assertSame(unit, unit.currentTile.firstMilitaryUnit())
         assertSame(worker, unit.currentTile.civilianUnit)
     }
 

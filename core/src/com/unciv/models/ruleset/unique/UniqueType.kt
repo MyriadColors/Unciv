@@ -1111,6 +1111,8 @@ enum class UniqueType(
         docDescription = "In this case, 'starting era' means the first defined Era in the entire ruleset."),
     AllowRazeCapital("Allow raze capital", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
     AllowRazeHolyCity("Allow raze holy city", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
+    AllowUnitStacking("Allows unlimited military units per tile", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
+    Civ4StackCombat("Uses Civ IV stack combat", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
     CityStatesSearchForFirstCitySite(
         "City-states search for first city location",
         UniqueTarget.ModOptions,

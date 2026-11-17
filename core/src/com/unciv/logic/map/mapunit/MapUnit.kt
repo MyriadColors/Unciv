@@ -774,7 +774,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
     @Readonly
     fun getOtherEscortUnit(): MapUnit? {
         if (!::currentTile.isInitialized) return null // In some cases we might not have the unit placed on the map yet
-        if (isCivilian()) return getTile().militaryUnit
+        if (isCivilian()) return getTile().firstMilitaryUnit()
         if (isMilitary()) return getTile().civilianUnit
         return null
     }
@@ -911,7 +911,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
         if (isEscorting() && !getOtherEscortUnit()!!.hasMovement()) return
 
         val enemyUnitsInWalkingDistance = movement.getDistanceToTiles().keys
-                .filter { it.militaryUnit != null && civ.isAtWarWith(it.militaryUnit!!.civ) }
+                .filter { tile -> tile.militaryUnits.any { civ.isAtWarWith(it.civ) } }
         if (enemyUnitsInWalkingDistance.isNotEmpty()) {
             if (isMoving()) // stop on enemy in sight
                 action = null
@@ -1008,7 +1008,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
     // Could be local to moveThroughTile, therefore left in the state-changing region
     private fun Tile.getUnguardedCivilian(attacker: MapUnit): MapUnit? {
         return when {
-            militaryUnit != null && militaryUnit != attacker -> null
+            militaryUnits.any { it != attacker } -> null
             civilianUnit != null -> civilianUnit!!
             else -> null
         }
@@ -1064,7 +1064,7 @@ class MapUnit : IsPartOfGameInfoSerialization {
             }
             baseUnit.isAirUnit() -> tile.airUnits.add(this)
             isCivilian() -> tile.civilianUnit = this
-            else -> tile.militaryUnit = this
+            else -> if (!tile.militaryUnits.contains(this)) tile.militaryUnits.add(this)
         }
         // this check is here in order to not load the fresh built unit into carrier right after the build
         if (baseUnit.isAirUnit()){

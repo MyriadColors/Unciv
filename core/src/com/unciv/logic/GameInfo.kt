@@ -509,11 +509,10 @@ class GameInfo : IsPartOfGameInfoSerialization, HasGameInfoSerializationVersion 
 
     private fun notifyOfCloseEnemyUnits(thisPlayer: Civilization) {
         val enemyUnitsCloseToTerritory = thisPlayer.viewableTiles
-            .filter {
-                it.militaryUnit != null && it.militaryUnit!!.civ != thisPlayer
-                        && thisPlayer.isAtWarWith(it.militaryUnit!!.civ)
-                        && (it.getOwner() == thisPlayer || it.neighbors.any { neighbor -> neighbor.getOwner() == thisPlayer }
-                        && it.militaryUnit!!.isVisibleTo(thisPlayer))
+            .filter { tile ->
+                tile.militaryUnits.any {
+                    it.civ != thisPlayer && thisPlayer.isAtWarWith(it.civ) && it.isVisibleTo(thisPlayer)
+                } && (tile.getOwner() == thisPlayer || tile.neighbors.any { neighbor -> neighbor.getOwner() == thisPlayer })
             }
 
         // enemy units IN our territory
@@ -562,7 +561,7 @@ class GameInfo : IsPartOfGameInfoSerialization, HasGameInfoSerializationVersion 
         // don't flood the player with similar messages. instead cycle through units by clicking the message multiple times.
         if (tiles.size < 3) {
             for (tile in tiles) {
-                val unitName = tile.militaryUnit!!.name
+                val unitName = tile.firstMilitaryUnit()!!.name
                 thisPlayer.addNotification("An enemy [$unitName] was spotted $inOrNear our territory", tile.position, NotificationCategory.War, NotificationIcon.War, unitName)
             }
         } else {

@@ -154,9 +154,9 @@ class UnitTurnManager(val unit: MapUnit) {
 
         // Wake sleeping units if there's an enemy in vision range:
         // Military units always but civilians only if not protected.
-        if (unit.isSleeping() && (unit.isMilitary() || (unit.currentTile.militaryUnit == null && !unit.currentTile.isCityCenter())) &&
-                unit.currentTile.getTilesInDistance(3).any {
-                    it.militaryUnit != null && it in unit.civ.viewableTiles && it.militaryUnit!!.civ.isAtWarWith(unit.civ)
+        if (unit.isSleeping() && (unit.isMilitary() || (!unit.currentTile.hasMilitaryUnit() && !unit.currentTile.isCityCenter())) &&
+                unit.currentTile.getTilesInDistance(3).any { tile ->
+                    tile in unit.civ.viewableTiles && tile.militaryUnits.any { it.civ.isAtWarWith(unit.civ) }
                 }
         )  unit.action = null
 

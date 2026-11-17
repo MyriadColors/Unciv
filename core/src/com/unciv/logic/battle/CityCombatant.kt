@@ -63,8 +63,9 @@ class CityCombatant(val city: City) : ICombatant {
         // Industrial - 32.4, Modern - 51, Atomic - 72.5, All - 118.3
 
         // Garrisoned unit gives up to 20% of strength to city, health-dependant
-        if (cityTile.militaryUnit != null)
-            strength += cityTile.militaryUnit!!.baseUnit.strength * (cityTile.militaryUnit!!.health / 100f) * modConstants.cityStrengthFromGarrison
+        val garrison = cityTile.firstMilitaryUnit()
+        if (garrison != null)
+            strength += garrison.baseUnit.strength * (garrison.health / 100f) * modConstants.cityStrengthFromGarrison
 
         var buildingsStrength = city.getStrength()
         val gameContext = GameContext(getCivInfo(), city, ourCombatant = this, theirCombatant = theirCombatant, combatAction = combatAction)

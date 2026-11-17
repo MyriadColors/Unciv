@@ -236,7 +236,7 @@ class TurnManager(val civInfo: Civilization) {
     // Higher is better
     @Readonly
     private fun rateTileForRevoltSpawn(tile: Tile): Int {
-        if (tile.isWater || tile.militaryUnit != null || tile.civilianUnit != null || tile.isCityCenter() || tile.isImpassible())
+        if (tile.isWater || tile.hasMilitaryUnit() || tile.civilianUnit != null || tile.isCityCenter() || tile.isImpassible())
             return -1
         var score = 10
         if (tile.improvement == null) {

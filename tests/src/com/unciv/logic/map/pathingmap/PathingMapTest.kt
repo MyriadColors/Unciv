@@ -247,7 +247,7 @@ class PathingMapTest {
         unit.currentMovement = 3f
 
         val pathing = PathingMap.createUnitPathingMap(unit)
-        val attackableTiles = pathing.bfsAllMatchingTiles(1) { tile, _ -> tile.militaryUnit?.civ == evemyCiv}
+        val attackableTiles = pathing.bfsAllMatchingTiles(1) { tile, _ -> tile.militaryUnits.any { it.civ == evemyCiv } }
         
         // cant hit enemy at -4,2 or 3,2 because unit would have no movement left.
         val expected = listOf(

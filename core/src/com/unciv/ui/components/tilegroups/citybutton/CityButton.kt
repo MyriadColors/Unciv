@@ -194,13 +194,13 @@ class CityButton(val foreignCityView: ForeignCityView, private val tileGroup: Ti
                     (neighbor.civilianUnit != null) && direction.x == 0 && direction.eq(0, 1) ->
                         insertHiddenUnitMarker(HiddenUnitMarkerPosition.Left)
                     // detect military under the city
-                    neighbor.militaryUnit != null && direction.eq(1, 1) ->
+                    neighbor.militaryUnits.isNotEmpty() && direction.eq(1, 1) ->
                         insertHiddenUnitMarker(HiddenUnitMarkerPosition.Center)
                     // detect civilian right-below the city
                     (neighbor.civilianUnit != null) && direction.eq(1, 0) ->
                         insertHiddenUnitMarker(HiddenUnitMarkerPosition.Right)
                 }
-            } else if (neighbor.militaryUnit != null) {
+            } else if (neighbor.militaryUnits.isNotEmpty()) {
                 when {
                     // detect military left from the city
                     direction.eq(0, 1) ->

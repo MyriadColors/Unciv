@@ -512,11 +512,12 @@ object DiplomacyAutomation {
         val nearbyForceByCiv = Counter<Civilization>()
 
         for (tile in nearbyTiles) {
-            val unit = tile.militaryUnit ?: continue
-            if (! unit.civ.isMajorCiv || unit.civ == civInfo || !unit.isVisibleTo(civInfo))
-                continue
-            nearbyUnitCountByCiv.add(unit.civ, 1)
-            nearbyForceByCiv.add(unit.civ, unit.getForceEvaluation())
+            for (unit in tile.militaryUnits) {
+                if (!unit.civ.isMajorCiv || unit.civ == civInfo || !unit.isVisibleTo(civInfo))
+                    continue
+                nearbyUnitCountByCiv.add(unit.civ, 1)
+                nearbyForceByCiv.add(unit.civ, unit.getForceEvaluation())
+            }
         }
 
         fun decideWhetherToDenounce(otherCiv: Civilization) {

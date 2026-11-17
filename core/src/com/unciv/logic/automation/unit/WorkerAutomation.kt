@@ -300,7 +300,7 @@ class WorkerAutomation(
         if (tile.isMarkedForCreatesOneImprovement()) return false
         if (!(tile == currentTile
                     || (unitView.getBaseUnit().isCivilian() && (tile.civilianUnit == null || !tile.civilianUnit!!.hasUnique(UniqueType.BuildImprovements)))
-                    || (unitView.getBaseUnit().isMilitary && (tile.militaryUnit == null || !tile.militaryUnit!!.hasUnique(UniqueType.BuildImprovements)))))
+                    || (unitView.getBaseUnit().isMilitary && (tile.militaryUnits.isEmpty() || tile.militaryUnits.none { it.hasUnique(UniqueType.BuildImprovements) }))))
             return false
         if (tile.owningCity() != null && tile.getOwner() != civ) return false
         if (tile.isCityCenter()) return false

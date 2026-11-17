@@ -184,7 +184,7 @@ class BarbarianManager : IsPartOfGameInfoSerialization {
     ): MapUnit? {
         if (allegiance.isBarbarian) {
             // Empty camp - spawn a defender
-            if (tile.militaryUnit == null)
+            if (!tile.hasMilitaryUnit())
                 // Try spawning a unit on this tile, return null if unsuccessful
                 return spawnUnit(tile.position, false)
 
@@ -193,7 +193,7 @@ class BarbarianManager : IsPartOfGameInfoSerialization {
                 return null
 
             var nearbyBarbarians = 0
-            tile.forEachTileInDistance(4) { if (it.militaryUnit?.civ?.isBarbarian == true) nearbyBarbarians++ }
+            tile.forEachTileInDistance(4) { nearbyTile -> nearbyBarbarians += nearbyTile.militaryUnits.count { it.civ.isBarbarian } }
             // Too many barbarians around already?
             if (nearbyBarbarians > 2)
                 return null

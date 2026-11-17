@@ -117,7 +117,7 @@ class BattleDamageTest {
     @Test
     fun `should retrieve modifiers from lack of strategic resource`() {
         // given
-        defaultAttackerTile.militaryUnit = null // otherwise we'll also get a flanking bonus
+        defaultAttackerTile.militaryUnits.clear() // otherwise we'll also get a flanking bonus
         val attackerTile = testGame.getTile(GridCoord.Zero)
         val attackerUnit = testGame.addUnit("Horseman", attackerCiv, attackerTile)
 

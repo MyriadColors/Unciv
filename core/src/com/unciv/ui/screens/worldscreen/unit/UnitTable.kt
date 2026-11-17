@@ -241,19 +241,24 @@ class UnitTable(val worldScreen: WorldScreen) : Table() {
         // 5. None (Deselect)
 
         val civUnit = selectedTileView.civilianUnit
-        val milUnit = selectedTileView.militaryUnit
+        val milUnits = selectedTileView.militaryUnits
+        val firstEligibleMilUnit = milUnits.firstOrNull { it.isEligible() }
 
         val nextUnitView: ForeignMapUnitView?
         val priorityUnit = when {
-            milUnit != null && milUnit.isEligible() -> milUnit
+            firstEligibleMilUnit != null -> firstEligibleMilUnit
             civUnit != null && civUnit.isEligible() -> civUnit
             else -> null
         }
 
+        val curMilIdx = milUnits.indexOfFirst { it == curUnit }
         nextUnitView = when {
             curUnit == null -> priorityUnit
-            curUnit == civUnit && milUnit != null && milUnit.isEligible() -> null
-            curUnit == milUnit && civUnit != null && civUnit.isEligible() -> civUnit
+            curMilIdx >= 0 -> {
+                val nextInStack = milUnits.drop(curMilIdx + 1).firstOrNull { it.isEligible() }
+                nextInStack ?: if (civUnit != null && civUnit.isEligible()) civUnit else null
+            }
+            curUnit == civUnit && firstEligibleMilUnit != null -> null
             else -> priorityUnit
         }
 

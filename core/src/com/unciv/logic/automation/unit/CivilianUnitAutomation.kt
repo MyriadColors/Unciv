@@ -181,7 +181,7 @@ object CivilianUnitAutomation {
             .filter { ThreatManager.doesTileHaveMilitaryEnemy(unit.civ(), it) }
 
         if (enemyUnitsInWalkingDistance.isNotEmpty() && !unit.getBaseUnit().isMilitary
-            && unit.getTile().militaryUnit == null && !unit.getTile().isCityCenter()) {
+            && unit.getTile().militaryUnits.isEmpty() && !unit.getTile().isCityCenter()) {
             runAway(unit, cache)
             return true
         }
@@ -199,7 +199,7 @@ object CivilianUnitAutomation {
         }
         val defensiveUnit = reachableTiles.keys
             .firstOrNull {
-                it.militaryUnit?.civ() == unit.civ() && it.civilianUnit == null
+                it.militaryUnits.any { u -> u.civ() == unit.civ() } && it.civilianUnit == null
             }
         if (defensiveUnit != null) {
             unit.tryMoveToTile(defensiveUnit)

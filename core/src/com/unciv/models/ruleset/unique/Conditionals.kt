@@ -254,7 +254,7 @@ object Conditionals {
             UniqueType.ConditionalBelowPopulationFilter ->
                 checkOnCity { population.getPopulationFilterAmount(conditional.params[1]) < conditional.params[0].toInt() }
             UniqueType.ConditionalWhenGarrisoned ->
-                checkOnCity { getCenterTile().militaryUnit?.canGarrison() == true }
+                checkOnCity { getCenterTile().militaryUnits.any { it.canGarrison() } }
 
             UniqueType.ConditionalVsCity -> state.theirCombatant?.matchesFilter("City", false) == true
             UniqueType.ConditionalVsUnits,  UniqueType.ConditionalVsCombatant -> state.theirCombatant?.matchesFilter(conditional.params[0]) == true
@@ -373,10 +373,10 @@ object Conditionals {
                 // Check if the unit is currently transported and being carried by matching filter
                 if (state.relevantUnit == null || !state.relevantUnit!!.isTransported) false
                 else {
-                    val carrier = state.relevantUnit!!.getTile().militaryUnit
-                    // Only true if: 1) carrier exists, 2) carrier is NOT the unit itself, 3) carrier matches filter
-                    carrier != null && carrier != state.relevantUnit && 
-                    carrier.matchesFilter(conditional.params[0]) == true
+                    val relevantUnit = state.relevantUnit!!
+                    relevantUnit.getTile().militaryUnits.any { carrier ->
+                        carrier != relevantUnit && carrier.matchesFilter(conditional.params[0]) == true
+                    }
                 }
             }
             

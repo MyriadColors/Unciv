@@ -434,7 +434,7 @@ object NextTurnAutomation {
             .flatMap { it.cities }
             .filter {
                 var count = 0
-                it.getCenterTile().forEachTileInDistance(4) { tile -> if (tile.militaryUnit?.civ == civInfo) count++ }
+                it.getCenterTile().forEachTileInDistance(4) { tile -> count += tile.militaryUnits.count { unit -> unit.civ == civInfo } }
                 count > 4
             }
             .toList()
@@ -500,7 +500,7 @@ object NextTurnAutomation {
     private fun automateCityConquer(civView: CivView, city: City, cache: AutomationCache){
         val civInfo = civView.getCiv()
         @Readonly fun ourUnitsInRange(range: Int) = city.getCenterTile().getTilesInDistance(range)
-            .mapNotNull { it.militaryUnit }.filter { it.civ == civInfo && (!it.baseUnit.isMelee() || it.health > 30) }.toList()
+            .flatMap { it.militaryUnits }.filter { it.civ == civInfo && (!it.baseUnit.isMelee() || it.health > 30) }.toList()
         
         
         fun attackIfPossible(unit: MapUnit, tile: Tile){
@@ -537,7 +537,7 @@ object NextTurnAutomation {
             if (attackableEnemies.isEmpty()) continue
             val mostSurroundedEnemy = attackableEnemies.maxBy {
                 var count = 0
-                it.tileToAttack.forEachTileAtDistance(1) { tile -> if (tile.militaryUnit?.civ == unit.civ) count++ }
+                it.tileToAttack.forEachTileAtDistance(1) { tile -> if (tile.militaryUnits.any { u -> u.civ == unit.civ }) count++ }
                 count
             } // aims to maximize flanking bonus and number of hits in order to get kills
 
@@ -550,7 +550,7 @@ object NextTurnAutomation {
         val civInfo = civView.getCiv()
         val capitalTile = civInfo.getCapital()!!.getCenterTile()
         @Readonly fun bestUnitInRange(tile: Tile, range: Int) = tile.getTilesInDistance(range)
-            .mapNotNull { it.militaryUnit }.filter {
+            .flatMap { it.militaryUnits }.filter {
                 it.civ == civInfo
                     && it.health >= 100
                     // only draft a unit from the core of the empire, or it'll interfere with other anti-barb activities

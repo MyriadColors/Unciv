@@ -76,11 +76,13 @@ object TileDescription {
                 tileView.civilianUnit!!.name.tr() + " - " + tileView.civilianUnit!!.civName.tr(),
                 link = "Unit/${tileView.civilianUnit!!.name}"
             )
-        if (tileView.militaryUnit != null && isViewableToPlayer && !hideUnits) {
-            val milUnitString = tileView.militaryUnit!!.name.tr() +
-                    (if (tileView.militaryUnit!!.unitHealth < 100) "(" + tileView.militaryUnit!!.unitHealth + ")" else "") +
-                    " - " + tileView.militaryUnit!!.civName.tr()
-            lineList += FormattedLine(milUnitString, link = "Unit/${tileView.militaryUnit!!.name}")
+        if (isViewableToPlayer && !hideUnits) {
+            for (milUnit in tileView.militaryUnits) {
+                val milUnitString = milUnit.name.tr() +
+                        (if (milUnit.unitHealth < 100) "(" + milUnit.unitHealth + ")" else "") +
+                        " - " + milUnit.civName.tr()
+                lineList += FormattedLine(milUnitString, link = "Unit/${milUnit.name}")
+            }
         }
 
         val defenceBonus = tileView.getDefensiveBonus()
