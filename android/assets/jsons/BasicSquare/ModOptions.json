@@ -1,3 +1,19 @@
 {
     "isBaseRuleset": true,
+    "uniques": [
+        "Can convert gold to science with sliders",
+        "Uses Civ IV Stack Combat",
+        "Allow raze capital",
+        "Uses Civ IV Civics",
+        "Uses Civ IV City Health",
+        "Uses Civ IV Religion"
+    ],
+    "constants": {
+        "cityStrengthBase": 1.0,
+        "cityStrengthPerPop": 0.05,
+        "cityStrengthFromTechsMultiplier": 1.0,
+        "cityStrengthFromTechsExponent": 1.0,
+        "cityStrengthFromTechsFullMultiplier": 1.0,
+        "cityStrengthFromGarrison": 0.05
+    }
 }
