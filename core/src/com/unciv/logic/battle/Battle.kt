@@ -143,6 +143,8 @@ object Battle {
 
         val damageDealt = takeDamage(attacker, defender) + extraRangedAttackDamage
 
+        applyCollateralDamage(attacker, defender, attackedTile)
+
         // check if unit is captured by the attacker (prize ships unique)
         // As ravignir clarified in issue #4374, this only works for aggressor
         val captureMilitaryUnitSuccess = BattleUnitCapture.tryCaptureMilitaryUnit(attacker, defender, attackedTile)
@@ -403,11 +405,25 @@ object Battle {
             //melee attack is complicated, because either side may defeat the other midway
             //so...for each round, we randomize who gets the attack in. Seems to be a good way to work for now.
 
+            var minDefenderHealth = 0
+            if (attacker is MapUnitCombatant && defender is MapUnitCombatant) {
+                var maxAttackDamagePercent = 0
+                for (unique in attacker.unit.getMatchingUniques(UniqueType.MaxAttackDamage)) {
+                    val value = unique.params[0].toInt()
+                    if (value > maxAttackDamagePercent) maxAttackDamagePercent = value
+                }
+                if (maxAttackDamagePercent > 0) {
+                    minDefenderHealth = (100 - maxAttackDamagePercent).coerceAtLeast(1)
+                }
+            }
+
             while (potentialDamageToDefender + potentialDamageToAttacker > 0) {
+                if (minDefenderHealth > 0 && defender.getHealth() <= minDefenderHealth) break
                 if (rng.nextInt(potentialDamageToDefender + potentialDamageToAttacker) < potentialDamageToDefender) {
                     potentialDamageToDefender--
                     defender.takeDamage(1)
                     if (defender.isDefeated()) break
+                    if (minDefenderHealth > 0 && defender.getHealth() <= minDefenderHealth) break
                 } else {
                     potentialDamageToAttacker--
                     attacker.takeDamage(1)
@@ -423,6 +439,44 @@ object Battle {
 
         plunderFromDamage(attacker, defender, attackerDamageDealt)
         return DamageDealt(attackerDamageDealt, defenderDamageDealt)
+    }
+
+    private fun applyCollateralDamage(attacker: ICombatant, defender: ICombatant, attackedTile: Tile) {
+        if (attacker !is MapUnitCombatant) return
+        var baseCollateralPercent = 0
+        var maxTargets = 0
+        for (unique in attacker.unit.getMatchingUniques(UniqueType.CollateralDamage)) {
+            baseCollateralPercent += unique.params[0].toInt()
+            maxTargets = max(maxTargets, unique.params[1].toInt())
+        }
+        if (baseCollateralPercent <= 0 || maxTargets <= 0) return
+
+        var bonusPercent = 0
+        for (unique in attacker.unit.getMatchingUniques(UniqueType.CollateralDamageBonus)) {
+            bonusPercent += unique.params[0].toInt()
+        }
+        val bonusMultiplier = 1f + bonusPercent / 100f
+        val primaryDefenderUnit = (defender as? MapUnitCombatant)?.unit
+        var targetsHit = 0
+
+        for (targetUnit in attackedTile.militaryUnits.toList()) {
+            if (targetsHit >= maxTargets) break
+            if (targetUnit == primaryDefenderUnit) continue
+            if (targetUnit.isCivilian()) continue
+            if (!attacker.getCivInfo().isAtWarWith(targetUnit.civ)) continue
+            if (targetUnit.hasUnique(UniqueType.ImmuneToCollateralDamage)) continue
+
+            val targetCombatant = MapUnitCombatant(targetUnit)
+            val attackerStr = attacker.getAttackingStrength(targetCombatant).toFloat()
+            val defenderStr = targetCombatant.getDefendingStrength(attacker).coerceAtLeast(1).toFloat()
+            val rawDamage = (baseCollateralPercent * bonusMultiplier * (attackerStr / defenderStr)).roundToInt().coerceAtLeast(1)
+            val maxAllowedDamage = (targetUnit.health - 1).coerceAtLeast(0)
+            val actualDamage = rawDamage.coerceAtMost(maxAllowedDamage)
+            if (actualDamage > 0) {
+                targetCombatant.takeDamage(actualDamage)
+            }
+            targetsHit++
+        }
     }
 
     private fun triggerLosingHPUniques(

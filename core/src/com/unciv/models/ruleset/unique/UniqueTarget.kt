@@ -36,6 +36,7 @@ enum class UniqueTarget(
     Era(inheritsFrom = Global),
     Tech(inheritsFrom = Global),
     Policy(inheritsFrom = Global),
+    Civic(inheritsFrom = Global),
     FounderBelief("Uniques for Founder and Enhancer type Beliefs, that will apply to the founder of this religion", inheritsFrom = Global),
     FollowerBelief("Uniques for Pantheon and Follower type beliefs, that will apply to each city where the religion is the majority religion", inheritsFrom = Triggerable),
 
@@ -126,7 +127,7 @@ enum class UniqueTarget(
         // As Array so it can used in a vararg parameter list.
         val Displayable = arrayOf(
             Building, Unit, UnitType, Improvement, Tech, FollowerBelief, FounderBelief,
-            Terrain, Resource, Policy, Promotion, Nation, Ruins, Speed, EventChoice,
+            Terrain, Resource, Policy, Civic, Promotion, Nation, Ruins, Speed, EventChoice,
             Difficulty
         )
         val CanIncludeSuppression = arrayOf(

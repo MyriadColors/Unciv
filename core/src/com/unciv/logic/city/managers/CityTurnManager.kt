@@ -163,8 +163,10 @@ class CityTurnManager(val city: City) {
         }
         val stats = city.cityStats.currentCityStats
 
-        city.cityConstructions.endTurn(stats)
-        city.expansion.nextTurn(stats.culture)
+        if (!city.civ.isInAnarchy()) {
+            city.cityConstructions.endTurn(stats)
+            city.expansion.nextTurn(stats.culture)
+        }
         if (city.isBeingRazed) {
             var removedPopulation = 1
             city.civ.forEachMatchingUnique(UniqueType.CitiesAreRazedXTimesFaster) {
@@ -186,17 +188,46 @@ class CityTurnManager(val city: City) {
                             city.population.getFoodToNextPopulation() - 1 //...reduce below the new growth threshold
                 }
             }
-        } else city.population.nextTurn(city.foodForNextTurn())
+        } else if (!city.civ.isInAnarchy()) {
+            city.population.nextTurn(city.foodForNextTurn())
+        }
 
         // This should go after the population change, as that might impact the amount of followers in this city
-        if (city.civ.gameInfo.isReligionEnabled()) city.religion.endTurn()
+        if (!city.civ.isInAnarchy() && city.civ.gameInfo.isReligionEnabled()) city.religion.endTurn()
 
         if (city in city.civ.cities) { // city was not destroyed
             city.health = (city.health + 20).coerceAtMost(city.getMaxHealth())
+            if (city.defenseDamageTaken > 0)
+                city.defenseDamageTaken = (city.defenseDamageTaken - 5).coerceAtLeast(0)
+            processWorkedImprovementUpgrades()
             city.population.unassignExtraPopulation()
         }
         
         city.clearCaches()
+    }
+
+    private fun processWorkedImprovementUpgrades() {
+        for (tile in city.getWorkedTiles().toList()) {
+            val tileImprovement = tile.getUnpillagedTileImprovement() ?: continue
+            val upgradeUnique = tileImprovement.getMatchingUniques(
+                UniqueType.ImprovementUpgradesAfterTurns, tile.stateThisTile
+            ).firstOrNull() ?: continue
+
+            var bonusPercent = 0
+            for (growthUnique in city.civ.getMatchingUniques(UniqueType.ImprovementGrowthRate, tile.stateThisTile)) {
+                if (tileImprovement.matchesFilter(growthUnique.params[0], tile.stateThisTile))
+                    bonusPercent += growthUnique.params[1].toInt()
+            }
+
+            val increment = ((100 + bonusPercent) / 100).coerceAtLeast(1)
+            tile.improvementWorkedTurns += increment
+
+            val targetImprovementName = upgradeUnique.params[0]
+            val threshold = upgradeUnique.params[1].toInt()
+            if (tile.improvementWorkedTurns >= threshold && targetImprovementName in tile.ruleset.tileImprovements) {
+                tile.setImprovement(targetImprovementName, city.civ)
+            }
+        }
     }
 
 }

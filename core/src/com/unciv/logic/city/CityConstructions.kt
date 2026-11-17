@@ -865,7 +865,7 @@ class CityConstructions : IsPartOfGameInfoSerialization {
     fun isConstructionPurchaseAllowed(construction: INonPerpetualConstruction, stat: Stat, constructionBuyCost: Int): Boolean {
         return when {
             city.isPuppet && !city.getMatchingUniques(UniqueType.MayBuyConstructionsInPuppets).any() -> false
-            city.isInResistance() -> false
+            city.isInResistance() || city.civ.isInAnarchy() -> false
             !construction.isPurchasable(city.cityConstructions) -> false    // checks via 'rejection reason'
             construction is BaseUnit && !city.canPlaceNewUnit(construction) -> false
             !construction.canBePurchasedWithStat(city, stat) -> false

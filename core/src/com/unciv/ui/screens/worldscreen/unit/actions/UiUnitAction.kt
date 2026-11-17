@@ -204,7 +204,8 @@ enum class UiUnitActionType private constructor(
     Skip(UnitActionType.Skip, portrait("Skip"), uncivSound = UncivSound.Silent, useFrequency = 0f),
     ShowAdditionalActions("Show more", portrait("ShowMore"), false, useFrequency = 0f),
     HideAdditionalActions("Back", portrait("HideMore"), false, page = 1, useFrequency = 0f),
-    AddInCapital(UnitActionType.AddInCapital, portrait("AddInCapital"), uncivSound = UncivSound.Chimes, useFrequency = 80f)
+    AddInCapital(UnitActionType.AddInCapital, portrait("AddInCapital"), uncivSound = UncivSound.Chimes, useFrequency = 80f),
+    Bombard(UnitActionType.Bombard, portrait("Attack"), uncivSound = UncivSound.Bombard, useFrequency = 85f)
     ;
 
     /** For types backed by a logic [UnitActionType] */

@@ -39,6 +39,8 @@ class TurnManager(val civInfo: Civilization) {
             civInfo.gainStockpiledResource(stockpiledResource.resource, stockpiledResource.amount)
 
         civInfo.civConstructions.startTurn()
+        if (civInfo.gameInfo.ruleset.modOptions.hasUnique(UniqueType.CivicsMode))
+            civInfo.civics.initDefaults()
         civInfo.attacksSinceTurnStart.clear()
         civInfo.updateStatsForNextTurn() // for things that change when turn passes e.g. golden age, city state influence
 
@@ -321,18 +323,22 @@ class TurnManager(val civInfo: Civilization) {
             }
         }
 
-        civInfo.addGold(nextTurnStats.gold.toInt() )
+        if (!civInfo.isInAnarchy()) {
+            civInfo.addGold(nextTurnStats.gold.toInt())
 
-        if (civInfo.cities.isNotEmpty() && civInfo.gameInfo.ruleset.technologies.isNotEmpty())
-            civInfo.tech.endTurn(nextTurnStats.science.toInt())
+            if (civInfo.cities.isNotEmpty() && civInfo.gameInfo.ruleset.technologies.isNotEmpty())
+                civInfo.tech.endTurn(nextTurnStats.science.toInt())
 
-        civInfo.religionManager.endTurn(nextTurnStats.faith.toInt())
-        civInfo.totalFaithForContests += nextTurnStats.faith.toInt()
+            civInfo.religionManager.endTurn(nextTurnStats.faith.toInt())
+            civInfo.totalFaithForContests += nextTurnStats.faith.toInt()
 
-        civInfo.espionageManager.endTurn()
+            civInfo.espionageManager.endTurn()
 
-        if (civInfo.isMajorCiv) // City-states don't get great people!
-            civInfo.greatPeople.addGreatPersonPoints()
+            if (civInfo.isMajorCiv) // City-states don't get great people!
+                civInfo.greatPeople.addGreatPersonPoints()
+        } else {
+            civInfo.espionageManager.endTurn()
+        }
 
         // To handle tile's owner issue (#8246), we need to run cities being razed first.
         // a city can be removed while iterating (if it's being razed) so we need to iterate over a copy - sorting does one
@@ -344,6 +350,8 @@ class TurnManager(val civInfo: Civilization) {
         civInfo.temporaryUniques.endTurn()
 
         civInfo.goldenAges.endTurn(civInfo.getHappiness())
+        if (civInfo.anarchyTurns > 0)
+            civInfo.anarchyTurns = (civInfo.anarchyTurns - 1).coerceAtLeast(0)
         civInfo.units.getCivUnits().forEach { UnitTurnManager(it).endTurn() }  // This is the most expensive part of endTurn
         civInfo.diplomacy.values.toList().forEach { it.nextTurn() } // we copy the diplomacy values so if it changes in-loop we won't crash
         civInfo.cache.updateHasActiveEnemyMovementPenalty()

@@ -112,5 +112,6 @@ enum class UnitActionType(val value: String) {
     EnhanceReligion("Enhance a Religion"),
     GiftUnit("Gift unit"),
     Skip("Skip turn"),
-    AddInCapital("Add in capital")
+    AddInCapital("Add in capital"),
+    Bombard("Bombard")
 }

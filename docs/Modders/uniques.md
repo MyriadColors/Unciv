@@ -3476,6 +3476,16 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 
 	Applicable to: ModOptions
 
+??? example  "Allows unlimited military units per tile"
+	This unique does not support conditionals.
+
+	Applicable to: ModOptions
+
+??? example  "Uses Civ IV stack combat"
+	This unique does not support conditionals.
+
+	Applicable to: ModOptions
+
 ??? example  "City-states search for first city location"
 	By default, city-state settlers with no cities yet found on their current tile when valid (predetermined map-gen / editor start). With this unique they use the same nearby-site search as major civs.
 

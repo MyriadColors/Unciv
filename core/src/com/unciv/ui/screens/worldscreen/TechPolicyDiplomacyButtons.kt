@@ -81,7 +81,11 @@ class TechPolicyDiplomacyButtons(val worldScreen: WorldScreen) : Table(BaseScree
 
         policyScreenButton.add(ImageGetter.getImage("OtherIcons/Policies")).size(30f).pad(15f)
         policyButtonHolder.onActivation(binding = KeyboardBinding.SocialPolicies) {
-            game.pushScreen { PolicyPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState) }
+            val ruleset = worldScreen.selectedCiv.gameInfo.ruleset
+            if (ruleset.modOptions.hasUnique(com.unciv.models.ruleset.unique.UniqueType.CivicsMode) && ruleset.civicCategories.isNotEmpty())
+                game.pushScreen { com.unciv.ui.screens.pickerscreens.CivicPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState) }
+            else
+                game.pushScreen { PolicyPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState) }
         }
 
         diplomacyButton.add(ImageGetter.getImage("OtherIcons/DiplomacyW")).size(30f).pad(15f)

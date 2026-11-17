@@ -180,6 +180,9 @@ class Civilization : IsPartOfGameInfoSerialization {
 
     var tech = TechManager()
     var policies = PolicyManager()
+    var civics = CivicManager()
+    var anarchyTurns: Int = 0
+    @Readonly fun isInAnarchy(): Boolean = anarchyTurns > 0
     var civConstructions = CivConstructions()
     var questManager = QuestManager()
     var religionManager = ReligionManager()
@@ -331,6 +334,8 @@ class Civilization : IsPartOfGameInfoSerialization {
         toReturn.civID = civID
         toReturn.tech = tech.clone()
         toReturn.policies = policies.clone()
+        toReturn.civics = civics.clone()
+        toReturn.anarchyTurns = anarchyTurns
         toReturn.civConstructions = civConstructions.clone().also { it.setTransients(toReturn) }
         toReturn.religionManager = religionManager.clone()
         toReturn.questManager = questManager.clone()
@@ -629,6 +634,7 @@ class Civilization : IsPartOfGameInfoSerialization {
             .flatMap { city -> city.getMatchingUniquesWithNonLocalEffects(uniqueType, gameContext) }
         )
         yieldAll(policies.policyUniques.getMatchingUniques(uniqueType, gameContext))
+        yieldAll(civics.civicUniques.getMatchingUniques(uniqueType, gameContext))
         yieldAll(tech.techUniques.getMatchingUniques(uniqueType, gameContext))
         yieldAll(temporaryUniques.getMatchingTagUniques(uniqueType, gameContext))
         yieldAll(getEra().getMatchingUniques(uniqueType, gameContext))
@@ -646,6 +652,7 @@ class Civilization : IsPartOfGameInfoSerialization {
         for (i in 0..<cities.size)
             cities[i].forEachMatchingUniqueWithNonLocalEffects(uniqueType, gameContext, op)
         policies.policyUniques.forEachMatchingUnique(uniqueType, gameContext, op)
+        civics.civicUniques.forEachMatchingUnique(uniqueType, gameContext, op)
         tech.techUniques.forEachMatchingUnique(uniqueType, gameContext, op)
         temporaryUniques.forEachMatchingUnique(uniqueType, gameContext, op)
         getEra().forEachMatchingUnique(uniqueType, gameContext, op)
@@ -669,6 +676,7 @@ class Civilization : IsPartOfGameInfoSerialization {
         if (religionManager.religion != null)
             yieldAll(religionManager.religion!!.founderBeliefUniqueMap.getAllUniques())
         yieldAll(policies.policyUniques.getAllUniques())
+        yieldAll(civics.civicUniques.getAllUniques())
         yieldAll(tech.techUniques.getAllUniques())
         yieldAll(getEra().uniqueMap.getAllUniques())
         yieldAll(gameInfo.getGlobalUniques().uniqueMap.getAllUniques())
@@ -695,6 +703,7 @@ class Civilization : IsPartOfGameInfoSerialization {
         if (religionManager.religion != null)
             yieldAll(religionManager.religion!!.founderBeliefUniqueMap.getAllUniques())
         yieldAll(policies.policyUniques.getAllUniques())
+        yieldAll(civics.civicUniques.getAllUniques())
         yieldAll(tech.techUniques.getAllUniques())
         yieldAll(getEra().uniqueMap.getAllUniques())
         yieldAll(gameInfo.getGlobalUniques().uniqueMap.getAllUniques())
@@ -733,6 +742,7 @@ class Civilization : IsPartOfGameInfoSerialization {
         }
         religionManager.religion?.founderBeliefUniqueMap?.forEachUnique(uniqueFilter, listOp)
         policies.policyUniques.forEachUnique(uniqueFilter, listOp)
+        civics.civicUniques.forEachUnique(uniqueFilter, listOp)
         tech.techUniques.forEachUnique(uniqueFilter, listOp)
         getEra().uniqueMap.forEachUnique(uniqueFilter, listOp)
         gameInfo.getGlobalUniques().uniqueMap.forEachUnique(uniqueFilter, listOp)
@@ -986,6 +996,7 @@ class Civilization : IsPartOfGameInfoSerialization {
         greatPeople.civInfo = this
         civConstructions.setTransients(civInfo = this)
         policies.setTransients(this)
+        civics.setTransients(this)
         questManager.setTransients(this)
         religionManager.setTransients(this) // needs to be before tech, since tech setTransients looks at all uniques
         tech.setTransients(this)

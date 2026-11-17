@@ -211,6 +211,15 @@ internal class BaseRulesetValidator(
         for (policy in ruleset.policyBranches.values.flatMap { it.policies + it })
             if (policy != ruleset.policies[policy.name])
                 lines.add("More than one policy with the name ${policy.name} exists!", sourceObject = policy)
+
+        for (category in ruleset.civicCategories.values) {
+            if (category.defaultCivic.isNotEmpty() && category.civics.none { it.name == category.defaultCivic })
+                lines.add("Civic category ${category.name} has defaultCivic ${category.defaultCivic} which is not in its civics!", sourceObject = category)
+            for (civic in category.civics) {
+                if (civic.requiredTech != null && civic.requiredTech !in ruleset.technologies)
+                    lines.add("Civic ${civic.name} requires tech ${civic.requiredTech} which does not exist!", sourceObject = civic)
+            }
+        }
     }
 
     override fun addEventErrors(lines: RulesetErrorList) {

@@ -60,6 +60,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
 
     var improvement: String? = null
     var improvementIsPillaged = false
+    var improvementWorkedTurns: Int = 0
 
     internal class ImprovementQueueEntry(
         val improvement: String, turnsToImprovement: Int
@@ -252,6 +253,7 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         @LocalState val cloneImprovementQueue = toReturn.improvementQueue
         cloneImprovementQueue.addAll(improvementQueue.map { it.clone() })
         toReturn.improvementIsPillaged = improvementIsPillaged
+        toReturn.improvementWorkedTurns = improvementWorkedTurns
         toReturn.roadStatus = roadStatus
         toReturn.roadIsPillaged = roadIsPillaged
         toReturn.roadOwner = roadOwner
@@ -1008,8 +1010,10 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
         terrainFeatures = terrainFeatures.filter { it in ruleset.terrains }
         if (resource != null && resource !in ruleset.tileResources)
             tileResource = null
-        if (improvement != null && improvement !in ruleset.tileImprovements)
+        if (improvement != null && improvement !in ruleset.tileImprovements) {
             improvement = null
+            improvementWorkedTurns = 0
+        }
         if (improvementQueue.any { it.improvement !in ruleset.tileImprovements })
             improvementQueue.clear() // Just get rid of everything, all bets are off
         if (naturalWonder != null && naturalWonder !in ruleset.terrains)
@@ -1035,12 +1039,14 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
             this.tileImprovement = tileImprovement
             improvement = tileImprovement.name
         }
+        improvementWorkedTurns = 0
     }
 
     fun setImprovementBasic(improvementName: String) {
         val tileImprovement = ruleset.tileImprovements[improvementName]
         this.tileImprovement = tileImprovement
         improvement = tileImprovement?.name
+        improvementWorkedTurns = 0
     }
 
     /** Does not remove roads */
@@ -1156,9 +1162,10 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
                 removeRoad()
         } else {
             // otherwise use pillage/repair systems
-            if (canPillageTileImprovement())
+            if (canPillageTileImprovement()) {
                 improvementIsPillaged = true
-            else {
+                improvementWorkedTurns = 0
+            } else {
                 roadIsPillaged = true
                 clearAllPathfindingCaches()
             }

@@ -212,6 +212,9 @@ class CivInfoStatsForNextTurn(val civInfo: Civilization) {
 
         statMap["Transportation upkeep"] = getTransportationUpkeep() * -1
         statMap["Unit upkeep"] = Stats(gold = -getUnitMaintenance().toFloat())
+        val civicUpkeep = if (civInfo.isInAnarchy()) 0 else civInfo.civics.getCivicUpkeep()
+        if (civicUpkeep > 0)
+            statMap["Civic upkeep"] = Stats(gold = -civicUpkeep.toFloat())
 
 
         if (civInfo.getHappiness() > 0) {

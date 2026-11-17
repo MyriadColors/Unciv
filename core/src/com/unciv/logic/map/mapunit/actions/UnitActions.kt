@@ -89,7 +89,8 @@ object UnitActions {
         UnitActionType.TriggerUnique to UnitActionsFromUniques::getTriggerUniqueActions,
         UnitActionType.AddInCapital to UnitActionsFromUniques::getAddInCapitalActions,
         UnitActionType.GiftUnit to UnitActions::getGiftActions,
-        UnitActionType.Pillage to UnitActionsPillage::getPillageActions
+        UnitActionType.Pillage to UnitActionsPillage::getPillageActions,
+        UnitActionType.Bombard to UnitActionsSiege::getBombardActions
     )
 
     private suspend fun SequenceScope<UnitAction>.addUnmappedUnitActions(unit: MapUnit) {

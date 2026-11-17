@@ -488,6 +488,12 @@ enum class UniqueType(
     NoDamagePenaltyWoundedUnits("No damage penalty for wounded units", UniqueTarget.Unit, UniqueTarget.Global),
     Uncapturable("Uncapturable", UniqueTarget.Unit),
     WithdrawsBeforeMeleeCombat("Withdraws before melee combat", UniqueTarget.Unit),
+    CanBombardCityDefenses("Can bombard city defenses by [amount]% per turn", UniqueTarget.Unit, UniqueTarget.Promotion),
+    CollateralDamage("Deals [amount]% collateral damage to up to [positiveAmount] units", UniqueTarget.Unit),
+    CollateralDamageBonus("[relativeAmount]% Collateral Damage", UniqueTarget.Unit, UniqueTarget.Promotion),
+    MaxAttackDamage("Maximum [amount]% damage dealt to primary defender", UniqueTarget.Unit),
+    ImmuneToCollateralDamage("Immune to collateral damage", UniqueTarget.Unit, UniqueTarget.Promotion),
+    CityDefenseBonus("[amount]% City Defense", UniqueTarget.Building, UniqueTarget.Global),
     CannotCaptureCities("Unable to capture cities", UniqueTarget.Unit, UniqueTarget.Global),
     CannotPillage("Unable to pillage tiles", UniqueTarget.Unit, UniqueTarget.Global),
     
@@ -745,6 +751,8 @@ enum class UniqueType(
         docDescription = "This is offered as an alternative to the improvedBy field of a resource." +
             " The result will be cached within the resource definition when loading a game, without knowledge about terrain, cities, civs, units or time." +
             " Therefore, most conditionals will not work, only those **not** dependent on game state."),
+    ImprovementUpgradesAfterTurns("Upgrades to [improvementName] after [amount] turns worked", UniqueTarget.Improvement),
+    ImprovementGrowthRate("[improvementFilter] improvements grow [relativeAmount]% faster", UniqueTarget.Global),
     //endregion
 
     /////////////////////////////////// region 07 PERSONALITY UNIQUES ////////////////////////////////////////
@@ -1110,6 +1118,9 @@ enum class UniqueType(
     CanOnlyStartFromStartingEra("Can only start games from the starting era", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals,
         docDescription = "In this case, 'starting era' means the first defined Era in the entire ruleset."),
     AllowRazeCapital("Allow raze capital", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
+    CivicsMode("Uses Civ IV Civics", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
+    NoAnarchy("No Anarchy when switching Civics or State Religion", UniqueTarget.Global),
+    CivicUpkeepDiscount("[relativeAmount]% Civic upkeep", UniqueTarget.Global),
     AllowRazeHolyCity("Allow raze holy city", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
     AllowUnitStacking("Allows unlimited military units per tile", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
     Civ4StackCombat("Uses Civ IV stack combat", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),

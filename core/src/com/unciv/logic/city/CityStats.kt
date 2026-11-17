@@ -619,10 +619,10 @@ class CityStats(val city: City) {
                 )
         }
 
-        if (city.isInResistance())
+        if (city.isInResistance() || city.civ.isInAnarchy())
             newFinalStatList.clear()  // NOPE
 
-        if (newFinalStatList.values.map { it.production }.sum() < 1)  // Minimum production for things to progress
+        if (!city.civ.isInAnarchy() && newFinalStatList.values.map { it.production }.sum() < 1)  // Minimum production for things to progress
             newFinalStatList["Production"] = Stats(production = 1f)
         finalStatList = newFinalStatList
     }

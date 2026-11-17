@@ -76,6 +76,7 @@ class City : IsPartOfGameInfoSerialization, INamed {
     var previousOwner = ""
     var turnAcquired = 0
     var health = 200
+    var defenseDamageTaken: Int = 0
 
 
     var population = CityPopulationManager()
@@ -188,6 +189,7 @@ class City : IsPartOfGameInfoSerialization, INamed {
         toReturn.id = if (id != NO_ID) id else pseudoRandomId(civ)
         toReturn.name = name
         toReturn.health = health
+        toReturn.defenseDamageTaken = defenseDamageTaken
         toReturn.population = population.clone()
         toReturn.cityConstructions = cityConstructions.clone()
         toReturn.expansion = expansion.clone()
@@ -358,6 +360,26 @@ class City : IsPartOfGameInfoSerialization, INamed {
     @Readonly internal fun getMaxHealth() = 200 + cityConstructions.getBuiltBuildings().sumOf { it.cityHealth }
 
     @Readonly fun getStrength() = cityConstructions.getBuiltBuildings().sumOf { it.cityStrength }.toFloat()
+
+    @Readonly
+    fun getMaxCityDefenseBonus(): Int {
+        val culturalDefense = when {
+            tiles.size > 80 -> 100
+            tiles.size > 55 -> 80
+            tiles.size > 35 -> 60
+            tiles.size > 20 -> 40
+            tiles.size > 9 -> 20
+            else -> 0
+        }
+        var buildingDefense = 0
+        for (unique in getMatchingUniques(UniqueType.CityDefenseBonus)) {
+            buildingDefense += unique.params[0].toInt()
+        }
+        return kotlin.math.max(culturalDefense, buildingDefense)
+    }
+
+    @Readonly
+    fun getCityDefenseBonus(): Int = (getMaxCityDefenseBonus() - defenseDamageTaken).coerceAtLeast(0)
 
     /** Gets max air units that can remain in the city untransported */
     @Readonly fun getMaxAirUnits(): Int = civ.gameInfo.ruleset.modOptions.constants.cityAirUnitCapacity +

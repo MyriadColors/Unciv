@@ -243,6 +243,11 @@ object BattleDamage {
 
             if (defender.unit.isFortified() || defender.unit.isGuarding())
                 modifiers["Fortification"] = BattleConstants.FORTIFICATION_BONUS * defender.unit.getFortificationTurns()
+
+            if (defender.getCivInfo().gameInfo.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat) && tile.isCityCenter()) {
+                val cityDefense = tile.getCity()?.getCityDefenseBonus() ?: 0
+                if (cityDefense > 0) modifiers["City Defense"] = cityDefense
+            }
         }
 
         return modifiers

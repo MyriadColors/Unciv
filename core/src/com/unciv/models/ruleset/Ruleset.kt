@@ -69,6 +69,7 @@ enum class RulesetFile(
         }
     }),
     Policies("Policies.json", { policies.values.asSequence() }),
+    Civics("Civics.json", { civics.values.asSequence() }),
     Techs("Techs.json", { technologies.values.asSequence() }),
     Terrains("Terrains.json", { terrains.values.asSequence() }),
     Tutorials("Tutorials.json", { tutorials.values.asSequence() }),
@@ -136,6 +137,8 @@ class Ruleset {
     val nations = LinkedHashMap<String, Nation>()
     val policies = LinkedHashMap<String, Policy>()
     val policyBranches = LinkedHashMap<String, PolicyBranch>()
+    val civics = LinkedHashMap<String, Civic>()
+    val civicCategories = LinkedHashMap<String, CivicCategory>()
     val religions = ArrayList<String>()
     val ruinRewards = LinkedHashMap<String, RuinReward>()
     val quests = LinkedHashMap<String, Quest>()
@@ -234,6 +237,7 @@ class Ruleset {
         nations.selectiveRemove(ruleset.modOptions.nationsToRemove) { matchesFilter(it) }
         nations.putAll(ruleset.nations)
         mergePolicies(ruleset)
+        mergeCivics(ruleset)
         quests.selectiveRemove(ruleset.modOptions.questsToRemove)
         quests.putAll(ruleset.quests)
 
@@ -335,6 +339,14 @@ class Ruleset {
         }
 
         policies.putAll(ruleset.policies)
+    }
+
+    private fun mergeCivics(ruleset: Ruleset) {
+        if (ruleset.civicCategories.isEmpty() && ruleset.civics.isEmpty()) return
+        for (category in ruleset.civicCategories.values) {
+            civicCategories[category.name] = category
+        }
+        civics.putAll(ruleset.civics)
     }
 
     private fun mergeTechnologies(ruleset: Ruleset) {
@@ -451,6 +463,8 @@ class Ruleset {
         nations.clear()
         policies.clear()
         policyBranches.clear()
+        civics.clear()
+        civicCategories.clear()
         quests.clear()
         religions.clear()
         ruinRewards.clear()
@@ -600,6 +614,21 @@ class Ruleset {
                 // Add a finisher
                 branch.policies.last().name =
                     branch.name + Policy.branchCompleteSuffix
+            }
+        }
+
+        val civicsFile = RulesetFile.Civics.file()
+        if (civicsFile.exists()) {
+            civicCategories += createHashmap(
+                json().fromJsonFile(Array<CivicCategory>::class.java, civicsFile)
+            )
+            for (category in civicCategories.values) {
+                category.originRuleset = name
+                for (civic in category.civics) {
+                    civic.category = category
+                    civic.originRuleset = name
+                    civics[civic.name] = civic
+                }
             }
         }
 
