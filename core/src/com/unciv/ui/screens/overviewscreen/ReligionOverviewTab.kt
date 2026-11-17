@@ -42,6 +42,27 @@ class ReligionOverviewTab(
     override fun getFixedContent() = headerTable
 
     init {
+        if (viewingPlayer.getCiv().isCiv4ReligionEnabled()) {
+            defaults().pad(8f).left()
+            align(Align.top)
+            val civ = viewingPlayer.getCiv()
+            val stateRel = civ.civ4Religion.stateReligion ?: "No State Religion"
+            add("Your State Religion: [$stateRel]".toLabel(fontSize = 20)).row()
+            addSeparator()
+            add("Founded Religions".toLabel(fontSize = 18)).row()
+            for ((religionName, holyCity) in civ.civ4Religion.getFoundedReligions()) {
+                val holyText = if (holyCity != null) "${holyCity.name} (${holyCity.civ.civName})" else "Unknown"
+                add("[$religionName] — Holy City: [$holyText]".toLabel()).row()
+            }
+            addSeparator()
+            add("Civilizations".toLabel(fontSize = 18)).row()
+            for (other in civ.gameInfo.civilizations) {
+                if (!other.isMajorCiv || other.isDefeated()) continue
+                if (other != civ && !civ.knows(other)) continue
+                val otherState = other.civ4Religion.stateReligion ?: "No State Religion"
+                add("[${other.civName}]: [$otherState]".toLabel()).row()
+            }
+        } else {
         civStatsTable.defaults().left().pad(5f)
         civStatsTable.addCivSpecificStats()
 
@@ -63,6 +84,7 @@ class ReligionOverviewTab(
         loadReligion(persistableData.selectedReligion)
         add(statsTable).row()
         add(beliefsTable).pad(20f)
+        }
     }
 
     private fun Table.addCivSpecificStats() {

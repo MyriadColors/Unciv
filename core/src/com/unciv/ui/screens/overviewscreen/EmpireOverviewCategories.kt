@@ -61,6 +61,9 @@ enum class EmpireOverviewCategories(
                 ReligionOverviewTab(viewingPlayer, overviewScreen, persistedData)
         override fun testState(viewingPlayer: CivView) = when {
             !viewingPlayer.getCiv().gameInfo.isReligionEnabled() -> EmpireOverviewTabState.Hidden
+            viewingPlayer.getCiv().isCiv4ReligionEnabled() ->
+                if (viewingPlayer.getCiv().civ4Religion.getFoundedReligions().isEmpty()) EmpireOverviewTabState.Disabled
+                else EmpireOverviewTabState.Normal
             viewingPlayer.getCiv().gameInfo.religions.isEmpty() -> EmpireOverviewTabState.Disabled
             else -> EmpireOverviewTabState.Normal
         }

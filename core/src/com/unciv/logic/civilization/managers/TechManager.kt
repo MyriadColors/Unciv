@@ -339,6 +339,14 @@ class TechManager : IsPartOfGameInfoSerialization {
             UniqueTriggerActivation.triggerUnique(unique, civInfo, triggerNotificationText = triggerNotificationText)
         }
 
+        if (isNewTech && civInfo.isCiv4ReligionEnabled()) {
+            for (unique in newTech.uniqueObjects) {
+                if (unique.type == UniqueType.FoundReligionOnTech && unique.conditionalsApply(civInfo.state)) {
+                    civInfo.civ4Religion.foundReligion(unique.params[0])
+                }
+            }
+        }
+
 
         val revealedResources = getRuleset().tileResources.values.filter { techName == it.revealedBy }
         if (civInfo.playerType == PlayerType.Human) {

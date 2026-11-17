@@ -153,7 +153,8 @@ enum class DiplomaticModifiers(val text: String) {
     GaveUsUnits("You gave us units!"),
     GaveUsGifts("We appreciate your gifts"),
     ReturnedCapturedUnits("You returned captured units to us"),
-    BelieveSameReligion("We believe in the same religion");
+    BelieveSameReligion("We believe in the same religion"),
+    BelieveDifferentReligion("We are upset that you have fallen under the sway of a heathen religion!");
 
     companion object{
         @Immutable private val valuesAsMap = entries.associateBy { it.name }
@@ -816,6 +817,25 @@ class DiplomacyManager() : IsPartOfGameInfoSerialization {
     }
 
     internal fun setReligionBasedModifier() {
+        if (civInfo.isCiv4ReligionEnabled()) {
+            val ourStateReligion = civInfo.civ4Religion.stateReligion
+            val theirStateReligion = otherCiv.civ4Religion.stateReligion
+            when {
+                ourStateReligion != null && ourStateReligion == theirStateReligion -> {
+                    setModifier(DiplomaticModifiers.BelieveSameReligion, 5f)
+                    removeModifier(DiplomaticModifiers.BelieveDifferentReligion)
+                }
+                ourStateReligion != null && theirStateReligion != null -> {
+                    setModifier(DiplomaticModifiers.BelieveDifferentReligion, -3f)
+                    removeModifier(DiplomaticModifiers.BelieveSameReligion)
+                }
+                else -> {
+                    removeModifier(DiplomaticModifiers.BelieveSameReligion)
+                    removeModifier(DiplomaticModifiers.BelieveDifferentReligion)
+                }
+            }
+            return
+        }
         if (otherCivDiplomacy().believesSameReligion())
             // they share same majority religion
             setModifier(DiplomaticModifiers.BelieveSameReligion, 5f)

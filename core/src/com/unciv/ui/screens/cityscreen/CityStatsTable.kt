@@ -167,6 +167,21 @@ class CityStatsTable(private val cityScreen: CityScreen) : Table() {
             val healthColor = if (health.netHealth >= 0) Color.GREEN else Color.SALMON
             lowerTable.add(healthText.toLabel(fontColor = healthColor)).row()
         }
+        if (cityView.isCiv4ReligionEnabled()) {
+            val present = cityView.getPresentReligions()
+            if (present.isNotEmpty()) {
+                val holy = cityView.getHolyCityReligions()
+                val stateRel = cityView.getStateReligion()
+                val formatted = present.sorted().joinToString(", ") { rel ->
+                    buildString {
+                        append(rel.tr())
+                        if (rel in holy) append("*")
+                        if (rel == stateRel) append(" (State)")
+                    }
+                }
+                lowerTable.add("Religions: [$formatted]".toLabel()).row()
+            }
+        }
         lowerTable.add(turnsToExpansionString.toLabel()).row()
         lowerTable.add(turnsToPopString.toLabel()).row()
 

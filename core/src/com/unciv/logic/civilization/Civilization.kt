@@ -186,6 +186,9 @@ class Civilization : IsPartOfGameInfoSerialization {
     var civConstructions = CivConstructions()
     var questManager = QuestManager()
     var religionManager = ReligionManager()
+    var civ4Religion = Civ4ReligionManager()
+
+    @Readonly fun isCiv4ReligionEnabled(): Boolean = gameInfo.isCiv4ReligionEnabled()
     var goldenAges = GoldenAgeManager()
     var greatPeople = GreatPersonManager()
     var espionageManager = EspionageManager()
@@ -338,6 +341,7 @@ class Civilization : IsPartOfGameInfoSerialization {
         toReturn.anarchyTurns = anarchyTurns
         toReturn.civConstructions = civConstructions.clone().also { it.setTransients(toReturn) }
         toReturn.religionManager = religionManager.clone()
+        toReturn.civ4Religion = civ4Religion.clone()
         toReturn.questManager = questManager.clone()
         toReturn.goldenAges = goldenAges.clone()
         toReturn.greatPeople = greatPeople.clone()
@@ -997,6 +1001,7 @@ class Civilization : IsPartOfGameInfoSerialization {
         civConstructions.setTransients(civInfo = this)
         policies.setTransients(this)
         civics.setTransients(this)
+        civ4Religion.setTransients(this)
         questManager.setTransients(this)
         religionManager.setTransients(this) // needs to be before tech, since tech setTransients looks at all uniques
         tech.setTransients(this)

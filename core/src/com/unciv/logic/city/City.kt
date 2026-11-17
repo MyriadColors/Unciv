@@ -83,6 +83,8 @@ class City : IsPartOfGameInfoSerialization, INamed {
     var cityConstructions = CityConstructions()
     var expansion = CityExpansionManager()
     var religion = CityReligionManager()
+    var presentReligions: HashSet<String> = hashSetOf()
+    var holyCityOfReligions: HashSet<String> = hashSetOf()
 
     @Transient // Class carries no persisted fields
     var espionage = CityEspionageManager()
@@ -194,6 +196,8 @@ class City : IsPartOfGameInfoSerialization, INamed {
         toReturn.cityConstructions = cityConstructions.clone()
         toReturn.expansion = expansion.clone()
         toReturn.religion = religion.clone()
+        toReturn.presentReligions.addAll(presentReligions)
+        toReturn.holyCityOfReligions.addAll(holyCityOfReligions)
         toReturn.disabledConstructions.addAll(disabledConstructions)
         toReturn.tiles = tiles
         toReturn.workedTiles = workedTiles
@@ -469,8 +473,12 @@ class City : IsPartOfGameInfoSerialization, INamed {
 
     override fun toString() = name // for debug
 
-    @Readonly fun isHolyCity(): Boolean = religion.religionThisIsTheHolyCityOf != null && !religion.isBlockedHolyCity
-    @Readonly fun isHolyCityOf(religionName: String?) = isHolyCity() && religion.religionThisIsTheHolyCityOf == religionName
+    @Readonly fun isHolyCity(): Boolean =
+        (religion.religionThisIsTheHolyCityOf != null && !religion.isBlockedHolyCity) ||
+        (civ.isCiv4ReligionEnabled() && holyCityOfReligions.isNotEmpty())
+    @Readonly fun isHolyCityOf(religionName: String?): Boolean =
+        (religion.religionThisIsTheHolyCityOf != null && !religion.isBlockedHolyCity && religion.religionThisIsTheHolyCityOf == religionName) ||
+        (civ.isCiv4ReligionEnabled() && religionName != null && religionName in holyCityOfReligions)
 
     @Readonly
     fun canBeDestroyed(justCaptured: Boolean = false): Boolean {

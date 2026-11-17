@@ -227,19 +227,31 @@ object Conditionals {
             UniqueType.ConditionalCityFilter -> checkOnCity { matchesFilter(conditional.params[0], state.relevantCiv) }
             UniqueType.ConditionalCityConnected -> checkOnCity { isConnectedToCapital() }
             UniqueType.ConditionalCityReligion -> checkOnCity {
-                religion.getMajorityReligion()
-                    ?.matchesFilter(conditional.params[0], state, state.relevantCiv) == true
+                if (civ.isCiv4ReligionEnabled())
+                    if (conditional.params[0] == "any") presentReligions.isNotEmpty()
+                    else conditional.params[0] in presentReligions
+                else
+                    religion.getMajorityReligion()
+                        ?.matchesFilter(conditional.params[0], state, state.relevantCiv) == true
             }
             UniqueType.ConditionalCityNotReligion -> checkOnCity {
-                religion.getMajorityReligion()
-                    ?.matchesFilter(conditional.params[0], state, state.relevantCiv) != true
+                if (civ.isCiv4ReligionEnabled())
+                    if (conditional.params[0] == "any") presentReligions.isEmpty()
+                    else conditional.params[0] !in presentReligions
+                else
+                    religion.getMajorityReligion()
+                        ?.matchesFilter(conditional.params[0], state, state.relevantCiv) != true
             }
             UniqueType.ConditionalCityMajorReligion -> checkOnCity {
                 religion.getMajorityReligion()?.isMajorReligion() == true }
             UniqueType.ConditionalCityEnhancedReligion -> checkOnCity {
                 religion.getMajorityReligion()?.isEnhancedReligion() == true }
             UniqueType.ConditionalCityThisReligion -> checkOnCity {
-                religion.getMajorityReligion().let { it != null && it == state.relevantCiv?.religionManager?.religion } }
+                if (civ.isCiv4ReligionEnabled())
+                    state.relevantCiv?.civ4Religion?.stateReligion?.let { it in presentReligions } == true
+                else
+                    religion.getMajorityReligion().let { it != null && it == state.relevantCiv?.religionManager?.religion }
+            }
             UniqueType.ConditionalWLTKD -> checkOnCity { isWeLoveTheKingDayActive() }
             UniqueType.ConditionalCityWithBuilding ->
                 checkOnCity { cityConstructions.containsBuildingOrEquivalent(conditional.params[0]) }

@@ -86,6 +86,10 @@ class CityView(city: City,
     @Readonly fun getHappinessList(): Map<String, Float> = city.cityStats.happinessList
     @Readonly fun isCityHealthEnabled(): Boolean = city.civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.CityHealthMode)
     @Readonly fun getHealthBreakdown(): City.CityHealthBreakdown = city.getHealthBreakdown()
+    @Readonly fun isCiv4ReligionEnabled(): Boolean = city.civ.isCiv4ReligionEnabled()
+    @Readonly fun getPresentReligions(): Set<String> = city.presentReligions
+    @Readonly fun getHolyCityReligions(): Set<String> = city.holyCityOfReligions
+    @Readonly fun getStateReligion(): String? = city.civ.civ4Religion.stateReligion
     @Readonly fun getBaseStatTree(): StatTreeNode = city.cityStats.baseStatTree
     @Readonly fun getStatPercentBonusTree(): StatTreeNode = city.cityStats.statPercentBonusTree
     @Readonly fun getFinalStatList(): Map<String, Stats> = city.cityStats.finalStatList

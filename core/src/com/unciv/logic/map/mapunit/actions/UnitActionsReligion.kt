@@ -86,8 +86,25 @@ object UnitActionsReligion {
     }
 
     internal fun getSpreadReligionActions(unit: MapUnit, tile: Tile): Sequence<UnitAction> {
-        if (!unit.civ.religionManager.maySpreadReligionAtAll(unit)) return emptySequence()
         val city = tile.getCity() ?: return emptySequence()
+        if (unit.civ.isCiv4ReligionEnabled()) {
+            val civ4Uniques = UnitActionModifiers.getUsableUnitActionUniques(unit, UniqueType.CanSpreadCiv4Religion)
+            return civ4Uniques.mapNotNull { unique ->
+                val religionName = unique.params[0]
+                if (!unit.civ.civ4Religion.canSpreadReligionToCity(religionName, city)) return@mapNotNull null
+                val title = UnitActionModifiers.actionTextWithSideEffects("Spread [$religionName]", unique, unit)
+                UnitAction(
+                    UnitActionType.SpreadReligion,
+                    title = title,
+                    associatedUnique = unique,
+                    action = {
+                        unit.civ.civ4Religion.spreadReligionToCity(religionName, city)
+                        UnitActionModifiers.activateSideEffects(unit, unique)
+                    }.takeIf { UnitActionModifiers.canActivateSideEffects(unit, unique) }
+                )
+            }
+        }
+        if (!unit.civ.religionManager.maySpreadReligionAtAll(unit)) return emptySequence()
 
         val newStyleUnique = UnitActionModifiers.getUsableUnitActionUniques(unit, UniqueType.CanSpreadReligion)
             .firstOrNull() ?: return emptySequence()

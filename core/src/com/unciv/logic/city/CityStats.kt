@@ -436,6 +436,17 @@ class CityStats(val city: City) {
                 newHappinessList[source] = newHappinessList[source]!! + stats.totalStats.happiness
             }
 
+        if (civInfo.isCiv4ReligionEnabled()) {
+            val stateReligion = civInfo.civ4Religion.stateReligion
+            if (stateReligion != null && stateReligion in city.presentReligions) {
+                var stateRelHappiness = 1f
+                city.forEachMatchingUnique(UniqueType.StateReligionHappiness) { unique ->
+                    stateRelHappiness += unique.params[0].toFloat()
+                }
+                newHappinessList["State Religion"] = stateRelHappiness
+            }
+        }
+
         // we don't want to modify the existing happiness list because that leads
         // to concurrency problems if we iterate on it while changing
         happinessList = newHappinessList
@@ -461,6 +472,31 @@ class CityStats(val city: City) {
             newBaseStatTree.addStats(stats, source)
 
         newBaseStatTree.add(statsFromUniquesBySource)
+
+        if (city.civ.isCiv4ReligionEnabled()) {
+            val stateReligion = city.civ.civ4Religion.stateReligion
+            val hasActiveHolyCity = city.holyCityOfReligions.isNotEmpty() &&
+                (stateReligion == null || stateReligion in city.holyCityOfReligions)
+            if (hasActiveHolyCity) {
+                newBaseStatTree.addStats(Stats(culture = 5f), "Holy City")
+            }
+            var shrineGold = 0f
+            city.forEachMatchingUnique(UniqueType.ShrineGoldForReligion) { unique ->
+                val amount = unique.params[0].toFloat()
+                val religionName = unique.params[1]
+                var cityCount = 0
+                for (civ in city.civ.gameInfo.civilizations) {
+                    for (otherCity in civ.cities) {
+                        if (religionName in otherCity.presentReligions) cityCount++
+                    }
+                }
+                shrineGold += amount * cityCount
+            }
+            if (shrineGold != 0f) {
+                newBaseStatTree.addStats(Stats(gold = shrineGold), "Shrine")
+            }
+        }
+
         baseStatTree = newBaseStatTree
     }
     

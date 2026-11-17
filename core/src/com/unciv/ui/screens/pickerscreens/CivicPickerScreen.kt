@@ -21,6 +21,7 @@ class CivicPickerScreen(
 ) : PickerScreen() {
 
     private val pendingSelections = HashMap<String, String>()
+    private var pendingStateReligion: String? = viewingCiv.civ4Religion.stateReligion
     private var selectedCivicForDescription: Civic? = null
 
     init {
@@ -32,6 +33,9 @@ class CivicPickerScreen(
         rightSideButton.setText("Adopt Civics".tr())
         rightSideButton.onClick(UncivSound.Policy) {
             viewingCiv.civics.switchCivics(pendingSelections)
+            if (viewingCiv.isCiv4ReligionEnabled() && pendingStateReligion != viewingCiv.civ4Religion.stateReligion) {
+                viewingCiv.civ4Religion.setStateReligion(pendingStateReligion)
+            }
             game.popScreen()
         }
 
@@ -47,6 +51,37 @@ class CivicPickerScreen(
         for (category in categories) {
             topTable.add(buildCategoryColumn(category)).top()
         }
+        if (viewingCiv.isCiv4ReligionEnabled()) {
+            topTable.row()
+            topTable.add(buildStateReligionRow()).colspan(categories.size.coerceAtLeast(1)).padTop(12f)
+        }
+    }
+
+    private fun buildStateReligionRow(): Table {
+        val rowTable = Table()
+        rowTable.defaults().pad(5f)
+        rowTable.add("State Religion:".toLabel(fontSize = 18)).padRight(10f)
+
+        val options = listOf<String?>(null) + viewingCiv.civ4Religion.getAvailableStateReligions()
+        for (option in options) {
+            val label = option ?: "No State Religion"
+            val isActive = option == viewingCiv.civ4Religion.stateReligion
+            val isPending = option == pendingStateReligion
+            val button = (if (isActive) "$label (Active)" else label).toTextButton()
+            when {
+                isPending -> button.color = colorFromRGB(37, 150, 190)
+                isActive -> button.color = Color.GREEN
+            }
+            button.onClick {
+                if (canChangeState) {
+                    pendingStateReligion = option
+                    rebuildLayout()
+                }
+                updateSummaryAndButton()
+            }
+            rowTable.add(button)
+        }
+        return rowTable
     }
 
     private fun buildCategoryColumn(category: CivicCategory): Table {
@@ -92,7 +127,11 @@ class CivicPickerScreen(
         val changedCount = pendingSelections.count { (cat, civicName) ->
             viewingCiv.civics.activeCivics[cat] != civicName
         }
-        val anarchyTurns = viewingCiv.civics.getAnarchyTurnsForChanges(changedCount)
+        val stateReligionChanged = viewingCiv.isCiv4ReligionEnabled() &&
+            pendingStateReligion != viewingCiv.civ4Religion.stateReligion
+        val civicAnarchy = viewingCiv.civics.getAnarchyTurnsForChanges(changedCount)
+        val religionAnarchy = if (stateReligionChanged && !viewingCiv.hasUnique(com.unciv.models.ruleset.unique.UniqueType.NoAnarchy) && !viewingCiv.goldenAges.isGoldenAge()) 1 else 0
+        val anarchyTurns = maxOf(civicAnarchy, religionAnarchy)
         val upkeep = viewingCiv.civics.getCivicUpkeep()
 
         val statusLine = if (viewingCiv.isInAnarchy()) {
@@ -104,7 +143,7 @@ class CivicPickerScreen(
         val descText = selectedCivicForDescription?.getDescription() ?: "Select a civic to view its effects.".tr()
         descriptionLabel.setText("$statusLine\n\n$descText")
 
-        if (canChangeState && !viewingCiv.isInAnarchy() && changedCount > 0) {
+        if (canChangeState && !viewingCiv.isInAnarchy() && (changedCount > 0 || stateReligionChanged)) {
             rightSideButton.enable()
         } else {
             rightSideButton.disable()
