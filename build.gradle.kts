@@ -18,12 +18,16 @@ buildscript {
     }
 }
 
-// Fixes the error "Please initialize at least one Kotlin target in 'Unciv (:)'"
 kotlin {
     jvm()
-    java {
-        // required for building Unciv with a Java version higher than 24 (e.g. Java 25)
-        sourceCompatibility = JavaVersion.VERSION_21
+    jvmToolchain(25) // Forces both Kotlin and Java compilation tasks to target JDK 25
+}
+
+subprojects {
+    plugins.withId("org.jetbrains.kotlin.jvm") {
+        extensions.configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
+            jvmToolchain(25)
+        }
     }
 }
 

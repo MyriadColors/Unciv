@@ -10,6 +10,10 @@ pluginManagement {
     }
 }
 
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
+
 include("desktop", "core", "tests", "server")
 
 // Browser support is opt-in so ordinary builds do not bootstrap browser toolchains.
