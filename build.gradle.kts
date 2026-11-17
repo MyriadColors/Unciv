@@ -70,6 +70,21 @@ allprojects {
 //    repositories { // for local purity
 //        mavenLocal()
 //    }
+    val detektPluginId = rootProject.libs.plugins.detekt.get().pluginId
+    apply(plugin = detektPluginId)
+    configure<dev.detekt.gradle.extensions.DetektExtension> {
+        buildUponDefaultConfig = true
+        allRules = false
+        config.setFrom(
+            files(
+                "$rootDir/.github/workflows/detekt_config/detekt-errors.yml",
+                "$rootDir/.github/workflows/detekt_config/detekt-warnings.yml"
+            )
+        )
+        parallel = true
+        source.setFrom(files("src", "src/main/kotlin", "src/test/kotlin"))
+    }
+
     val purityId = rootProject.libs.plugins.purity.get().pluginId
     apply(plugin = purityId)
     configure<yairm210.purity.PurityConfiguration> {
