@@ -34,7 +34,7 @@ import com.unciv.models.ruleset.tile.Terrain
 import com.unciv.models.ruleset.tile.TileImprovement
 import com.unciv.models.ruleset.tile.TileResource
 import com.unciv.models.ruleset.unique.Countables
-import com.unciv.models.ruleset.unique.DeprecatedUniqueType
+import com.unciv.models.ruleset.unique.DeprecatedUniques
 import com.unciv.models.ruleset.unique.Unique
 import com.unciv.models.ruleset.unique.UniqueFlag
 import com.unciv.models.ruleset.unique.UniqueParameterType
@@ -508,7 +508,7 @@ object TranslationFileWriter {
         return text.fillPlaceholders(*newPlaceholders.toTypedArray())
     }
 
-    private fun DeprecatedUniqueType.getTranslatable(): String {
+    private fun DeprecatedUniques.getTranslatable(): String {
         val newPlaceholders = ArrayList<String>()
         for (placeholderText in text.getPlaceholderParameters()) {
             newPlaceholders.addNumberedParameter(placeholderText)

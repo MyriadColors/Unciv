@@ -5,7 +5,7 @@ import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.Notification
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.PlayerType
 import com.unciv.logic.civilization.Proximity
 import com.unciv.logic.civilization.transients.CapitalConnectionsFinder.CapitalConnectionMedium
@@ -139,12 +139,12 @@ class CivInfoTransientCache(val civInfo: Civilization) {
                     civInfo.addNotification("We have encountered [${metCiv.civName}]!",
                         entry.value.position,
                         NotificationCategory.Diplomacy, metCiv.civName,
-                        NotificationIcon.Diplomacy
+                        NotificationIcons.Diplomacy
                     )
                 metCiv.addNotification("We have encountered [${civInfo.civName}]!",
                     entry.value.position,
                     NotificationCategory.Diplomacy, civInfo.civName,
-                    NotificationIcon.Diplomacy
+                    NotificationIcons.Diplomacy
                 )
             }
 
@@ -305,14 +305,14 @@ class CivInfoTransientCache(val civInfo: Civilization) {
         for (city in newConnectedCities)
             if (city !in oldConnectedCities && city.civ == civInfo && city != civInfo.getCapital())
                 civInfo.addNotification("[${city.name}] has been connected to your capital!",
-                    city.location, NotificationCategory.Cities, NotificationIcon.Gold
+                    city.location, NotificationCategory.Cities, NotificationIcons.Gold
                 )
 
         // This may still contain cities that have just been destroyed by razing - thus the population test
         for (city in oldConnectedCities)
             if (city !in newConnectedCities && city.civ == civInfo && city.population.population > 0)
                 civInfo.addNotification("[${city.name}] has been disconnected from your capital!",
-                    city.location, NotificationCategory.Cities, NotificationIcon.Gold
+                    city.location, NotificationCategory.Cities, NotificationIcons.Gold
                 )
 
         for (city in civInfo.cities)

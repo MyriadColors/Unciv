@@ -521,34 +521,39 @@ fun equalizeColumns(vararg tables: Table) {
         .mapTo(ArrayList(columns)) { column ->
             tablesWithRows.maxOf { it.getColumnWidth(column) } // getColumnWidth is 0f for non-existent columns
         }
-    fun neutralActor() = Actor().apply { touchable = Touchable.disabled }
-
     for (table in tables) {
-        if (table.rows == 0) continue
-        // Support ragged tables by treating the topmost Cell per column, whichever row it's in:
-        // This code assumes normal Table construction where Cell.row increases monotonously over [cells].
-        // Table currently does not allow breaking that rule, but is must be said there is no documented guarantee.
-        val columnDone = BooleanArray(table.columns)
-        // Not using gdx.Array.iterator to sidestep reentrancy warning and problems - this is efficient:
-        for (i in 0 until table.cells.size) {
-            val cell = table.cells[i]
-            if (cell.colspan != 1) continue // ignore colspanned cells, some other row must have better candidates
-            val col = cell.column
-            if (columnDone[col]) continue
-            columnDone[col] = true
-            cell.run {
-                // Empty cells ignore minWidth, so just doing Table.add() for an empty cell in the top row will break this. Fix!
-                if (actor == null) setActor(neutralActor())
-                else (actor as? Label)?.run {
-                    if (Align.isCenterHorizontal(align) && !Align.isCenterHorizontal(labelAlign))
-                        setAlignment(Align.center)
-                    if (Align.isRight(align) && !Align.isRight(labelAlign))
-                        setAlignment(Align.right)
-                }
-                minWidth(widths[col] - padLeft - padRight)
-            }
+        if (table.rows > 0) equalizeSingleTableColumns(table, widths)
+    }
+}
+
+private fun equalizeSingleTableColumns(table: Table, widths: ArrayList<Float>) {
+    // Support ragged tables by treating the topmost Cell per column, whichever row it's in:
+    // This code assumes normal Table construction where Cell.row increases monotonously over [cells].
+    // Table currently does not allow breaking that rule, but is must be said there is no documented guarantee.
+    val columnDone = BooleanArray(table.columns)
+    // Not using gdx.Array.iterator to sidestep reentrancy warning and problems - this is efficient:
+    for (i in 0 until table.cells.size) {
+        val cell = table.cells[i]
+        if (cell.colspan != 1) continue // ignore colspanned cells, some other row must have better candidates
+        val col = cell.column
+        if (columnDone[col]) continue
+        columnDone[col] = true
+        adjustCellForEqualizedColumn(cell, widths[col])
+    }
+    table.invalidate()
+}
+
+private fun adjustCellForEqualizedColumn(cell: Cell<*>, targetWidth: Float) {
+    cell.run {
+        // Empty cells ignore minWidth, so just doing Table.add() for an empty cell in the top row will break this. Fix!
+        if (actor == null) setActor(Actor().apply { touchable = Touchable.disabled })
+        else (actor as? Label)?.run {
+            if (Align.isCenterHorizontal(align) && !Align.isCenterHorizontal(labelAlign))
+                setAlignment(Align.center)
+            if (Align.isRight(align) && !Align.isRight(labelAlign))
+                setAlignment(Align.right)
         }
-        table.invalidate()
+        minWidth(targetWidth - padLeft - padRight)
     }
 }
 

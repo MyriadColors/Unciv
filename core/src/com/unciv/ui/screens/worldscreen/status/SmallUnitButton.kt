@@ -11,8 +11,8 @@ import com.unciv.ui.images.IconTextButton
 import com.unciv.ui.images.ImageGetter
 import com.unciv.ui.screens.worldscreen.WorldScreen
 
-const val nextLabel = "Cycle"
-const val skipLabel = "Skip"
+const val NEXT_LABEL = "Cycle"
+const val SKIP_LABEL = "Skip"
 
 class SmallUnitButton(
     private val worldScreen: WorldScreen,
@@ -31,12 +31,12 @@ class SmallUnitButton(
         keyShortcuts.clear()
         isSkip = worldScreen.game.settings.checkForDueUnitsCycles // refresh value
         if(isSkip) {
-            label.setText(skipLabel.tr())
+            label.setText(SKIP_LABEL.tr())
             iconCell.setActor(ImageGetter.getImage("OtherIcons/Skip").apply { setSize(20f) })
             //keyShortcuts.add(KeyboardBinding.Skip) // don't double binding
             addTooltip(KeyboardBinding.Skip)
         } else {
-            label.setText(nextLabel.tr())
+            label.setText(NEXT_LABEL.tr())
             iconCell.setActor(ImageGetter.getImage("OtherIcons/Loading").apply { setSize(20f) })
             keyShortcuts.add(KeyboardBinding.Cycle)
             addTooltip(KeyboardBinding.Cycle)

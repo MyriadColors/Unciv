@@ -79,7 +79,7 @@ object LuxuryResourcePlacementLogic {
             globalRng
         )
 
-        val randomLuxuries = getLuxuriesForRandomPlacement(assignableLuxuries, amountRegionsWithLuxury, tileData, ruleset)
+        val randomLuxuries = getLuxuriesForRandomPlacement(assignableLuxuries, amountRegionsWithLuxury, tileData)
 
         return Pair(cityStateLuxuries, randomLuxuries)
     }
@@ -88,8 +88,7 @@ object LuxuryResourcePlacementLogic {
     private fun getLuxuriesForRandomPlacement(
         assignableLuxuries: List<TileResource>,
         amountRegionsWithLuxury: HashMap<String, Int>,
-        tileData: TileDataMap,
-        ruleset: Ruleset
+        tileData: TileDataMap
     ): List<String> {
         val remainingLuxuries = assignableLuxuries.filter {
             amountRegionsWithLuxury[it.name] == 0

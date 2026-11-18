@@ -246,7 +246,7 @@ class Spy private constructor() : IsPartOfGameInfoSerialization {
         }
         if (detectionString != null)
             // Not using Spy.addNotification, shouldn't open the espionage screen
-            otherCiv.addNotification(detectionString, city.location, NotificationCategory.Espionage, NotificationIcon.Spy)
+            otherCiv.addNotification(detectionString, city.location, NotificationCategory.Espionage, NotificationIcons.Spy)
         if (spyResult < 200 && stolenTech != null) {
             civInfo.tech.addTechnology(stolenTech)
             addNotification("Your spy [$name] stole the Technology [$stolenTech] from [$city]!")
@@ -296,17 +296,17 @@ class Spy private constructor() : IsPartOfGameInfoSerialization {
             cityState.getDiplomacyManager(civInfo)!!.setInfluence(previousInfluence)
 
             civInfo.addNotification("Your spy [$name] successfully staged a coup in [${cityState.civName}]!", getCity().location,
-                    NotificationCategory.Espionage, NotificationIcon.Spy, cityState.civName)
+                    NotificationCategory.Espionage, NotificationIcons.Spy, cityState.civName)
             if (allyCiv != null) {
                 cityState.getDiplomacyManagerOrMeet(allyCiv).reduceInfluence(20f)
                 allyCiv.addNotification("A spy from [${civInfo.civName}] successfully staged a coup in our former ally [${cityState.civName}]!", getCity().location,
-                        NotificationCategory.Espionage, civInfo.civName,  NotificationIcon.Spy, cityState.civName)
+                        NotificationCategory.Espionage, civInfo.civName,  NotificationIcons.Spy, cityState.civName)
                 allyCiv.getDiplomacyManagerOrMeet(civInfo).addModifier(DiplomaticModifiers.SpiedOnUs, -15f)
             }
             for (civ in cityState.getKnownCivsWithSpectators()) {
                 if (civ == allyCiv || civ == civInfo) continue
                 civ.addNotification("A spy from [${civInfo.civName}] successfully staged a coup in [${cityState.civName}]!", getCity().location,
-                        NotificationCategory.Espionage, civInfo.civName,  NotificationIcon.Spy, cityState.civName)
+                        NotificationCategory.Espionage, civInfo.civName,  NotificationIcons.Spy, cityState.civName)
                 if (civ.isSpectator) continue
                 cityState.getDiplomacyManager(civ)!!.reduceInfluence(10f) // Guess
             }
@@ -318,11 +318,11 @@ class Spy private constructor() : IsPartOfGameInfoSerialization {
             val spy = allyCiv?.espionageManager?.getSpyAssignedToCity(getCity())
             cityState.getDiplomacyManager(civInfo)!!.addInfluence(-20f)
             allyCiv?.addNotification("A spy from [${civInfo.civName}] failed to stage a coup in our ally [${cityState.civName}] and was killed!", getCity().location,
-                    NotificationCategory.Espionage, civInfo.civName,  NotificationIcon.Spy, cityState.civName)
+                    NotificationCategory.Espionage, civInfo.civName,  NotificationIcons.Spy, cityState.civName)
             allyCiv?.getDiplomacyManagerOrMeet(civInfo)?.addModifier(DiplomaticModifiers.SpiedOnUs, -10f)
 
             civInfo.addNotification("Our spy [$name] failed to stage a coup in [${cityState.civName}] and was killed!", getCity().location,
-                    NotificationCategory.Espionage, civInfo.civName,  NotificationIcon.Spy, cityState.civName)
+                    NotificationCategory.Espionage, civInfo.civName,  NotificationIcons.Spy, cityState.civName)
 
             killSpy()
             spy?.levelUpSpy() // Technically not in Civ V, but it's like the same thing as with counter-intelligence
@@ -492,7 +492,7 @@ class Spy private constructor() : IsPartOfGameInfoSerialization {
 
     /** Shorthand for [Civilization.addNotification] specialized for espionage - action, category and icon are always the same */
     fun addNotification(text: String) =
-        civInfo.addNotification(text, EspionageAction.withLocation(location?.toGridCoord()), NotificationCategory.Espionage, NotificationIcon.Spy)
+        civInfo.addNotification(text, EspionageAction.withLocation(location?.toGridCoord()), NotificationCategory.Espionage, NotificationIcons.Spy)
 
     /** Anti-save-scum: Deterministic random from city and turn
      *  @throws NullPointerException for spies in the hideout */

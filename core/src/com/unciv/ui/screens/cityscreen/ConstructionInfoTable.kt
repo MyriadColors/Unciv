@@ -8,7 +8,7 @@ import com.unciv.GUI
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.Notification
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.models.UncivSound
 import com.unciv.models.ruleset.Building
 import com.unciv.models.ruleset.IConstruction
@@ -156,7 +156,7 @@ class ConstructionInfoTable(val cityScreen: CityScreen) : Table() {
     private fun notifyMissingCities(missingCities: List<City>, requiredBuilding: String, construction: INonPerpetualConstruction) {
         val notification = Notification(
             "[${missingCities.size}] cities need a [$requiredBuilding] to allow construction of [$construction]",
-            arrayOf(NotificationIcon.City),
+            arrayOf(NotificationIcons.City),
             actions = LocationAction(missingCities.asSequence().map { it.location }).asIterable()
         )
         val worldScreen = GUI.getWorldScreen()

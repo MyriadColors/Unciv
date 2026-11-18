@@ -3,12 +3,11 @@ package com.unciv.logic.civilization
 import com.unciv.models.ruleset.Ruleset
 import com.unciv.ui.images.ImageGetter
 
-@Suppress("ConstPropertyName") // We want enum-like names
 /**
  *  For use in the `notificationIcons` parameter of [addNotification][Civilization.addNotification],
  *  which accepts texture paths or some ruleset object names (nation, tech, unit) - this will be translated through [getImage].
  */
-object NotificationIcon {
+object NotificationIcons {
     // Remember: The typical white-on-transparency icon will not be visible on Notifications
 
     const val Barbarians = "ImprovementIcons/Barbarian encampment"

@@ -55,10 +55,10 @@ import yairm210.purity.annotations.Readonly
  *   The retreat tile found this way can itself be damaging, but that needs no extra lookup: it's
  *   always either the current tile (if IT is stoppable -- the only way this field is ever zero)
  *   or already folded into the current tile's own damagingTiles (if not) -- see
- *   [AStarPathfinder.calculateNeighborNode]'s `!canMoveTo` case.
+ *   [PathingMapAStarPathfinder.calculateNeighborNode]'s `!canMoveTo` case.
  *   Avoiding damage specifically is a different, harder concern, handled by a genuine on-demand
- *   backward search (see [AStarPathfinder.findDamageFreeAnchor]) rather than by this field -- see
- *   the KNOWN LIMITATION note on [AStarPathfinder.calculateNeighborNode] for why. This is stored as
+ *   backward search (see [PathingMapAStarPathfinder.findDamageFreeAnchor]) rather than by this field -- see
+ *   the KNOWN LIMITATION note on [PathingMapAStarPathfinder.calculateNeighborNode] for why. This is stored as
  *   fixed-point, base 30, in 9 bits.
  * - [moveUsedThisTurn]: How much movement we have used this turn so far.  This is stored as
  *   fixed-point, base 30, in 9 bits.
@@ -84,8 +84,8 @@ import yairm210.purity.annotations.Readonly
  *   every tile, including ones merely passed through -- letting a cheap single backward pass over
  *   the route (see [PathingMap.pathAsListNoDamage]) tell a genuine "turns" boundary apart from a
  *   tile that merely happens to be reachable within the same nominal turn number, without
- *   recomputing anything, and letting [AStarPathfinder.findDamageFreeAnchor] check a candidate
- *   anchor's own damage status without recomputing [AStarPathfinder.endTurnDamage] either.
+ *   recomputing anything, and letting [PathingMapAStarPathfinder.findDamageFreeAnchor] check a candidate
+ *   anchor's own damage status without recomputing [PathingMapAStarPathfinder.endTurnDamage] either.
  * - `padding`: In a RouteNode, the other remaining 12 bits of underestimatedTotal just hold zeroes,
  *   for now.
  * - [damagingTiles]: How many tiles that cause end-turn damage have been crossed to reach this tile.
@@ -95,7 +95,7 @@ import yairm210.purity.annotations.Readonly
  *   tiles, so this takes 2 bits.
  *   KNOWN LIMITATION: being the primary sort key does NOT guarantee the globally minimal
  *   damagingTiles count on every possible map -- see the comment on
- *   [AStarPathfinder.calculateNeighborNode] for why (in short: it's a resource-constrained
+ *   [PathingMapAStarPathfinder.calculateNeighborNode] for why (in short: it's a resource-constrained
  *   shortest path problem, and we keep one label per tile rather than a full Pareto frontier).
  * - `sign bit`: Zero.  We *could* use it for values, but then we'd have to handle negative values
  *   in the comparison, which might involve negation and other complexity when reading other

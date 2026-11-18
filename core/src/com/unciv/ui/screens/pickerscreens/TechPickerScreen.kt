@@ -266,106 +266,113 @@ class TechPickerScreen(
         }
 
         for (tech in ruleset.technologies.values) {
-            if (!techNameToButton.containsKey(tech.name)) {
+            val techButton = techNameToButton[tech.name]
+            if (techButton == null) {
                 ToastPopup("Tech ${tech.name} appears to be missing - perhaps two techs have the same row & column", this)
                 continue
             }
-            val techButton = techNameToButton[tech.name]!!
-            for (prerequisite in tech.prerequisites) {
-                if (!techNameToButton.containsKey(prerequisite)) {
-                    ToastPopup("Tech $prerequisite. prerequisite of ${tech.name}, appears to be missing - perhaps two techs have the same row & column", this)
-                    continue
-                }
-                val prerequisiteButton = techNameToButton[prerequisite]!!
-                val techButtonCoords = Vector2(0f, techButton.height / 2)
-                techButton.localToStageCoordinates(techButtonCoords)
-                techTable.stageToLocalCoordinates(techButtonCoords)
-
-                val prerequisiteCoords = Vector2(prerequisiteButton.width, prerequisiteButton.height / 2)
-                prerequisiteButton.localToStageCoordinates(prerequisiteCoords)
-                techTable.stageToLocalCoordinates(prerequisiteCoords)
-
-                val lineColor = when {
-                    civTech.isResearched(tech.name) && !tech.isContinuallyResearchable() -> Color.WHITE.cpy()
-                    civTech.isResearched(prerequisite) -> researchableTechColor
-                    tempTechsToResearch.contains(tech.name) -> currentTechColor
-                    else -> Color.WHITE.cpy()
-                }
-
-                val lineSize = when {
-                    tempTechsToResearch.contains(tech.name) && !civTech.isResearched(prerequisite) -> 4f
-                    else -> 2f
-                }
-
-                if (techButtonCoords.y != prerequisiteCoords.y) {
-
-                    val r = 6f
-
-                    val deltaX = techButtonCoords.x - prerequisiteCoords.x
-                    val deltaY = techButtonCoords.y - prerequisiteCoords.y
-                    val halfLength = deltaX / 2f
-
-                    val line = ImageGetter.getWhiteDot().apply {
-                        width = halfLength - r - lineSize/2
-                        height = lineSize
-                        x = prerequisiteCoords.x
-                        y = prerequisiteCoords.y - lineSize / 2
-                    }
-                    val line1 = ImageGetter.getWhiteDot().apply {
-                        width = halfLength - r - lineSize/2
-                        height = lineSize
-                        x = techButtonCoords.x - width
-                        y = techButtonCoords.y - lineSize / 2
-                    }
-                    val line2 = ImageGetter.getWhiteDot().apply {
-                        width = lineSize
-                        height = abs(deltaY) - 2*r - lineSize
-                        x = techButtonCoords.x - halfLength - lineSize / 2
-                        y = techButtonCoords.y + (if (deltaY > 0f) -height-r-lineSize/2 else r+lineSize/2)
-                    }
-
-                    var line3: Image?
-                    var line4: Image?
-
-                    if (deltaY < 0) {
-                        /* -\ */ line3 = ImageGetter.getLine(line2.x+lineSize/2+0.3f, line2.y + line2.height-lineSize/2,line.x + line.width-lineSize/2, line.y+lineSize/2+0.3f, lineSize)
-                        /* \- */ line4 = ImageGetter.getLine(line2.x+lineSize/2-0.3f, line2.y+lineSize/2, line1.x+lineSize/2, line1.y+lineSize/2-0.3f, lineSize)
-                    } else {
-                        /* -/ */ line3 = ImageGetter.getLine(line2.x+lineSize/2+0.3f, line2.y+lineSize/2, line.x + line.width-lineSize/2, line.y+lineSize/2-0.3f, lineSize)
-                        /* /- */ line4 = ImageGetter.getLine(line2.x+lineSize/2-0.3f, line2.y + line2.height-lineSize/2, line1.x+lineSize/2, line1.y+lineSize/2+0.3f, lineSize)
-                    }
-
-                    line.color = lineColor
-                    line1.color = lineColor
-                    line2.color = lineColor
-                    line3.color = lineColor
-                    line4.color = lineColor
-
-                    lines.addActor(line)
-                    lines.addActor(line1)
-                    lines.addActor(line2)
-                    lines.addActor(line3)
-                    lines.addActor(line4)
-
-                } else {
-
-                    val line = ImageGetter.getWhiteDot().apply {
-                        width = techButtonCoords.x - prerequisiteCoords.x
-                        height = lineSize
-                        x = prerequisiteCoords.x
-                        y = prerequisiteCoords.y - lineSize / 2
-                    }
-                    line.color = lineColor
-
-                    lines.addActor(line)
-                }
-            }
+            addTechPrerequisiteLines(tech, techButton)
         }
 
         lines.children.filter { it.color == currentTechColor && it.color != Color.WHITE.cpy() }
             .forEach { it.toFront() }
 
         lines.setSize(techTable.width, techTable.height)
+    }
+
+    private fun addTechPrerequisiteLines(tech: Technology, techButton: Table) {
+        for (prerequisite in tech.prerequisites) {
+            val prerequisiteButton = techNameToButton[prerequisite]
+            if (prerequisiteButton == null) {
+                ToastPopup("Tech $prerequisite. prerequisite of ${tech.name}, appears to be missing - perhaps two techs have the same row & column", this)
+                continue
+            }
+            val techButtonCoords = Vector2(0f, techButton.height / 2)
+            techButton.localToStageCoordinates(techButtonCoords)
+            techTable.stageToLocalCoordinates(techButtonCoords)
+
+            val prerequisiteCoords = Vector2(prerequisiteButton.width, prerequisiteButton.height / 2)
+            prerequisiteButton.localToStageCoordinates(prerequisiteCoords)
+            techTable.stageToLocalCoordinates(prerequisiteCoords)
+
+            val lineColor = when {
+                civTech.isResearched(tech.name) && !tech.isContinuallyResearchable() -> Color.WHITE.cpy()
+                civTech.isResearched(prerequisite) -> researchableTechColor
+                tempTechsToResearch.contains(tech.name) -> currentTechColor
+                else -> Color.WHITE.cpy()
+            }
+
+            val lineSize = when {
+                tempTechsToResearch.contains(tech.name) && !civTech.isResearched(prerequisite) -> 4f
+                else -> 2f
+            }
+
+            if (techButtonCoords.y != prerequisiteCoords.y) {
+                addSteppedConnectingLine(techButtonCoords, prerequisiteCoords, lineColor, lineSize)
+            } else {
+                val line = ImageGetter.getWhiteDot().apply {
+                    width = techButtonCoords.x - prerequisiteCoords.x
+                    height = lineSize
+                    x = prerequisiteCoords.x
+                    y = prerequisiteCoords.y - lineSize / 2
+                }
+                line.color = lineColor
+                lines.addActor(line)
+            }
+        }
+    }
+
+    private fun addSteppedConnectingLine(
+        techButtonCoords: Vector2,
+        prerequisiteCoords: Vector2,
+        lineColor: Color,
+        lineSize: Float
+    ) {
+        val r = 6f
+        val deltaX = techButtonCoords.x - prerequisiteCoords.x
+        val deltaY = techButtonCoords.y - prerequisiteCoords.y
+        val halfLength = deltaX / 2f
+
+        val line = ImageGetter.getWhiteDot().apply {
+            width = halfLength - r - lineSize/2
+            height = lineSize
+            x = prerequisiteCoords.x
+            y = prerequisiteCoords.y - lineSize / 2
+        }
+        val line1 = ImageGetter.getWhiteDot().apply {
+            width = halfLength - r - lineSize/2
+            height = lineSize
+            x = techButtonCoords.x - width
+            y = techButtonCoords.y - lineSize / 2
+        }
+        val line2 = ImageGetter.getWhiteDot().apply {
+            width = lineSize
+            height = abs(deltaY) - 2*r - lineSize
+            x = techButtonCoords.x - halfLength - lineSize / 2
+            y = techButtonCoords.y + (if (deltaY > 0f) -height-r-lineSize/2 else r+lineSize/2)
+        }
+
+        val line3: Image
+        val line4: Image
+        if (deltaY < 0) {
+            /* -\ */ line3 = ImageGetter.getLine(line2.x+lineSize/2+0.3f, line2.y + line2.height-lineSize/2,line.x + line.width-lineSize/2, line.y+lineSize/2+0.3f, lineSize)
+            /* \- */ line4 = ImageGetter.getLine(line2.x+lineSize/2-0.3f, line2.y+lineSize/2, line1.x+lineSize/2, line1.y+lineSize/2-0.3f, lineSize)
+        } else {
+            /* -/ */ line3 = ImageGetter.getLine(line2.x+lineSize/2+0.3f, line2.y+lineSize/2, line.x + line.width-lineSize/2, line.y+lineSize/2-0.3f, lineSize)
+            /* /- */ line4 = ImageGetter.getLine(line2.x+lineSize/2-0.3f, line2.y + line2.height-lineSize/2, line1.x+lineSize/2, line1.y+lineSize/2+0.3f, lineSize)
+        }
+
+        line.color = lineColor
+        line1.color = lineColor
+        line2.color = lineColor
+        line3.color = lineColor
+        line4.color = lineColor
+
+        lines.addActor(line)
+        lines.addActor(line1)
+        lines.addActor(line2)
+        lines.addActor(line3)
+        lines.addActor(line4)
     }
 
     private fun addOrderIndicators() {

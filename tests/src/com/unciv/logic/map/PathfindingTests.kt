@@ -791,7 +791,7 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         worker.automatedRoadConnectionDestination = destination.position
         // Act
         val auto = RoadToAutomation(civInfo)
-        auto.automateConnectRoad(GameView(civInfo.gameInfo, civInfo).getMapUnitView(worker), emptySet())
+        auto.automateConnectRoad(GameView(civInfo.gameInfo, civInfo).getMapUnitView(worker))
         // Assert
         assertTrue("Worker must have queued a Road", originTile.improvementInProgress == RoadStatus.Road.name)
     }

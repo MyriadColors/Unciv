@@ -1,7 +1,7 @@
 package com.unciv.logic.map.mapunit.actions
 
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.UnitAction
@@ -41,7 +41,7 @@ object UnitActionsSiege {
                             "An enemy [${unit.baseUnit.name}] bombarded [${city.name}]'s defenses (-$reducedBy%)!",
                             city.location,
                             NotificationCategory.War,
-                            NotificationIcon.War,
+                            NotificationIcons.War,
                             unit.baseUnit.name
                         )
                     }.takeIf { canExecute }

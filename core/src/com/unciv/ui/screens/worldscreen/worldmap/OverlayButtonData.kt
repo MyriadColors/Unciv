@@ -33,8 +33,8 @@ interface OverlayButtonData {
     fun createButton(worldMapHolder: WorldMapHolder): Actor
 }
 
-const val buttonSize = 60f
-const val smallerCircleSizes = 25f
+const val BUTTON_SIZE = 60f
+const val SMALLER_CIRCLE_SIZES = 25f
 
 class MoveHereOverlayButtonData(
     val unitToTurnsToDestination: HashMap<MapUnitView, Int>,
@@ -47,27 +47,27 @@ class MoveHereOverlayButtonData(
     private fun getMoveHereButton(worldMapHolder: WorldMapHolder): Group {
         val isParadrop = unitToTurnsToDestination.keys.all { it.isPreparingParadrop() }
         val image = if (isParadrop)
-            ImageGetter.getUnitActionPortrait("Paradrop", buttonSize / 2)
+            ImageGetter.getUnitActionPortrait("Paradrop", BUTTON_SIZE / 2)
         else ImageGetter.getStatIcon("Movement")
-            .apply { color = ImageGetter.CHARCOAL; width = buttonSize / 2; height = buttonSize / 2 }
+            .apply { color = ImageGetter.CHARCOAL; width = BUTTON_SIZE / 2; height = BUTTON_SIZE / 2 }
         val moveHereButton = image
-            .surroundWithCircle(buttonSize - 2, false)
-            .surroundWithCircle(buttonSize, false, ImageGetter.CHARCOAL)
+            .surroundWithCircle(BUTTON_SIZE - 2, false)
+            .surroundWithCircle(BUTTON_SIZE, false, ImageGetter.CHARCOAL)
 
         if (!isParadrop) {
             val numberCircle = unitToTurnsToDestination.values.maxOrNull()!!.tr().toLabel(fontSize = 14)
                 .apply { setAlignment(Align.center) }
-                .surroundWithCircle(smallerCircleSizes - 2, color = BaseScreen.skinStrings.skinConfig.baseColor.darken(0.3f))
-                .surroundWithCircle(smallerCircleSizes, false)
+                .surroundWithCircle(SMALLER_CIRCLE_SIZES - 2, color = BaseScreen.skinStrings.skinConfig.baseColor.darken(0.3f))
+                .surroundWithCircle(SMALLER_CIRCLE_SIZES, false)
             moveHereButton.addActor(numberCircle)
         }
 
         val firstUnit = unitToTurnsToDestination.keys.first()
-        val unitIcon = if (unitToTurnsToDestination.size == 1) UnitIconGroup(firstUnit, smallerCircleSizes)
+        val unitIcon = if (unitToTurnsToDestination.size == 1) UnitIconGroup(firstUnit, SMALLER_CIRCLE_SIZES)
         else unitToTurnsToDestination.size.tr().toLabel(fontColor = firstUnit.civ().getInnerColor()).apply { setAlignment(
             Align.center) }
-            .surroundWithCircle(smallerCircleSizes).apply { circle.color = firstUnit.civ().getOuterColor() }
-        unitIcon.y = buttonSize - unitIcon.height
+            .surroundWithCircle(SMALLER_CIRCLE_SIZES).apply { circle.color = firstUnit.civ().getOuterColor() }
+        unitIcon.y = BUTTON_SIZE - unitIcon.height
         moveHereButton.addActor(unitIcon)
 
         val unitsThatCanMove = unitToTurnsToDestination.keys.filter { it.hasMovement() }
@@ -90,18 +90,18 @@ class SwapWithOverlayButtonData(val unitView: MapUnitView, val tileView: TileVie
 
     fun getSwapWithButton(worldMapHolder: WorldMapHolder): Group {
         val swapWithButton = Group()
-        swapWithButton.setSize(buttonSize, buttonSize)
-        swapWithButton.addActor(ImageGetter.getCircle(size = buttonSize))
+        swapWithButton.setSize(BUTTON_SIZE, BUTTON_SIZE)
+        swapWithButton.addActor(ImageGetter.getCircle(size = BUTTON_SIZE))
         swapWithButton.addActor(
             ImageGetter.getImage("OtherIcons/Swap").apply {
                 color = ImageGetter.CHARCOAL
-                setSize(buttonSize / 2)
+                setSize(BUTTON_SIZE / 2)
                 center(swapWithButton)
             }
         )
 
-        val unitIcon = UnitIconGroup(unitView, smallerCircleSizes)
-        unitIcon.y = buttonSize - unitIcon.height
+        val unitIcon = UnitIconGroup(unitView, SMALLER_CIRCLE_SIZES)
+        unitIcon.y = BUTTON_SIZE - unitIcon.height
         swapWithButton.addActor(unitIcon)
 
         swapWithButton.onActivation(UncivSound.Silent) {
@@ -121,14 +121,14 @@ class ConnectRoadOverlayButtonData(val unitView: MapUnitView, val tileView: Tile
 
     private fun getConnectRoadButton(worldMapHolder: WorldMapHolder): Group {
         val connectRoadButton = Group()
-        connectRoadButton.setSize(buttonSize, buttonSize)
-        connectRoadButton.addActor(ImageGetter.getUnitActionPortrait("RoadConnection", buttonSize * 0.8f).apply {
+        connectRoadButton.setSize(BUTTON_SIZE, BUTTON_SIZE)
+        connectRoadButton.addActor(ImageGetter.getUnitActionPortrait("RoadConnection", BUTTON_SIZE * 0.8f).apply {
             center(connectRoadButton)
         }
         )
 
-        val unitIcon = UnitIconGroup(unitView, smallerCircleSizes)
-        unitIcon.y = buttonSize - unitIcon.height
+        val unitIcon = UnitIconGroup(unitView, SMALLER_CIRCLE_SIZES)
+        unitIcon.y = BUTTON_SIZE - unitIcon.height
         connectRoadButton.addActor(unitIcon)
 
         connectRoadButton.onActivation(UncivSound.Silent) {
@@ -163,20 +163,20 @@ class MoveSpyOverlayButtonData(val spyView: SpyView, val cityView: ForeignCityVi
 
     private fun getMoveSpyButton(worldMapHolder: WorldMapHolder): Group {
         val spyActionButton = Group()
-        spyActionButton.setSize(buttonSize, buttonSize)
-        spyActionButton.addActor(ImageGetter.getCircle(size = buttonSize))
+        spyActionButton.setSize(BUTTON_SIZE, BUTTON_SIZE)
+        spyActionButton.addActor(ImageGetter.getCircle(size = BUTTON_SIZE))
         if (cityView != null) {
             spyActionButton.addActor(
                 ImageGetter.getStatIcon("Movement").apply {
                     name = "Button"
                     color = ImageGetter.CHARCOAL
-                    setSize(buttonSize / 2)
+                    setSize(BUTTON_SIZE / 2)
                     center(spyActionButton)
                 }
             )
             spyActionButton.addActor(
                 ImageGetter.getImage("OtherIcons/Spy_White")
-                    .surroundWithCircle(smallerCircleSizes, color = ImageGetter.CHARCOAL).apply {
+                    .surroundWithCircle(SMALLER_CIRCLE_SIZES, color = ImageGetter.CHARCOAL).apply {
                         setPosition(2f, spyActionButton.height - 2f, Align.topLeft)
                     }
             )
@@ -185,7 +185,7 @@ class MoveSpyOverlayButtonData(val spyView: SpyView, val cityView: ForeignCityVi
                 ImageGetter.getImage("OtherIcons/Close").apply {
                     name = "Button"
                     color = Color.RED
-                    setSize(buttonSize / 2)
+                    setSize(BUTTON_SIZE / 2)
                     center(spyActionButton)
                 }
             )

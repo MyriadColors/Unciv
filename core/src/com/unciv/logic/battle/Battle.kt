@@ -137,7 +137,7 @@ object Battle {
 
         val isAlreadyDefeatedCity = defender is CityCombatant && defender.isDefeated()
 
-        val extraRangedAttackDamage = tryExtraRangedAttack(attacker, defender, attackedTile)
+        val extraRangedAttackDamage = tryExtraRangedAttack(attacker, defender)
 
         triggerCombatUniques(attacker, defender, attackedTile)
 
@@ -237,7 +237,7 @@ object Battle {
                     "We have destroyed the city of [$cityName]!",
                     defender.getTile().position,
                     NotificationCategory.War,
-                    NotificationIcon.War
+                    NotificationIcons.War
                 )
 
                 defender.city.destroyCity()
@@ -259,7 +259,7 @@ object Battle {
                 "Barbarians raided [${defender.city.name}] and stole [$ransom] Gold from your treasury!",
                 defender.city.location,
                 NotificationCategory.War,
-                NotificationIcon.War
+                NotificationIcons.War
             )
             attacker.unit.destroy() // Remove the barbarian
         } else
@@ -560,8 +560,8 @@ object Battle {
                 "${plunderingUnit.getNotificationDisplay("Your ")} plundered [${plunderedAmount}] [${resourceName}] from [${plunderedUnit.getName()}]",
                 plunderedUnit.getTile().position,
                 NotificationCategory.War,
-                plunderingUnit.getName(), NotificationIcon.War, icon,
-                if (plunderedUnit is CityCombatant) NotificationIcon.City else plunderedUnit.getName()
+                plunderingUnit.getName(), NotificationIcons.War, icon,
+                if (plunderedUnit is CityCombatant) NotificationIcons.City else plunderedUnit.getName()
             )
         }
 
@@ -573,8 +573,8 @@ object Battle {
                 "${plunderingUnit.getNotificationDisplay("Your ")} plundered [${plunderedAmount}] [${key.name}] from [${plunderedUnit.getName()}]",
                 plunderedUnit.getTile().position,
                 NotificationCategory.War,
-                plunderingUnit.getName(), NotificationIcon.War, "StatIcons/${key.name}",
-                if (plunderedUnit is CityCombatant) NotificationIcon.City else plunderedUnit.getName()
+                plunderingUnit.getName(), NotificationIcons.War, "StatIcons/${key.name}",
+                if (plunderedUnit is CityCombatant) NotificationIcons.City else plunderedUnit.getName()
             )
         }
     }
@@ -591,15 +591,15 @@ object Battle {
         // If what happened was that a civilian unit was captured, that's dealt with in the captureCivilianUnit function
         val (battleActionIcon, battleActionString) = when {
             attacker !is CityCombatant && attacker.isDefeated() ->
-                NotificationIcon.War to "was destroyed while attacking"
+                NotificationIcons.War to "was destroyed while attacking"
             !defender.isDefeated() ->
-                NotificationIcon.War to "has attacked"
+                NotificationIcons.War to "has attacked"
             defender.isCity() && attacker.isMelee() && attacker.getCivInfo().isBarbarian ->
-                NotificationIcon.War to "has raided"
+                NotificationIcons.War to "has raided"
             defender.isCity() && attacker.isMelee() ->
-                NotificationIcon.War to "has captured"
+                NotificationIcons.War to "has captured"
             else ->
-                NotificationIcon.Death to "has destroyed"
+                NotificationIcons.Death to "has destroyed"
         }
         val attackerString =
                 if (attacker.isCity()) "Enemy city [" + attacker.getName() + "]"
@@ -614,8 +614,8 @@ object Battle {
         val attackerHurtString = if (damageDealt != null && damageDealt.defenderDealt != 0) " ([-${damageDealt.defenderDealt}] HP)" else ""
         val defenderHurtString = if (damageDealt != null) " ([-${damageDealt.attackerDealt}] HP)" else ""
         val notificationString = "$attackerString$attackerHurtString $battleActionString $defenderString$defenderHurtString"
-        val attackerIcon = if (attacker is CityCombatant) NotificationIcon.City else attacker.getName()
-        val defenderIcon = if (defender is CityCombatant) NotificationIcon.City else defender.getName()
+        val attackerIcon = if (attacker is CityCombatant) NotificationIcons.City else attacker.getName()
+        val defenderIcon = if (defender is CityCombatant) NotificationIcons.City else defender.getName()
 
         val locations = LocationAction(attackedTile.position, attackerTile?.position)
         defender.getCivInfo().addNotification(notificationString, locations, NotificationCategory.War, attackerIcon, battleActionIcon, defenderIcon)
@@ -756,7 +756,7 @@ object Battle {
     private fun conquerCity(city: City, attacker: MapUnitCombatant) {
         val attackerCiv = attacker.getCivInfo()
 
-        attackerCiv.addNotification("We have conquered the city of [${city.name}]!", city.location, NotificationCategory.War, NotificationIcon.War)
+        attackerCiv.addNotification("We have conquered the city of [${city.name}]!", city.location, NotificationCategory.War, NotificationIcons.War)
 
         city.hasJustBeenConquered = true
         city.getCenterTile().apply {
@@ -922,8 +922,8 @@ object Battle {
         val defenderName = defender.getName()
         val notificationString = "[$defenderName] withdrew from a [$attackerName]"
         val locations = LocationAction(toTile.position, attacker.getTile().position)
-        defender.getCivInfo().addNotification(notificationString, locations, NotificationCategory.War, defenderName, NotificationIcon.War, attackerName)
-        attacker.getCivInfo().addNotification(notificationString, locations, NotificationCategory.War, defenderName, NotificationIcon.War, attackerName)
+        defender.getCivInfo().addNotification(notificationString, locations, NotificationCategory.War, defenderName, NotificationIcons.War, attackerName)
+        attacker.getCivInfo().addNotification(notificationString, locations, NotificationCategory.War, defenderName, NotificationIcons.War, attackerName)
         return true
     }
 
@@ -938,11 +938,11 @@ object Battle {
                 "An enemy [${attacker.unit.baseUnit.name}] has destroyed our tile improvement [${currentTileImprovement.name}]",
                 LocationAction(attackedTile.position, attacker.getTile().position),
                 NotificationCategory.War, attacker.unit.baseUnit.name,
-                NotificationIcon.War)
+                NotificationIcons.War)
         }
     }
 
-    private fun tryExtraRangedAttack(attacker: ICombatant, defender: ICombatant, attackedTile: Tile): DamageDealt {
+    private fun tryExtraRangedAttack(attacker: ICombatant, defender: ICombatant): DamageDealt {
         if (attacker !is MapUnitCombatant) return DamageDealt.None
         if (defender !is MapUnitCombatant) return DamageDealt.None
         if (defender.isCivilian()) return DamageDealt.None

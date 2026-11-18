@@ -566,21 +566,21 @@ class GameInfo : IsPartOfGameInfoSerialization, HasGameInfoSerializationVersion 
         if (tiles.size < 3) {
             for (tile in tiles) {
                 val unitName = tile.firstMilitaryUnit()!!.name
-                thisPlayer.addNotification("An enemy [$unitName] was spotted $inOrNear our territory", tile.position, NotificationCategory.War, NotificationIcon.War, unitName)
+                thisPlayer.addNotification("An enemy [$unitName] was spotted $inOrNear our territory", tile.position, NotificationCategory.War, NotificationIcons.War, unitName)
             }
         } else {
             val positions = tiles.asSequence().map { it.position }
-            thisPlayer.addNotification("[${tiles.size}] enemy units were spotted $inOrNear our territory", LocationAction(positions.map { it }), NotificationCategory.War, NotificationIcon.War)
+            thisPlayer.addNotification("[${tiles.size}] enemy units were spotted $inOrNear our territory", LocationAction(positions.map { it }), NotificationCategory.War, NotificationIcons.War)
         }
     }
 
     private fun addBombardNotification(thisPlayer: Civilization, cities: List<City>) {
         if (cities.size < 3) {
             for (city in cities)
-                thisPlayer.addNotification("Your city [${city.name}] can bombard the enemy!", MapUnitAction(city.location), NotificationCategory.War, NotificationIcon.City, NotificationIcon.Crosshair)
+                thisPlayer.addNotification("Your city [${city.name}] can bombard the enemy!", MapUnitAction(city.location), NotificationCategory.War, NotificationIcons.City, NotificationIcons.Crosshair)
         } else {
             val notificationActions = cities.asSequence().map { MapUnitAction(it.location) }
-            thisPlayer.addNotification("[${cities.size}] of your cities can bombard the enemy!", notificationActions,  NotificationCategory.War, NotificationIcon.City, NotificationIcon.Crosshair)
+            thisPlayer.addNotification("[${cities.size}] of your cities can bombard the enemy!", notificationActions,  NotificationCategory.War, NotificationIcons.City, NotificationIcons.Crosshair)
         }
     }
 

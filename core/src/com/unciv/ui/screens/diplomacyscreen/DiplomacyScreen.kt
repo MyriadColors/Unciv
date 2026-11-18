@@ -9,7 +9,7 @@ import com.unciv.Constants
 import com.unciv.GUI
 import com.unciv.UncivGame
 import com.unciv.logic.civilization.Civilization
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.diplomacy.DiplomacyFlags
 import com.unciv.logic.civilization.diplomacy.DiplomacyManager
 import com.unciv.logic.civilization.diplomacy.DiplomaticStatus
@@ -180,7 +180,7 @@ class DiplomacyScreen(
             }
 
             if (civ.isCityState && civ.questManager.haveQuestsFor(viewingCiv)) {
-                val questIcon = ImageGetter.getImage(NotificationIcon.Quest)
+                val questIcon = ImageGetter.getImage(NotificationIcons.Quest)
                     .surroundWithCircle(size = 30f, color = Color.GOLDENROD)
                 civIndicator.addActor(questIcon)
                 questIcon.x = floor(civIndicator.width - questIcon.width)

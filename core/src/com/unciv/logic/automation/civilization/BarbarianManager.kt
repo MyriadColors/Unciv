@@ -5,7 +5,7 @@ import com.unciv.logic.GameInfo
 import com.unciv.logic.IsPartOfGameInfoSerialization
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.TileMap
 import com.unciv.logic.map.mapunit.MapUnit
@@ -156,7 +156,7 @@ class BarbarianManager : IsPartOfGameInfoSerialization {
         for (civ in gameInfo.civilizations) {
             if (!civ.hasExplored(tile)) continue
             if (!civ.hasUnique(UniqueType.NotifiedOfBarbarianEncampments)) continue
-            civ.addNotification("A new barbarian encampment has spawned!", tile.position, NotificationCategory.War, NotificationIcon.War)
+            civ.addNotification("A new barbarian encampment has spawned!", tile.position, NotificationCategory.War, NotificationIcons.War)
             civ.setLastSeenImprovement(tile.position, tile.improvement)
         }
     }

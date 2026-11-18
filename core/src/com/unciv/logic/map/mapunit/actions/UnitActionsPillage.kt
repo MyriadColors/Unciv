@@ -1,7 +1,7 @@
 package com.unciv.logic.map.mapunit.actions
 
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.UnitAction
@@ -37,7 +37,7 @@ object UnitActionsPillage {
                     tile.position,
                     NotificationCategory.War,
                     icon,
-                    NotificationIcon.War,
+                    NotificationIcons.War,
                     unit.baseUnit.name
                 )
 
@@ -119,7 +119,7 @@ object UnitActionsPillage {
         fun Stats.notify(suffix: String) {
             if (isEmpty()) return
             val text = "We have looted [${toStringWithoutIcons()}] from a [${improvement.name}]" + suffix
-            unit.civ.addNotification(text, tile.position, NotificationCategory.War, "ImprovementIcons/${improvement.name}", NotificationIcon.War)
+            unit.civ.addNotification(text, tile.position, NotificationCategory.War, "ImprovementIcons/${improvement.name}", NotificationIcons.War)
         }
         toCityPillageYield.notify(" which has been sent to [${closestCity?.name}]")
         globalPillageYield.notify("")

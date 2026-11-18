@@ -67,7 +67,7 @@ class Notification() : IsPartOfGameInfoSerialization, Json.Serializable {
     fun addNotificationIconsTo(table: Table, ruleset: Ruleset, iconSize: Float) {
         if (icons.isEmpty()) return
         for (icon in icons.reversed())
-            table.add(NotificationIcon.getImage(icon, ruleset, iconSize)).size(iconSize).padRight(5f)
+            table.add(NotificationIcons.getImage(icon, ruleset, iconSize)).size(iconSize).padRight(5f)
     }
 
     fun execute(worldScreen: WorldScreen) {
@@ -132,7 +132,7 @@ class Notification() : IsPartOfGameInfoSerialization, Json.Serializable {
         if (!jsonData.hasChild("actions")) return
         var entry = jsonData.get("actions").child
         while (entry != null) {
-            actions.addAll(NotificationActionsDeserializer().read(json, entry))
+            actions.addAll(NotificationActionsDeserializer.read(json, entry))
             entry = entry.next
         }
     }

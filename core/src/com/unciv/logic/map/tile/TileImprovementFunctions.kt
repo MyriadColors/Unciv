@@ -4,7 +4,7 @@ import com.unciv.Constants
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.managers.ImprovementFunctions
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.models.ruleset.tile.TerrainType
@@ -430,7 +430,7 @@ class TileImprovementFunctions(val tile: Tile) {
             val locations = LocationAction(tile.position, closestCity.location.toGridCoord())
             civ.addNotification(
                 "Clearing a [$removedTerrainFeature] has created [${stats.toStringForNotifications()}] for [${closestCity.name}]",
-                locations, NotificationCategory.Production, NotificationIcon.Construction
+                locations, NotificationCategory.Production, NotificationIcons.Construction
             )
         }
     }

@@ -10,8 +10,9 @@ import com.unciv.logic.civilization.AlertType
 import com.unciv.logic.civilization.CivilopediaAction
 import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.MapUnitAction
+import com.unciv.logic.civilization.NotificationAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.PopupAlert
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
@@ -496,7 +497,7 @@ class CityConstructions : IsPartOfGameInfoSerialization {
                         "Excess production for [$constructionName] converted to [$workDone] gold",
                         city.location,
                         NotificationCategory.Production,
-                        NotificationIcon.Gold, "BuildingIcons/${constructionName}")
+                        NotificationIcons.Gold, "BuildingIcons/${constructionName}")
                 }
                 removeImprovementForBuilding(construction)
 
@@ -534,56 +535,64 @@ class CityConstructions : IsPartOfGameInfoSerialization {
             when {
                 otherCiv.hasExplored(city.getCenterTile()) ->
                     otherCiv.addNotification("The city of [${city.name}] has started constructing [${construction.name}]!",
-                        city.location, NotificationCategory.General, NotificationIcon.Construction, icon)
+                        city.location, NotificationCategory.General, NotificationIcons.Construction, icon)
                 otherCiv.knows(city.civ) ->
                     otherCiv.addNotification("[${city.civ.civName}] has started constructing [${construction.name}]!",
-                        NotificationCategory.General, NotificationIcon.Construction, icon)
+                        NotificationCategory.General, NotificationIcons.Construction, icon)
                 else -> otherCiv.addNotification("[An unknown civilization] has started constructing [${construction.name}]!",
-                    NotificationCategory.General, NotificationIcon.Construction, icon)
+                    NotificationCategory.General, NotificationIcons.Construction, icon)
             }
         }
     }
 
     /** Returns false if we tried to construct a unit but it has nowhere to go */
+    private fun applySavedPromotions(unit: MapUnit) {
+        val savedPromotion = city.unitToPromotions[unit.baseUnit.name]
+        if (city.unitShouldUseSavedPromotion[unit.baseUnit.name] != true ||
+            savedPromotion == null || unit.promotions.XP < savedPromotion.XP) return
+
+        /* Added all the possible Prmotion that the unit can be promoted,
+           to avoid edge case where upgrading a scout to spearman
+           whould give the rest of the spearman the "ignore terrain cost" promotion
+           when built with auto promotion. */
+        val possiblePromotions = PromotionTree(unit).possiblePromotions.mapTo(hashSetOf()) { it.name }
+        // to get promotion in order from nodes
+        val prmotionTreeOrder = PromotionTree(unit).allNodes().mapTo(mutableSetOf()) { it.promotion.name }
+        // this variable is the filted promotion from savedPrmotion to only get promotion that are possible for this unit.
+        val possiblePromotionFilted = savedPromotion.promotions.filter { it in possiblePromotions }
+        // sort in order to avoid getting Accuracy III before Accuracy I
+        for (promotions in prmotionTreeOrder) {
+            // check if here is enough XP for the next promotion
+            if (unit.promotions.XP - unit.promotions.xpForNextPromotion() < 0) break
+            if (promotions in possiblePromotionFilted) unit.promotions.addPromotion(promotions)
+        }
+    }
+
+    private fun notifyWonderBuilt(
+        construction: Building,
+        locationAndPediaActions: List<NotificationAction>,
+        pediaAction: CivilopediaAction,
+        buildingIcon: String
+    ) {
+        city.civ.popupAlerts.add(PopupAlert(AlertType.WonderBuilt, construction.name))
+        for (civ in city.civ.gameInfo.civilizations) {
+            if (civ.hasExplored(city.getCenterTile()))
+                civ.addNotification("[${construction.name}] has been built in [${city.name}]",
+                    locationAndPediaActions,
+                    if (civ == city.civ) NotificationCategory.Production else NotificationCategory.General, buildingIcon)
+            else
+                civ.addNotification("[${construction.name}] has been built in a faraway land",
+                    pediaAction, NotificationCategory.General, buildingIcon)
+        }
+    }
+
     fun completeConstruction(construction: INonPerpetualConstruction): Boolean {
         var unit: MapUnit? = null
         if (construction is Building) construction.construct(this)
         else if (construction is BaseUnit) {
             unit = construction.construct(this, null)
                 ?: return false // unable to place unit
-
-            /* check if it's true that we should load saved promotion for the unitType,
-               Then check if the player want to rebuild the unit the saved promotion,
-               and do a null check.
-               and finally check if the current unit has enough XP. */
-            val possiblePromotions = hashSetOf<String>()
-
-            // to get promotion in order from nodes
-            val prmotionTreeOrder = mutableSetOf<String>()
-
-            /* Added all the possible Prmotion that the unit can be promoted,
-               to avoid edge case where upgrading a scout to spearman
-               whould give the rest of the spearman the "ignore terrain cost" promotion
-               when built with auto promotion. */
-            for (promotion in PromotionTree(unit).possiblePromotions) possiblePromotions.add(promotion.name)
-            for (roots in PromotionTree(unit).allNodes()) prmotionTreeOrder.add(roots.promotion.name)
-
-            val savedPromotion = city.unitToPromotions[unit.baseUnit.name]
-
-            if (city.unitShouldUseSavedPromotion[unit.baseUnit.name] == true &&
-                savedPromotion != null && unit.promotions.XP >= savedPromotion.XP) {
-                // this variable is the filted promotion from savedPrmotion to only get promotion that are possible for this unit.
-                val possiblePromotionFilted =  savedPromotion.promotions.filter { it in possiblePromotions }
-                // sort in order to avoid getting Accuracy III before Accuracy I
-                for (promotions in prmotionTreeOrder) {
-                    // check if here is enough XP for the next promotion
-                    if (unit.promotions.XP-unit.promotions.xpForNextPromotion() >= 0) {
-                        if (promotions in possiblePromotionFilted) unit.promotions.addPromotion(promotions)
-                    } else {
-                        break
-                    }
-                }
-            }
+            applySavedPromotions(unit)
         }
 
         if (construction.name in inProgressConstructions)
@@ -602,21 +611,12 @@ class CityConstructions : IsPartOfGameInfoSerialization {
         val locationAndPediaActions = listOf(locationAction, pediaAction)
 
         if (construction is Building && construction.isWonder) {
-            city.civ.popupAlerts.add(PopupAlert(AlertType.WonderBuilt, construction.name))
-            for (civ in city.civ.gameInfo.civilizations) {
-                if (civ.hasExplored(city.getCenterTile()))
-                    civ.addNotification("[${construction.name}] has been built in [${city.name}]",
-                        locationAndPediaActions,
-                        if (civ == city.civ) NotificationCategory.Production else NotificationCategory.General, buildingIcon)
-                else
-                    civ.addNotification("[${construction.name}] has been built in a faraway land",
-                        pediaAction, NotificationCategory.General, buildingIcon)
-            }
+            notifyWonderBuilt(construction, locationAndPediaActions, pediaAction, buildingIcon)
         } else {
             val icon = if (construction is Building) buildingIcon else construction.name // could be a unit, in which case take the unit name.
             city.civ.addNotification(
                 "[${construction.name}] has been built in [${city.name}]",
-                locationAndPediaActions, NotificationCategory.Production, NotificationIcon.Construction, icon)
+                locationAndPediaActions, NotificationCategory.Production, NotificationIcons.Construction, icon)
         }
 
         if (construction.hasUnique(UniqueType.TriggersAlertOnCompletion, city.state)) {
@@ -626,7 +626,7 @@ class CityConstructions : IsPartOfGameInfoSerialization {
                 val completingCivDescription =
                     if (otherCiv.knows(city.civ)) "[${city.civ.civName}]" else "[An unknown civilization]"
                 otherCiv.addNotification("$completingCivDescription has completed [${construction.name}]!",
-                    pediaAction, NotificationCategory.General, NotificationIcon.Construction, buildingIcon)
+                    pediaAction, NotificationCategory.General, NotificationIcons.Construction, buildingIcon)
             }
         }
         return true

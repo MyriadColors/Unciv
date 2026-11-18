@@ -238,4 +238,12 @@ class UnitPromotions : IsPartOfGameInfoSerialization {
         if (other !is UnitPromotions) return false
         return XP == other.XP && promotions == other.promotions && numberOfPromotions == other.numberOfPromotions
     }
+
+    @Readonly
+    override fun hashCode(): Int {
+        var result = XP
+        result = 31 * result + promotions.hashCode()
+        result = 31 * result + numberOfPromotions
+        return result
+    }
 }

@@ -82,6 +82,7 @@ allprojects {
             )
         )
         parallel = true
+        baseline.set(file("detekt-baseline.xml"))
         source.setFrom(files("src", "src/main/kotlin", "src/test/kotlin"))
     }
 

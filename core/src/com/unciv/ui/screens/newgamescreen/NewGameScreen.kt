@@ -197,6 +197,7 @@ class NewGameScreen(
             val map = try {
                 MapSaver.loadMap(gameSetupInfo.mapFile!!)
             } catch (ex: Throwable) {
+                Log.debug("Could not load map", ex)
                 return "Could not load map"
             }
 

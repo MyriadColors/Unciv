@@ -254,27 +254,33 @@ class ReligionAction(private val religionName: String? = null) : NotificationAct
  *
  *  In a way, this is like asking the class loader to resolve the class by compilation instead of via the reflection API, like Gdx would try unaided.
  */
-internal class NotificationActionsDeserializer {
-    private val LocationAction: LocationAction? = null
-    private val TechAction: TechAction? = null
-    private val CityAction: CityAction? = null
-    private val DiplomacyAction: DiplomacyAction? = null
-    private val MayaLongCountAction: MayaLongCountAction? = null
-    private val MapUnitAction: MapUnitAction? = null
-    private val CivilopediaAction: CivilopediaAction? = null
-    private val PromoteUnitAction: PromoteUnitAction? = null
-    private val OverviewAction: OverviewAction? = null
-    private val PolicyAction: PolicyAction? = null
-    private val EspionageAction: EspionageAction? = null
-    private val LinkAction: LinkAction? = null
-    private val ReligionAction: ReligionAction? = null
+internal object NotificationActionsDeserializer {
+    private val actionTypes = mapOf<String, Class<out NotificationAction>>(
+        "LocationAction" to LocationAction::class.java,
+        "TechAction" to TechAction::class.java,
+        "CityAction" to CityAction::class.java,
+        "DiplomacyAction" to DiplomacyAction::class.java,
+        "MayaLongCountAction" to MayaLongCountAction::class.java,
+        "MapUnitAction" to MapUnitAction::class.java,
+        "CivilopediaAction" to CivilopediaAction::class.java,
+        "PromoteUnitAction" to PromoteUnitAction::class.java,
+        "OverviewAction" to OverviewAction::class.java,
+        "PolicyAction" to PolicyAction::class.java,
+        "EspionageAction" to EspionageAction::class.java,
+        "LinkAction" to LinkAction::class.java,
+        "ReligionAction" to ReligionAction::class.java
+    )
 
     fun read(json: Json, jsonData: JsonValue): List<NotificationAction> {
-        json.readFields(this, jsonData)
-        return listOfNotNull(
-            LocationAction, TechAction, CityAction, DiplomacyAction, MayaLongCountAction,
-            MapUnitAction, CivilopediaAction, PromoteUnitAction, OverviewAction, PolicyAction,
-            EspionageAction, LinkAction, ReligionAction
-        )
+        val result = ArrayList<NotificationAction>(1)
+        var child = jsonData.child
+        while (child != null) {
+            val clazz = actionTypes[child.name]
+            if (clazz != null) {
+                json.readValue(clazz, child)?.let { result.add(it) }
+            }
+            child = child.next
+        }
+        return result
     }
 }

@@ -35,14 +35,12 @@ class CityTileGroup(val cityView: CityView, tileView: TileView, tileSetStrings: 
         layerMisc.removeWorkedIcon()
         var icon: Actor? = null
 
-        val setDimmed = if (nightMode) fun(factor: Float) {
-                layerTerrain.dim(0.25f * factor)
-            } else fun(factor: Float) {
-                layerTerrain.dim(0.5f * factor)
-            }
-        val setUndimmed = if (nightMode) fun() {
-                layerTerrain.dim(0.5f)
-            } else fun() {}
+        fun setDimmed(factor: Float) {
+            layerTerrain.dim((if (nightMode) 0.25f else 0.5f) * factor)
+        }
+        fun setUndimmed() {
+            if (nightMode) layerTerrain.dim(0.5f)
+        }
 
         when {
 

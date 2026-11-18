@@ -8,7 +8,7 @@ import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.Notification  // for Kdoc
 import com.unciv.logic.civilization.NotificationAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.Proximity
 import com.unciv.logic.civilization.diplomacy.DiplomacyFlags
 import com.unciv.logic.civilization.managers.quests.QuestTargetHelpers.getRandom
@@ -164,7 +164,7 @@ class QuestManager : IsPartOfGameInfoSerialization {
     ////////// Internal Implementation //////////
 
     private fun Civilization.addQuestNotification(text: String, actions: Iterable<NotificationAction>) =
-        addNotification(text, actions, NotificationCategory.Diplomacy, civ.civName, NotificationIcon.Quest)
+        addNotification(text, actions, NotificationCategory.Diplomacy, civ.civName, NotificationIcons.Quest)
     private fun Civilization.addDiplomacyNotification(text: String) =
         addQuestNotification(text, listOf(DiplomacyAction(civ)))
     private fun Civilization.addQuestNotification(text: String, location: GridCoord? = civ.getCapital()!!.location) =
@@ -288,7 +288,7 @@ class QuestManager : IsPartOfGameInfoSerialization {
                     "[${civ.civName}] is being invaded by Barbarians! Destroy Barbarians near their territory to earn Influence.",
                     civ.getCapital()!!.location,
                     NotificationCategory.Diplomacy, civ.civName,
-                    NotificationIcon.War
+                    NotificationIcons.War
                 )
             }
             civ.addFlag(CivFlags.TurnsTillCallForBarbHelp.name, 30)

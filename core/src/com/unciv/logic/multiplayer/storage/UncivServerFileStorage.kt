@@ -29,8 +29,8 @@ object UncivServerFileStorage : FileStorage {
         } catch (ex: SimpleHttp.HttpStatusException) {
             debug("Error from UncivServer during load: %s", ex.message)
             when (ex.code) {
-                404 -> throw MultiplayerFileNotFoundException(Exception(ex.message))
-                else -> throw Exception(ex.message)
+                404 -> throw MultiplayerFileNotFoundException(ex)
+                else -> throw Exception(ex.message, ex)
             }
         }
     }

@@ -22,14 +22,14 @@ import yairm210.purity.annotations.Readonly
  * ## Upgrade chains
  *
  * A deprecated unique's `@Deprecated.replaceWith.expression` may itself match another
- * [DeprecatedUniqueType] (or half-deprecated [UniqueType]) entry.
+ * [DeprecatedUniques] (or half-deprecated [UniqueType]) entry.
  * [com.unciv.models.ruleset.validation.UniqueAutoUpdater] must follow such chains to their end.
  * Example real chain:
  *
  *   [DecreasedBuildingMaintenanceDeprecated] → [BuildingMaintenanceOld] → [UniqueType.BuildingMaintenance]
  *
  */
-enum class DeprecatedUniqueType(
+enum class DeprecatedUniques(
     val text: String,
     vararg targets: UniqueTarget, // retained for copy-paste compatibility; unused at runtime
     val flags: Set<UniqueFlag> = emptySet(), // retained for copy-paste compatibility; unused at runtime
@@ -530,7 +530,7 @@ enum class DeprecatedUniqueType(
     val replacementText: String by lazy { getDeprecationAnnotation()!!.replaceWith.expression }
 
     companion object {
-        /** Lookup from [placeholderText] to [DeprecatedUniqueType], mirroring [UniqueType.uniqueTypeMap]. */
-        val uniqueTypeMap: Map<String, DeprecatedUniqueType> = entries.associateBy { it.placeholderText }
+        /** Lookup from [placeholderText] to [DeprecatedUniques], mirroring [UniqueType.uniqueTypeMap]. */
+        val uniqueTypeMap: Map<String, DeprecatedUniques> = entries.associateBy { it.placeholderText }
     }
 }

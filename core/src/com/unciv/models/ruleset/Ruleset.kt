@@ -495,6 +495,76 @@ class Ruleset {
         RulesetFile.entries.asSequence().flatMap { it.getNames(this) }.filter { it.name.isNotEmpty() }
     @Readonly fun allICivilopediaText(): Sequence<ICivilopediaText> = allRulesetObjects()
 
+    private fun loadTechs(techFile: FileHandle) {
+        val techColumns = json().fromJsonFile(Array<TechColumn>::class.java, techFile)
+        for (techColumn in techColumns) {
+            this.techColumns.add(techColumn)
+            for (tech in techColumn.techs) {
+                if (tech.cost == 0) tech.cost = techColumn.techCost
+                tech.column = techColumn
+                tech.originRuleset = name
+                technologies[tech.name] = tech
+            }
+        }
+    }
+
+    private fun loadPolicies(policiesFile: FileHandle) {
+        policyBranches += createHashmap(
+            json().fromJsonFile(Array<PolicyBranch>::class.java, policiesFile)
+        )
+        for (branch in policyBranches.values) {
+            // Setup this branch
+            branch.requires = ArrayList()
+            branch.branch = branch
+            for (victoryType in victories.values) {
+                if (victoryType.name !in branch.priorities.keys) {
+                    branch.priorities[victoryType.name] = 0
+                }
+            }
+            policies[branch.name] = branch
+
+            // Append child policies of this branch
+            for (policy in branch.policies) {
+                policy.branch = branch
+                policy.originRuleset = name
+                if (policy.requires == null) {
+                    policy.requires = arrayListOf(branch.name)
+                }
+
+                if (policy != branch.policies.last()) {
+                    // If mods override a previous policy's location, we don't want that policy to stick around,
+                    // because it leads to softlocks on the policy picker screen
+                    val conflictingLocationPolicy = policies.values.firstOrNull {
+                        it.branch.name == policy.branch.name
+                            && it.column == policy.column
+                            && it.row == policy.row
+                    }
+                    if (conflictingLocationPolicy != null)
+                        policies.remove(conflictingLocationPolicy.name)
+                }
+                policies[policy.name] = policy
+            }
+
+            // Add a finisher
+            branch.policies.last().name =
+                branch.name + Policy.branchCompleteSuffix
+        }
+    }
+
+    private fun loadCivics(civicsFile: FileHandle) {
+        civicCategories += createHashmap(
+            json().fromJsonFile(Array<CivicCategory>::class.java, civicsFile)
+        )
+        for (category in civicCategories.values) {
+            category.originRuleset = name
+            for (civic in category.civics) {
+                civic.category = category
+                civic.originRuleset = name
+                civics[civic.name] = civic
+            }
+        }
+    }
+
     fun load(folderHandle: FileHandle) {
         fun RulesetFile.file() = folderHandle.child(filename)
 
@@ -511,18 +581,7 @@ class Ruleset {
         }
 
         val techFile = RulesetFile.Techs.file()
-        if (techFile.exists()) {
-            val techColumns = json().fromJsonFile(Array<TechColumn>::class.java, techFile)
-            for (techColumn in techColumns) {
-                this.techColumns.add(techColumn)
-                for (tech in techColumn.techs) {
-                    if (tech.cost == 0) tech.cost = techColumn.techCost
-                    tech.column = techColumn
-                    tech.originRuleset = name
-                    technologies[tech.name] = tech
-                }
-            }
-        }
+        if (techFile.exists()) loadTechs(techFile)
 
         val buildingsFile = RulesetFile.Buildings.file()
         if (buildingsFile.exists()) buildings += createHashmap(json().fromJsonFile(Array<Building>::class.java, buildingsFile))
@@ -573,64 +632,10 @@ class Ruleset {
         if (specialistsFile.exists()) specialists += createHashmap(json().fromJsonFile(Array<Specialist>::class.java, specialistsFile))
 
         val policiesFile = RulesetFile.Policies.file()
-        if (policiesFile.exists()) {
-            policyBranches += createHashmap(
-                json().fromJsonFile(Array<PolicyBranch>::class.java, policiesFile)
-            )
-            for (branch in policyBranches.values) {
-                // Setup this branch
-                branch.requires = ArrayList()
-                branch.branch = branch
-                for (victoryType in victories.values) {
-                    if (victoryType.name !in branch.priorities.keys) {
-                        branch.priorities[victoryType.name] = 0
-                    }
-                }
-                policies[branch.name] = branch
-
-                // Append child policies of this branch
-                for (policy in branch.policies) {
-                    policy.branch = branch
-                    policy.originRuleset = name
-                    if (policy.requires == null) {
-                        policy.requires = arrayListOf(branch.name)
-                    }
-
-                    if (policy != branch.policies.last()) {
-                        // If mods override a previous policy's location, we don't want that policy to stick around,
-                        // because it leads to softlocks on the policy picker screen
-                        val conflictingLocationPolicy = policies.values.firstOrNull {
-                            it.branch.name == policy.branch.name
-                                && it.column == policy.column
-                                && it.row == policy.row
-                        }
-                        if (conflictingLocationPolicy != null)
-                            policies.remove(conflictingLocationPolicy.name)
-                    }
-                    policies[policy.name] = policy
-
-                }
-
-                // Add a finisher
-                branch.policies.last().name =
-                    branch.name + Policy.branchCompleteSuffix
-            }
-        }
+        if (policiesFile.exists()) loadPolicies(policiesFile)
 
         val civicsFile = RulesetFile.Civics.file()
-        if (civicsFile.exists()) {
-            civicCategories += createHashmap(
-                json().fromJsonFile(Array<CivicCategory>::class.java, civicsFile)
-            )
-            for (category in civicCategories.values) {
-                category.originRuleset = name
-                for (civic in category.civics) {
-                    civic.category = category
-                    civic.originRuleset = name
-                    civics[civic.name] = civic
-                }
-            }
-        }
+        if (civicsFile.exists()) loadCivics(civicsFile)
 
         val beliefsFile = RulesetFile.Beliefs.file()
         if (beliefsFile.exists())

@@ -148,7 +148,7 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
             .ifEmpty { sequenceOf(TerrainOccursRange(this)) }
 
     fun generateMap(mapParameters: MapParameters, gameParameters: GameParameters = GameParameters(), gameInfo: GameInfo? = null): TileMap {
-        val mapSize = if (mapParameters.mapSize.name != auto) mapParameters.mapSize else resolveAutoMapSize(mapParameters, gameParameters, gameInfo)
+        val mapSize = if (mapParameters.mapSize.name != auto) mapParameters.mapSize else resolveAutoMapSize(mapParameters, gameInfo)
         val mapType = mapParameters.type
 
         if (mapParameters.seed == 0L)
@@ -237,7 +237,7 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
 
         return map
     }
-    private fun resolveAutoMapSize(mapParameters: MapParameters, gameParameters: GameParameters, gameInfo: GameInfo?): MapSize {
+    private fun resolveAutoMapSize(mapParameters: MapParameters, gameInfo: GameInfo?): MapSize {
         if (gameInfo == null) return mapParameters.mapSize
 
         val numberOfMajorCivs = gameInfo.civilizations.count { it.isMajorCiv }
@@ -371,22 +371,7 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
 
     private fun spreadCoast(map: TileMap, coasts: List<TerrainOccursRange>) {
         for (i in 1..map.mapParameters.maxCoastExtension) {
-            val toCoast = mutableListOf<Tile>()
-            for (tile in map.values.filter { it.isOcean }) {
-                val tilesInDistance = tile.getTilesInDistance(1)
-                for (neighborTile in tilesInDistance) {
-                    if (neighborTile.isLand) {
-                        toCoast.add(tile)
-                        break
-                    } else if (neighborTile.getBaseTerrain().isCoast) {
-                        val randbool = randomness.RNG.nextBoolean()
-                        if (randbool) {
-                            toCoast.add(tile)
-                        }
-                        break
-                    }
-                }
-            }
+            val toCoast = map.values.filter { it.isOcean && shouldSpreadCoastToTile(it) }
             for (tile in toCoast) {
                 val coast = coasts.filter { it.matchesHumidityAndTemp(tile) }.ifEmpty { coasts }.random(randomness.RNG)
                 tile.baseTerrain = coast.name
@@ -395,52 +380,69 @@ class MapGenerator(val ruleset: Ruleset, private val coroutineScope: CoroutineSc
         }
     }
 
+    private fun shouldSpreadCoastToTile(tile: Tile): Boolean {
+        for (neighborTile in tile.getTilesInDistance(1)) {
+            if (neighborTile.isLand) return true
+            if (neighborTile.getBaseTerrain().isCoast) return randomness.RNG.nextBoolean()
+        }
+        return false
+    }
+
     private fun spawnLakesAndCoasts(map: TileMap) {
         val lakeTerrains = terrainConditions.filter { it.isFreshwater && !it.rareFeature && it.terrain.type == TerrainType.Water }
         if (lakeTerrains.isNotEmpty()) {
-            //define lakes
-            val waterTiles = map.values.filter { it.isWater }.toHashSet()
-
-            val tilesInArea = HashSet<Tile>()
-            val tilesToCheck = ArrayDeque<Tile>()
-
-            val maxLakeSize = ruleset.modOptions.constants.maxLakeSize
-
-            while (waterTiles.isNotEmpty()) {
-                val initialWaterTile = waterTiles.first()
-                waterTiles.remove(initialWaterTile)
-                tilesInArea += initialWaterTile
-                tilesToCheck += initialWaterTile
-
-                // Floodfill to cluster water tiles
-                while (tilesToCheck.isNotEmpty()) {
-                    val tileWeAreChecking = tilesToCheck.removeFirst()
-                    for (vector in tileWeAreChecking.neighbors){
-                        if (vector in tilesInArea) continue
-                        if (vector !in waterTiles) continue
-                        tilesInArea += vector
-                        tilesToCheck += vector
-                        waterTiles -= vector
-                    }
-                }
-
-                val lakeTerrain = lakeTerrains.filter { it.matchesHumidityAndTemp(initialWaterTile) }
-                    .ifEmpty {lakeTerrains}
-                    .random(randomness.RNG)
-                if (tilesInArea.size <= maxLakeSize) {
-                    for (tile in tilesInArea) {
-                        tile.baseTerrain = lakeTerrain.name
-                        tile.setTransients()
-                    }
-                }
-                tilesInArea.clear()
-            }
+            defineLakes(map, lakeTerrains)
         }
 
         //Coasts
         val coasts = terrainConditions.filter { it.isCoast && !it.rareFeature }
         if (coasts.isNotEmpty()) {
             spreadCoast(map, coasts)
+        }
+    }
+
+    private fun defineLakes(map: TileMap, lakeTerrains: List<TerrainOccursRange>) {
+        val waterTiles = map.values.filter { it.isWater }.toHashSet()
+        val tilesInArea = HashSet<Tile>()
+        val tilesToCheck = ArrayDeque<Tile>()
+        val maxLakeSize = ruleset.modOptions.constants.maxLakeSize
+
+        while (waterTiles.isNotEmpty()) {
+            val initialWaterTile = waterTiles.first()
+            floodFillWaterArea(initialWaterTile, waterTiles, tilesInArea, tilesToCheck)
+
+            val lakeTerrain = lakeTerrains.filter { it.matchesHumidityAndTemp(initialWaterTile) }
+                .ifEmpty { lakeTerrains }
+                .random(randomness.RNG)
+            if (tilesInArea.size <= maxLakeSize) {
+                for (tile in tilesInArea) {
+                    tile.baseTerrain = lakeTerrain.name
+                    tile.setTransients()
+                }
+            }
+            tilesInArea.clear()
+        }
+    }
+
+    private fun floodFillWaterArea(
+        initialWaterTile: Tile,
+        waterTiles: HashSet<Tile>,
+        tilesInArea: HashSet<Tile>,
+        tilesToCheck: ArrayDeque<Tile>
+    ) {
+        waterTiles.remove(initialWaterTile)
+        tilesInArea += initialWaterTile
+        tilesToCheck += initialWaterTile
+
+        while (tilesToCheck.isNotEmpty()) {
+            val tileWeAreChecking = tilesToCheck.removeFirst()
+            for (vector in tileWeAreChecking.neighbors) {
+                if (vector in tilesInArea) continue
+                if (vector !in waterTiles) continue
+                tilesInArea += vector
+                tilesToCheck += vector
+                waterTiles -= vector
+            }
         }
     }
 

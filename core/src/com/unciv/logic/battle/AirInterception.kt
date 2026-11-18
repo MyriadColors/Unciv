@@ -3,7 +3,7 @@ package com.unciv.logic.battle
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.ruleset.unique.GameContext
@@ -66,11 +66,11 @@ object AirInterception {
                     "Our [$interceptorName] ([-0] HP) intercepted and attacked an enemy [$attackerName] ([-0] HP)"
                 attacker.getCivInfo().addNotification(
                     attackerText, locations, NotificationCategory.War,
-                    attackerName, NotificationIcon.War, interceptorName
+                    attackerName, NotificationIcons.War, interceptorName
                 )
                 interceptor.civ.addNotification(
                     interceptorText, locations, NotificationCategory.War,
-                    interceptorName, NotificationIcon.War, attackerName
+                    interceptorName, NotificationIcons.War, attackerName
                 )
                 attacker.unit.action = null
                 return
@@ -125,7 +125,7 @@ object AirInterception {
 
         attacker.getCivInfo().addNotification(
             attackerText, locationsInterceptorUnknown, NotificationCategory.War,
-            attackerName, NotificationIcon.War, NotificationIcon.Question
+            attackerName, NotificationIcons.War, NotificationIcons.Question
         )
 
         val interceptorText =
@@ -138,7 +138,7 @@ object AirInterception {
 
         interceptor.civ.addNotification(
             interceptorText, locations, NotificationCategory.War,
-            interceptorName, NotificationIcon.War, attackerName
+            interceptorName, NotificationIcons.War, attackerName
         )
     }
 
@@ -209,7 +209,7 @@ object AirInterception {
 
         attacker.getCivInfo().addNotification(
             attackerText, interceptor.currentTile.position, NotificationCategory.War,
-            attackerName, NotificationIcon.War, interceptorName
+            attackerName, NotificationIcons.War, interceptorName
         )
 
         val interceptorText = if (attacker.isDefeated())
@@ -217,7 +217,7 @@ object AirInterception {
         else "Our [$interceptorName] ([-0] HP) intercepted and attacked an enemy [$attackerName] ([-$damage] HP)"
         interceptor.civ.addNotification(
             interceptorText, locations, NotificationCategory.War,
-            interceptorName, NotificationIcon.War, attackerName
+            interceptorName, NotificationIcons.War, attackerName
         )
     }
 

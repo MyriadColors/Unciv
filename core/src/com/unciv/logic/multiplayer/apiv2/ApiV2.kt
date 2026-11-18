@@ -388,79 +388,77 @@ class ApiV2(private val baseUrl: String) : ApiV2Wrapper(baseUrl), Disposable {
     /**
      * Handle a newly established WebSocket connection
      */
+    private fun startPingJob(session: ClientWebSocketSession) = Concurrency.run {
+        val currentChannel = session.outgoing
+        while (sendChannel != null && currentChannel == sendChannel) {
+            try {
+                sendPing()
+            } catch (e: Exception) {
+                Log.debug("Failed to send WebSocket ping: %s", e.localizedMessage)
+                Concurrency.run {
+                    if (reconnectWebSocket) {
+                        websocket(::handleWebSocket)
+                    }
+                }
+            }
+            delay(DEFAULT_WEBSOCKET_PING_FREQUENCY)
+        }
+        Log.debug("It looks like the WebSocket channel has been replaced")
+    }
+
+    private fun handleIncomingTextFrame(incomingFrame: Frame.Text) {
+        try {
+            val text = incomingFrame.readText()
+            val msg = Json.decodeFromString(WebSocketMessageSerializer(), text)
+            Log.debug("Incoming WebSocket message ${msg::class.java.canonicalName}: $msg")
+            if (msg.type == WebSocketMessageType.InvalidMessage) {
+                Log.debug("Received 'InvalidMessage' from WebSocket connection")
+                return
+            }
+            // Casting any message but InvalidMessage to WebSocketMessageWithContent should work,
+            // otherwise the class hierarchy has been messed up somehow; all messages should have content
+            val content = (msg as WebSocketMessageWithContent).content
+            Concurrency.runOnGLThread {
+                EventBus.send(content)
+            }
+            dispatchEventToChannels(content)
+        } catch (e: Throwable) {
+            Log.error("%s\n%s", e.localizedMessage, e.stackTraceToString())
+        }
+    }
+
+    private fun dispatchEventToChannels(content: Event) {
+        for (c in eventChannelList) {
+            Concurrency.run {
+                try {
+                    c.send(content)
+                } catch (_: ClosedSendChannelException) {
+                    delay(10)
+                    eventChannelList.remove(c)
+                } catch (t: Throwable) {
+                    Log.debug("Sending event %s to event channel %s failed: %s", content, c, t)
+                    delay(10)
+                    eventChannelList.remove(c)
+                }
+            }
+        }
+    }
+
     private suspend fun handleWebSocket(session: ClientWebSocketSession) {
         sendChannel?.close()
         sendChannel = session.outgoing
 
-        websocketJobs.add(Concurrency.run {
-            val currentChannel = session.outgoing
-            while (sendChannel != null && currentChannel == sendChannel) {
-                try {
-                    sendPing()
-                } catch (e: Exception) {
-                    Log.debug("Failed to send WebSocket ping: %s", e.localizedMessage)
-                    Concurrency.run {
-                        if (reconnectWebSocket) {
-                            websocket(::handleWebSocket)
-                        }
-                    }
-                }
-                delay(DEFAULT_WEBSOCKET_PING_FREQUENCY)
-            }
-            Log.debug("It looks like the WebSocket channel has been replaced")
-        })
+        websocketJobs.add(startPingJob(session))
 
         try {
             while (true) {
                 val incomingFrame = session.incoming.receive()
                 when (incomingFrame.frameType) {
-                    FrameType.PING -> {
-                        sendPong(incomingFrame.data)
-                    }
-                    FrameType.PONG -> {
-                        onPong(incomingFrame.data)
-                    }
-                    FrameType.CLOSE -> {
-                        throw ClosedReceiveChannelException("Received CLOSE frame via WebSocket")
-                    }
-                    FrameType.BINARY -> {
-                        Log.debug("Received binary packet of size %s which can't be parsed at the moment", incomingFrame.data.size)
-                    }
-                    FrameType.TEXT -> {
-                        try {
-                            val text = (incomingFrame as Frame.Text).readText()
-                            val msg = Json.decodeFromString(WebSocketMessageSerializer(), text)
-                            Log.debug("Incoming WebSocket message ${msg::class.java.canonicalName}: $msg")
-                            when (msg.type) {
-                                WebSocketMessageType.InvalidMessage -> {
-                                    Log.debug("Received 'InvalidMessage' from WebSocket connection")
-                                }
-                                else -> {
-                                    // Casting any message but InvalidMessage to WebSocketMessageWithContent should work,
-                                    // otherwise the class hierarchy has been messed up somehow; all messages should have content
-                                    Concurrency.runOnGLThread {
-                                        EventBus.send((msg as WebSocketMessageWithContent).content)
-                                    }
-                                    for (c in eventChannelList) {
-                                        Concurrency.run {
-                                            try {
-                                                c.send((msg as WebSocketMessageWithContent).content)
-                                            } catch (_: ClosedSendChannelException) {
-                                                delay(10)
-                                                eventChannelList.remove(c)
-                                            } catch (t: Throwable) {
-                                                Log.debug("Sending event %s to event channel %s failed: %s", (msg as WebSocketMessageWithContent).content, c, t)
-                                                delay(10)
-                                                eventChannelList.remove(c)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        } catch (e: Throwable) {
-                            Log.error("%s\n%s", e.localizedMessage, e.stackTraceToString())
-                        }
-                    }
+                    FrameType.PING -> sendPong(incomingFrame.data)
+                    FrameType.PONG -> onPong(incomingFrame.data)
+                    FrameType.CLOSE -> throw ClosedReceiveChannelException("Received CLOSE frame via WebSocket")
+                    FrameType.BINARY -> Log.debug("Received binary packet of size %s which can't be parsed at the moment", incomingFrame.data.size)
+                    FrameType.TEXT -> handleIncomingTextFrame(incomingFrame as Frame.Text)
                 }
             }
         } catch (e: ClosedReceiveChannelException) {

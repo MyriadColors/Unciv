@@ -2,7 +2,7 @@ package com.unciv.models.ruleset.unique
 
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 
 /**
  *  Container for the innermost "executors" for triggers, the code actually affecting game state.
@@ -31,12 +31,12 @@ internal object UniqueTriggerExecutors {
                 // templates:
                 // [civName|An unknown civilization] has adopted the [policyName] policy
                 "has adopted the " + triggerNotificationText.removePrefix("due to adopting ") +
-                " policy" to NotificationIcon.Culture
+                " policy" to NotificationIcons.Culture
             triggerNotificationText.startsWith("due to researching ") ->
                 // templates:
                 // [civName|An unknown civilization] has researched [techName]
                 "has researched " + triggerNotificationText.removePrefix("due to researching ") to
-                NotificationIcon.Science
+                NotificationIcons.Science
             // Kludge! If we get here, the translation template will be missing.
             triggerNotificationText.startsWith("due to ") ->
                 triggerNotificationText.removePrefix("due to ") to ""

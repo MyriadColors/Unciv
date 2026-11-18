@@ -22,7 +22,7 @@ import yairm210.purity.annotations.Cache
 import yairm210.purity.annotations.InternalState
 import yairm210.purity.annotations.Readonly
 
-internal class AStarPathfinder(
+internal class PathingMapAStarPathfinder(
     private val debugId: Any,
     private val debugMapType: String,
     private val destination: Tile?,

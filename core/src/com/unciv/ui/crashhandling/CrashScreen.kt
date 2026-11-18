@@ -120,7 +120,6 @@ class CrashScreen(val exception: Throwable) : BaseScreen() {
     }
 
     init {
-        System.gc() // If we previously died to an OOM error, this decreases the chances that the *crash screen* will OOM as well
         stage.addActor(makeLayoutTable())
     }
 

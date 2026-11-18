@@ -1219,7 +1219,7 @@ class Civilization : IsPartOfGameInfoSerialization {
                 val tile = gameInfo.tileMap[notificationLocation]
                 tile.isVisible(civ) || tile.isExplored(civ) && tile.getShownImprovement(civ) == Constants.cityCenter
             }
-            civ.addNotification(destructionText, LocationAction(location), NotificationCategory.General, civName, NotificationIcon.Death)
+            civ.addNotification(destructionText, LocationAction(location), NotificationCategory.General, civName, NotificationIcons.Death)
         }
         units.getCivUnits().forEach { it.destroy() }
         tradeRequests.clear() // if we don't do this then there could be resources taken by "pending" trades forever

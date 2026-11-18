@@ -114,7 +114,7 @@ object Nuke {
                     nukeNotificationAction,
                     Notification.NotificationCategory.Diplomacy,
                     defendingCiv.civName,
-                    NotificationIcon.War,
+                    NotificationIcons.War,
                     attacker.getName()
                 )
             return
@@ -124,7 +124,7 @@ object Nuke {
         for (defendingCiv in notifyDeclaredWarCivs)
             attackingCiv.addNotification(
                 "After being hit by our [${attacker.getName()}], [${defendingCiv}] has declared war on us!",
-                nukeNotificationAction, NotificationCategory.Diplomacy, defendingCiv.civName, NotificationIcon.War, attacker.getName()
+                nukeNotificationAction, NotificationCategory.Diplomacy, defendingCiv.civName, NotificationIcons.War, attacker.getName()
             )
 
         // Message all other civs
@@ -133,17 +133,17 @@ object Nuke {
             if (hitCivsTerritory.contains(otherCiv))
                 otherCiv.addNotification(
                     "A(n) [${attacker.getName()}] from [${attackingCiv.civName}] has exploded in our territory!",
-                    nukeNotificationAction, NotificationCategory.War, attackingCiv.civName, NotificationIcon.War, attacker.getName()
+                    nukeNotificationAction, NotificationCategory.War, attackingCiv.civName, NotificationIcons.War, attacker.getName()
                 )
             else if (otherCiv.knows(attackingCiv))
                 otherCiv.addNotification(
                     "A(n) [${attacker.getName()}] has been detonated by [${attackingCiv.civName}]!",
-                    nukeNotificationAction, NotificationCategory.War, attackingCiv.civName, NotificationIcon.War, attacker.getName()
+                    nukeNotificationAction, NotificationCategory.War, attackingCiv.civName, NotificationIcons.War, attacker.getName()
                 )
             else
                 otherCiv.addNotification(
                     "A(n) [${attacker.getName()}] has been detonated by [an unknown civilization]!",
-                    nukeNotificationAction, NotificationCategory.War, NotificationIcon.War, attacker.getName()
+                    nukeNotificationAction, NotificationCategory.War, NotificationIcons.War, attacker.getName()
                 )
         }
     }

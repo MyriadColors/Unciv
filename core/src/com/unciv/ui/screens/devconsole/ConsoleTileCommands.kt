@@ -4,7 +4,7 @@ import com.unciv.logic.city.City
 import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.Notification
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.map.mapgenerator.RiverGenerator
 import com.unciv.logic.map.mapgenerator.RiverGenerator.RiverDirections
 import com.unciv.logic.map.tile.Tile
@@ -130,7 +130,7 @@ internal class ConsoleTileCommands: ConsoleCommandNode {
                 .map { it.position }
             if (locations.isEmpty()) DevConsoleResponse.hint("None found")
             else {
-                val notification = Notification("tile find ${filter.toStringAsPlaceholder()}: ${locations.size} matches", arrayOf(NotificationIcon.Spy),
+                val notification = Notification("tile find ${filter.toStringAsPlaceholder()}: ${locations.size} matches", arrayOf(NotificationIcons.Spy),
                     locations.map { LocationAction(it) }, NotificationCategory.General)
                 console.screen.notificationsScroll.oneTimeNotification = notification
                 notification.execute(console.screen)

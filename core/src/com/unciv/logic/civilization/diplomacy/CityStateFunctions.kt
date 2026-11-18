@@ -96,7 +96,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             // No spy won the election, the civs that tried to rig the election loose influence
             for (spy in spies) {
                 civInfo.getDiplomacyManager(spy.civInfo)!!.addInfluence(-5f)
-                spy.civInfo.addNotification("Your spy lost the election in [$capital]!", capital.location, NotificationCategory.Espionage, NotificationIcon.Spy)
+                spy.civInfo.addNotification("Your spy lost the election in [$capital]!", capital.location, NotificationCategory.Espionage, NotificationIcons.Spy)
             }
             return
         }
@@ -108,12 +108,12 @@ class CityStateFunctions(val civInfo: Civilization) {
             val influence = if (civ == winner) 20f else -5f
             civInfo.getDiplomacyManager(civ)!!.addInfluence(influence)
             if (civ == winner)  {
-                civ.addNotification("Your spy successfully rigged the election in [${civInfo.civName}]!", capital.location, NotificationCategory.Espionage, NotificationIcon.Spy)
+                civ.addNotification("Your spy successfully rigged the election in [${civInfo.civName}]!", capital.location, NotificationCategory.Espionage, NotificationIcons.Spy)
             } else if (spies.any { it.civInfo == civ}) {
-                civ.addNotification("Your spy lost the election in [${civInfo.civName}] to [${winner.civName}]!", capital.location, NotificationCategory.Espionage, NotificationIcon.Spy)
+                civ.addNotification("Your spy lost the election in [${civInfo.civName}] to [${winner.civName}]!", capital.location, NotificationCategory.Espionage, NotificationIcons.Spy)
             } else if (civ == allyCiv) {
                 // If the previous ally has no spy in the city then we should notify them
-                allyCiv.addNotification("The election in [${civInfo.civName}] was rigged by [${winner.civName}]!", capital.location, NotificationCategory.Espionage, NotificationIcon.Spy)
+                allyCiv.addNotification("The election in [${civInfo.civName}] was rigged by [${winner.civName}]!", capital.location, NotificationCategory.Espionage, NotificationIcons.Spy)
             }
         }
 
@@ -304,7 +304,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             newAlly.addNotification(text,
                 getNotificationActions(),
                 NotificationCategory.Diplomacy, civInfo.civName,
-                NotificationIcon.Diplomacy
+                NotificationIcons.Diplomacy
             )
             newAlly.cache.updateViewableTiles()
             newAlly.cache.updateCivResources()
@@ -329,7 +329,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             oldAlly.addNotification(text,
                 getNotificationActions(),
                 NotificationCategory.Diplomacy, civInfo.civName,
-                NotificationIcon.Diplomacy
+                NotificationIcons.Diplomacy
             )
             if (newAlly != null && oldAlly.knows(newAlly)){
                 val diplomacyManager = oldAlly.getDiplomacyManager(newAlly)!!
@@ -394,13 +394,13 @@ class CityStateFunctions(val civInfo: Civilization) {
         otherCiv.addNotification("We have married into the ruling family of [${civInfo.civName}], bringing them under our control.",
             notificationLocation,
             NotificationCategory.Diplomacy, civInfo.civName,
-            NotificationIcon.Diplomacy, otherCiv.civName)
+            NotificationIcons.Diplomacy, otherCiv.civName)
 
         for (civ in civInfo.gameInfo.civilizations.filter { it != otherCiv })
             civ.addNotification("[${otherCiv.civName}] has married into the ruling family of [${civInfo.civName}], bringing them under their control.",
                 notificationLocation,
                 NotificationCategory.Diplomacy, civInfo.civName,
-                NotificationIcon.Diplomacy, otherCiv.civName)
+                NotificationIcons.Diplomacy, otherCiv.civName)
 
         for (unit in civInfo.units.getCivUnits())
             unit.gift(otherCiv)
@@ -425,13 +425,13 @@ class CityStateFunctions(val civInfo: Civilization) {
         otherCiv.addNotification("We have bought the City-State of [${civInfo.civName}], bringing them under our control!",
             notificationLocation,
             NotificationCategory.Diplomacy, civInfo.civName,
-            NotificationIcon.Diplomacy, otherCiv.civName)
+            NotificationIcons.Diplomacy, otherCiv.civName)
 
         for (civ in civInfo.gameInfo.civilizations.filter { it != otherCiv })
             civ.addNotification("[${otherCiv.civName}] has bought the City-State of [${civInfo.civName}], bringing them under their control.",
                 notificationLocation,
                 NotificationCategory.Diplomacy, civInfo.civName,
-                NotificationIcon.Diplomacy, otherCiv.civName)
+                NotificationIcons.Diplomacy, otherCiv.civName)
         
         // OPTIONAL: Make other civs angry because you circumvented their protection pledge/stole their alliance
         // Merchants of Venice in base BNW don't anger other civs when you puppet CSes, but considering how you can buy any CS regardless of influence, I felt it'd be appropriate to cause a bit of tension.
@@ -443,7 +443,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             if (allyCiv.playerType != PlayerType.Human)
                 otherCiv.addNotification(
                     "[${allyCiv.civName}] is outraged that you bought out [${civInfo.civName}], whom they were allied with!",
-                    NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, allyCiv.civName
+                    NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, allyCiv.civName
                 )
         }
             
@@ -457,7 +457,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             if (protector.playerType != PlayerType.Human)   // Humans can have their own emotions
                 otherCiv.addNotification(
                     "[${protector.civName}] is angry that you bought out [${civInfo.civName}], whom they had pledged to protect!",
-                    NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, protector.civName
+                    NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, protector.civName
                 )
         } */
 
@@ -693,7 +693,7 @@ class CityStateFunctions(val civInfo: Civilization) {
 
             if (protector.playerType != PlayerType.Human)   // Humans can have their own emotions
                 bully.addNotification("[${protector.civName}] is upset that you demanded tribute from [${civInfo.civName}], whom they have pledged to protect!",
-                    NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, protector.civName)
+                    NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, protector.civName)
             else    // Let humans choose who to side with
                 protector.popupAlerts.add(
                     PopupAlert(
@@ -793,7 +793,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             if (protector.playerType != PlayerType.Human)   // Humans can have their own emotions
                 attacker.addNotification(
                     "[${protector.civName}] is upset that you attacked [${civInfo.civName}], whom they have pledged to protect!",
-                    NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, protector.civName
+                    NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, protector.civName
                 )
             else    // Let humans choose who to side with
                 protector.popupAlerts.add(
@@ -815,7 +815,7 @@ class CityStateFunctions(val civInfo: Civilization) {
             if (allyCiv.playerType != PlayerType.Human)   // Humans can have their own emotions
                 attacker.addNotification(
                     "[${allyCiv.civName}] is upset that you attacked [${civInfo.civName}], whom they are allied with!",
-                    NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, allyCiv.civName
+                    NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, allyCiv.civName
                 )
             else    // Let humans choose who to side with
                 allyCiv.popupAlerts.add(
@@ -844,9 +844,9 @@ class CityStateFunctions(val civInfo: Civilization) {
 
             if (protector.playerType != PlayerType.Human)   // Humans can have their own emotions
                 attacker.addNotification("[${protector.civName}] is outraged that you destroyed [${civInfo.civName}], whom they had pledged to protect!",
-                    NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, protector.civName)
+                    NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, protector.civName)
             protector.addNotification("[${attacker.civName}] has destroyed [${civInfo.civName}], whom you had pledged to protect!",
-                NotificationCategory.Diplomacy,  attacker.civName, NotificationIcon.Death, civInfo.civName)
+                NotificationCategory.Diplomacy,  attacker.civName, NotificationIcons.Death, civInfo.civName)
         }
 
         // Notify all City-States that we were killed (for quest completion)

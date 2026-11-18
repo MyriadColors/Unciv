@@ -23,7 +23,7 @@ class Unique(val text: String, val sourceObjectType: UniqueTarget? = null, val s
     /** Does not include conditional params */
     val params = text.getPlaceholderParameters()
     val type = UniqueType.uniqueTypeMap[placeholderText]
-    val deprecatedType: DeprecatedUniqueType? = if (type == null) DeprecatedUniqueType.uniqueTypeMap[placeholderText] else null
+    val deprecatedType: DeprecatedUniques? = if (type == null) DeprecatedUniques.uniqueTypeMap[placeholderText] else null
 
     val stats: Stats by lazy {
         val firstStatParam = params.firstOrNull { Stats.isStats(it) }
@@ -135,7 +135,7 @@ class Unique(val text: String, val sourceObjectType: UniqueTarget? = null, val s
     @Readonly
     fun getMultiplied(gameContext: GameContext): Sequence<Unique> {
         val multiplier = getUniqueMultiplier(gameContext)
-        return EndlessSequenceOf(this).take(multiplier)
+        return sequence { repeat(multiplier) { yield(this@Unique) } }
     }
     
     @Readonly
@@ -145,12 +145,6 @@ class Unique(val text: String, val sourceObjectType: UniqueTarget? = null, val s
             op(this)
     }
 
-    private class EndlessSequenceOf<T>(private val value: T) : Sequence<T> {
-        override fun iterator(): Iterator<T> = object : Iterator<T> {
-            override fun next() = value
-            override fun hasNext() = true
-        }
-    }
 
     @Readonly fun getDeprecationAnnotation(): Deprecated? =
         type?.getDeprecationAnnotation() ?: deprecatedType?.getDeprecationAnnotation()

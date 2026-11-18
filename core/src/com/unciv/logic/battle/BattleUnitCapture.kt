@@ -4,7 +4,7 @@ import com.unciv.logic.civilization.AlertType
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.MapUnitAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.PlayerType
 import com.unciv.logic.civilization.PopupAlert
 import com.unciv.logic.map.GridCoord
@@ -88,7 +88,7 @@ object BattleUnitCapture {
         defender.getCivInfo().addNotification(
             "An enemy [${attacker.getName()}] has captured our [${defender.getName()}]",
             defender.getTile().position, NotificationCategory.War, attacker.getName(),
-            NotificationIcon.War, defender.getName()
+            NotificationIcons.War, defender.getName()
         )
 
         val civilianUnit = defenderTile.civilianUnit
@@ -166,13 +166,13 @@ object BattleUnitCapture {
             defenderCiv.addNotification(
                 "An enemy [${attacker.getName()}] has captured our [${defender.getName()}]",
                 defender.getTile().position, NotificationCategory.War, attacker.getName(),
-                NotificationIcon.War, defender.getName()
+                NotificationIcons.War, defender.getName()
             )
         else {
             defenderCiv.addNotification(
                 "An enemy [${attacker.getName()}] has destroyed our [${defender.getName()}]",
                 defender.getTile().position, NotificationCategory.War, attacker.getName(),
-                NotificationIcon.War, defender.getName()
+                NotificationIcons.War, defender.getName()
             )
             Battle.triggerDefeatUniques(defender, attacker, capturedUnitTile)
         }

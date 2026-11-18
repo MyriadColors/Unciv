@@ -225,72 +225,69 @@ class TileGroupMap<T: TileGroup>(
         }
 
         if (worldWrap) {
-            // Prevent flickering when zoomed out so you can see entire map
-            val visibleMapWidth =
-                    if (mapHolder.width > maxVisibleMapWidth) maxVisibleMapWidth
-                    else mapHolder.width
-
-            // Where is viewport's boundaries
-            val rightSide = mapHolder.scrollX + visibleMapWidth / 2f
-            val leftSide = mapHolder.scrollX - visibleMapWidth / 2f
-
-            // Have we looked beyond map?
-            val diffRight = rightSide - drawTopX
-            val diffLeft = leftSide - drawBottomX
-
-            val beyondRight = diffRight >= 0f
-            val beyondLeft = diffLeft <= 0f
-
-            if (beyondRight || beyondLeft) {
-
-                // If we looked beyond - reposition needed tiles from the other side
-                // and update topX and bottomX accordingly.
-
-                var newBottomX = Float.MAX_VALUE
-                var newTopX = -Float.MAX_VALUE
-
-                // Reposition tile-level actors via tileLayers (each TileLayer owns its actors).
-                // Bounds are tracked via the reference layer's tileX values.
-                val referenceMapLayer = allMapLayers
-                    .filterIsInstance<TileMapLayer<*>>()
-                    .first()
-
-                for ((i, referenceTileLayer) in referenceMapLayer.tileLayers.withIndex()) {
-                    val shouldMove = when {
-                        beyondRight -> referenceTileLayer.tileX - drawBottomX <= diffRight
-                        beyondLeft  -> referenceTileLayer.tileX + groupSize >= drawTopX + diffLeft
-                        else        -> false
-                    }
-                    if (shouldMove) {
-                        val dx = if (beyondRight) width else -width
-                        for (mapLayer in allMapLayers) {
-                            val tl = (mapLayer as? TileMapLayer<*>)?.tileLayers?.get(i) ?: continue
-                            tl.tileX += dx
-                            tl.forEachOwnedActor { it.x += dx }
-                        }
-                        sortedTileGroups[i].x += dx
-                    }
-                    newBottomX = min(newBottomX, referenceTileLayer.tileX)
-                    newTopX    = max(newTopX,    referenceTileLayer.tileX + groupSize)
-                }
-
-                // Also reposition any actors added directly to this group (e.g. transient overlays).
-                for (child in children) {
-                    if (child !in allMapLayers) {
-                        if (beyondRight) {
-                            if (child.x - drawBottomX <= diffRight)
-                                child.x += width
-                        } else if (beyondLeft) {
-                            if (child.x + groupSize >= drawTopX + diffLeft)
-                                child.x -= width
-                        }
-                    }
-                }
-
-                drawBottomX = newBottomX
-                drawTopX = newTopX
-            }
+            updateWorldWrapPositions()
         }
         super.draw(batch, parentAlpha)
+    }
+
+    private fun updateWorldWrapPositions() {
+        // Prevent flickering when zoomed out so you can see entire map
+        val visibleMapWidth =
+                if (mapHolder.width > maxVisibleMapWidth) maxVisibleMapWidth
+                else mapHolder.width
+
+        // Where is viewport's boundaries
+        val rightSide = mapHolder.scrollX + visibleMapWidth / 2f
+        val leftSide = mapHolder.scrollX - visibleMapWidth / 2f
+
+        // Have we looked beyond map?
+        val diffRight = rightSide - drawTopX
+        val diffLeft = leftSide - drawBottomX
+
+        val beyondRight = diffRight >= 0f
+        val beyondLeft = diffLeft <= 0f
+        if (!beyondRight && !beyondLeft) return
+
+        // If we looked beyond - reposition needed tiles from the other side
+        // and update topX and bottomX accordingly.
+        var newBottomX = Float.MAX_VALUE
+        var newTopX = -Float.MAX_VALUE
+
+        // Reposition tile-level actors via tileLayers (each TileLayer owns its actors).
+        // Bounds are tracked via the reference layer's tileX values.
+        val referenceMapLayer = allMapLayers
+            .filterIsInstance<TileMapLayer<*>>()
+            .first()
+
+        for ((i, referenceTileLayer) in referenceMapLayer.tileLayers.withIndex()) {
+            val shouldMove = when {
+                beyondRight -> referenceTileLayer.tileX - drawBottomX <= diffRight
+                beyondLeft  -> referenceTileLayer.tileX + groupSize >= drawTopX + diffLeft
+                else        -> false
+            }
+            if (shouldMove) {
+                val dx = if (beyondRight) width else -width
+                for (mapLayer in allMapLayers) {
+                    val tl = (mapLayer as? TileMapLayer<*>)?.tileLayers?.get(i) ?: continue
+                    tl.tileX += dx
+                    tl.forEachOwnedActor { it.x += dx }
+                }
+                sortedTileGroups[i].x += dx
+            }
+            newBottomX = min(newBottomX, referenceTileLayer.tileX)
+            newTopX    = max(newTopX,    referenceTileLayer.tileX + groupSize)
+        }
+
+        // Also reposition any actors added directly to this group (e.g. transient overlays).
+        for (child in children) {
+            if (child in allMapLayers) continue
+            if (beyondRight && child.x - drawBottomX <= diffRight)
+                child.x += width
+            else if (beyondLeft && child.x + groupSize >= drawTopX + diffLeft)
+                child.x -= width
+        }
+
+        drawBottomX = newBottomX
+        drawTopX = newTopX
     }
 }

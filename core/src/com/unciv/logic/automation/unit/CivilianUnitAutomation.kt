@@ -49,7 +49,7 @@ object CivilianUnitAutomation {
         }
 
         if (unit.isAutomatingRoadConnection())
-            return workerAutomation.roadToAutomation.automateConnectRoad(unit, dangerousTiles)
+            return workerAutomation.roadToAutomation.automateConnectRoad(unit)
 
         if (unit.hasUnique(UniqueType.BuildImprovements))
             return workerAutomation.automateWorkerAction(unit, dangerousTiles, cache)

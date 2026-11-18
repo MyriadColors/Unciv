@@ -1,7 +1,7 @@
 package com.unciv.uniques
 
 import com.unciv.models.ruleset.RulesetCache
-import com.unciv.models.ruleset.unique.DeprecatedUniqueType
+import com.unciv.models.ruleset.unique.DeprecatedUniques
 import com.unciv.models.ruleset.unique.Unique
 import com.unciv.models.ruleset.unique.UniqueType
 import com.unciv.models.ruleset.validation.RulesetErrorSeverity
@@ -18,20 +18,20 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * Tests for the [DeprecatedUniqueType] system and its integration with [UniqueValidator] and [UniqueAutoUpdater].
+ * Tests for the [DeprecatedUniques] system and its integration with [UniqueValidator] and [UniqueAutoUpdater].
  *
- * All tests in this file are expected to **fail initially** because [DeprecatedUniqueType] does not
+ * All tests in this file are expected to **fail initially** because [DeprecatedUniques] does not
  * yet exist, and the required companion changes to [Unique], [UniqueValidator], and [UniqueAutoUpdater]
- * have not yet been made (see [DeprecatedUniqueType] KDoc for the full list).
+ * have not yet been made (see [DeprecatedUniques] KDoc for the full list).
  *
  * ## Use cases covered
- * 1. No placeholder-text overlap between [DeprecatedUniqueType] and active [UniqueType] entries.
- * 2. Every [DeprecatedUniqueType] replacement chain terminates at a non-deprecated [UniqueType].
- * 3. A unique whose text matches a [DeprecatedUniqueType] entry reports an **error** in [UniqueValidator].
+ * 1. No placeholder-text overlap between [DeprecatedUniques] and active [UniqueType] entries.
+ * 2. Every [DeprecatedUniques] replacement chain terminates at a non-deprecated [UniqueType].
+ * 3. A unique whose text matches a [DeprecatedUniques] entry reports an **error** in [UniqueValidator].
  * 4. A half-deprecated unique (still in [UniqueType] with [DeprecationLevel.WARNING]) still reports a
  *    **warning** in [UniqueValidator] — ensuring backward compatibility.
  * 5. [UniqueAutoUpdater] detects and maps a fully deprecated unique to its replacement.
- * 6. [UniqueAutoUpdater] follows chains through multiple [DeprecatedUniqueType] hops before producing
+ * 6. [UniqueAutoUpdater] follows chains through multiple [DeprecatedUniques] hops before producing
  *    the final replacement (tests the "fully deprecated → fully deprecated → current" path).
  * 7. [UniqueAutoUpdater] handles a ruleset containing both half-deprecated and fully deprecated uniques.
  */
@@ -39,7 +39,7 @@ import org.junit.runner.RunWith
 class DeprecatedUniquesTest {
 
     // -------------------------------------------------------------------------------------
-    // Test 1 — Structural: no text collision between DeprecatedUniqueType and UniqueType
+    // Test 1 — Structural: no text collision between DeprecatedUniques and UniqueType
     // -------------------------------------------------------------------------------------
 
     @Test
@@ -47,14 +47,14 @@ class DeprecatedUniquesTest {
         val activeTypeMap = UniqueType.entries.associateBy { it.placeholderText }
         val conflicts = mutableListOf<String>()
 
-        for (deprecated in DeprecatedUniqueType.entries) {
+        for (deprecated in DeprecatedUniques.entries) {
             if (activeTypeMap.containsKey(deprecated.placeholderText)) {
                 conflicts += "${deprecated.name} conflicts with ${activeTypeMap[deprecated.placeholderText]!!.name}"
             }
         }
 
         assertTrue(
-            "DeprecatedUniqueType entries must not share placeholder text with active UniqueType entries:\n${conflicts.joinToString("\n")}",
+            "DeprecatedUniques entries must not share placeholder text with active UniqueType entries:\n${conflicts.joinToString("\n")}",
             conflicts.isEmpty()
         )
     }
@@ -64,16 +64,16 @@ class DeprecatedUniquesTest {
     // -------------------------------------------------------------------------------------
 
     @Test
-    fun allDeprecatedUniqueTypeReplacementChainsTerminate() {
+    fun allDeprecatedUniquesReplacementChainsTerminate() {
         // Simulate the same chain-following logic that UniqueAutoUpdater uses, but without a
         // ruleset (parameter substitution is skipped; we only follow placeholder matches).
-        for (entry in DeprecatedUniqueType.entries) {
+        for (entry in DeprecatedUniques.entries) {
             var currentPlaceholder = entry.replacementText.getPlaceholderText()
             var hops = 0
             val maxHops = 20
 
             while (true) {
-                val nextDeprecated = DeprecatedUniqueType.uniqueTypeMap[currentPlaceholder]
+                val nextDeprecated = DeprecatedUniques.uniqueTypeMap[currentPlaceholder]
                 val nextHalfDeprecated = UniqueType.uniqueTypeMap[currentPlaceholder]
                     ?.takeIf { it.getDeprecationAnnotation() != null }
 
@@ -88,7 +88,7 @@ class DeprecatedUniquesTest {
 
                 hops++
                 assertTrue(
-                    "Replacement chain for DeprecatedUniqueType.${entry.name} has not terminated after $maxHops hops — possible cycle",
+                    "Replacement chain for DeprecatedUniques.${entry.name} has not terminated after $maxHops hops — possible cycle",
                     hops <= maxHops
                 )
             }
@@ -102,7 +102,7 @@ class DeprecatedUniquesTest {
     @Test
     fun fullyDeprecatedUniqueReportsErrorInValidator() {
         // TripleGoldFromEncampmentsAndCities is a simple, parameter-free fully deprecated unique.
-        val deprecatedText = DeprecatedUniqueType.TripleGoldFromEncampmentsAndCities.text
+        val deprecatedText = DeprecatedUniques.TripleGoldFromEncampmentsAndCities.text
         val unique = Unique(deprecatedText)
 
         RulesetCache.loadRulesets(noMods = true)
@@ -111,7 +111,7 @@ class DeprecatedUniquesTest {
         val errors = UniqueValidator(ruleset).checkUnique(unique, null)
 
         assertTrue(
-            "A unique matching DeprecatedUniqueType should produce at least one ErrorOptionsOnly error, got: ${errors.map { it.errorSeverityToReport }}",
+            "A unique matching DeprecatedUniques should produce at least one ErrorOptionsOnly error, got: ${errors.map { it.errorSeverityToReport }}",
             errors.any { it.errorSeverityToReport == RulesetErrorSeverity.ErrorOptionsOnly }
         )
     }
@@ -123,7 +123,7 @@ class DeprecatedUniquesTest {
     @Test
     fun autoUpdaterReplacesFullyDeprecatedUnique() {
         // TripleGoldFromEncampmentsAndCities has a clear, parameter-free replacement.
-        val deprecated = DeprecatedUniqueType.TripleGoldFromEncampmentsAndCities
+        val deprecated = DeprecatedUniques.TripleGoldFromEncampmentsAndCities
         val game = TestGame()
         game.createBuilding(deprecated.text)
 
@@ -140,13 +140,13 @@ class DeprecatedUniquesTest {
             replacement.getDeprecationAnnotation()
         )
         assertNull(
-            "The produced replacement '${replacement.text}' must not match any DeprecatedUniqueType",
-            DeprecatedUniqueType.uniqueTypeMap[replacement.placeholderText]
+            "The produced replacement '${replacement.text}' must not match any DeprecatedUniques",
+            DeprecatedUniques.uniqueTypeMap[replacement.placeholderText]
         )
     }
 
     // -------------------------------------------------------------------------------------
-    // Test 6 — AutoUpdater: follows a two-hop chain through DeprecatedUniqueType
+    // Test 6 — AutoUpdater: follows a two-hop chain through DeprecatedUniques
     //
     // Chain: DecreasedBuildingMaintenanceDeprecated → BuildingMaintenanceOld → BuildingMaintenance
     //
@@ -158,17 +158,17 @@ class DeprecatedUniquesTest {
     // -------------------------------------------------------------------------------------
 
     @Test
-    fun autoUpdaterFollowsChainThroughDeprecatedUniqueType() {
+    fun autoUpdaterFollowsChainThroughDeprecatedUniques() {
         // A building with a very old building-maintenance unique that was deprecated twice.
         // Concrete text: "-[50]% maintenance cost for buildings [in all cities]"
-        val chainStart = DeprecatedUniqueType.DecreasedBuildingMaintenanceDeprecated
+        val chainStart = DeprecatedUniques.DecreasedBuildingMaintenanceDeprecated
         val concreteText = "-[50]% maintenance cost for buildings [in all cities]"
 
         // Verify our test assumption: the replacement's placeholder matches BuildingMaintenanceOld
         val replacementPlaceholder = chainStart.replacementText.getPlaceholderText()
         assertEquals(
             "Test assumption violated: DecreasedBuildingMaintenanceDeprecated.replacementText placeholder should match BuildingMaintenanceOld",
-            DeprecatedUniqueType.BuildingMaintenanceOld.placeholderText,
+            DeprecatedUniques.BuildingMaintenanceOld.placeholderText,
             replacementPlaceholder
         )
 
@@ -188,8 +188,8 @@ class DeprecatedUniquesTest {
             finalReplacement.getDeprecationAnnotation()
         )
         assertNull(
-            "The final replacement '${finalReplacement.text}' must not match any DeprecatedUniqueType (chain was not fully followed)",
-            DeprecatedUniqueType.uniqueTypeMap[finalReplacement.placeholderText]
+            "The final replacement '${finalReplacement.text}' must not match any DeprecatedUniques (chain was not fully followed)",
+            DeprecatedUniques.uniqueTypeMap[finalReplacement.placeholderText]
         )
 
         // The final replacement should resolve to UniqueType.BuildingMaintenance
@@ -208,8 +208,8 @@ class DeprecatedUniquesTest {
     fun autoUpdaterHandlesMixOfHalfAndFullyDeprecatedUniques() {
         val game = TestGame()
 
-        // Fully deprecated (in DeprecatedUniqueType)
-        game.createBuilding(DeprecatedUniqueType.TripleGoldFromEncampmentsAndCities.text)
+        // Fully deprecated (in DeprecatedUniques)
+        game.createBuilding(DeprecatedUniques.TripleGoldFromEncampmentsAndCities.text)
 
         // Half deprecated (still in UniqueType with DeprecationLevel.WARNING)
         // FoodConsumptionBySpecialists: "[relativeAmount]% Food consumption by specialists [cityFilter]"
@@ -220,7 +220,7 @@ class DeprecatedUniquesTest {
         // Both should appear in the replacement map (assuming valid replacements)
         assertTrue(
             "AutoUpdater should detect and replace the fully deprecated unique",
-            replacements.containsKey(DeprecatedUniqueType.TripleGoldFromEncampmentsAndCities.text)
+            replacements.containsKey(DeprecatedUniques.TripleGoldFromEncampmentsAndCities.text)
         )
         assertTrue(
             "AutoUpdater should detect and replace the half-deprecated unique",
@@ -235,8 +235,8 @@ class DeprecatedUniquesTest {
                 replacementUnique.getDeprecationAnnotation()
             )
             assertNull(
-                "Replacement for '$original' is still in DeprecatedUniqueType: '$replacement'",
-                DeprecatedUniqueType.uniqueTypeMap[replacementUnique.placeholderText]
+                "Replacement for '$original' is still in DeprecatedUniques: '$replacement'",
+                DeprecatedUniques.uniqueTypeMap[replacementUnique.placeholderText]
             )
         }
     }

@@ -14,6 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
+        module: [core, tests, desktop, server]
 
     steps:
     - name: Checkout code
@@ -30,7 +31,7 @@ jobs:
       uses: peter-murray/setup-detekt@v3
 
     - name: Detekt errors
-      run: detekt-cli --parallel --config .github/workflows/detekt_config/detekt-errors.yml
+      run: detekt-cli --parallel --build-upon-default-config --fail-on-severity error --config .github/workflows/detekt_config/detekt-errors.yml --baseline ${{ matrix.module }}/detekt-baseline.xml --input ${{ matrix.module }}/src
 
     - name: Detekt warnings
-      run: detekt-cli --parallel --config .github/workflows/detekt_config/detekt-warnings.yml
+      run: detekt-cli --parallel --build-upon-default-config --config .github/workflows/detekt_config/detekt-warnings.yml --baseline ${{ matrix.module }}/detekt-baseline.xml --input ${{ matrix.module }}/src

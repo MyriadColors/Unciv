@@ -6,7 +6,7 @@ import com.unciv.view.hasMovement
 import com.unciv.Constants
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.map.tile.RoadStatus
 import com.unciv.utils.Log
 import com.unciv.utils.debug
@@ -30,8 +30,7 @@ class RoadToAutomation(val civInfo: Civilization) {
      * - End automation upon finish
      */
     // TODO: Caching
-    @Suppress("UNUSED_PARAMETER")  // tilesWhereWeWillBeCaptured may be useful in the future
-    fun automateConnectRoad(unitView: MapUnitView, tilesWhereWeWillBeCaptured: Set<TileView>) {
+    fun automateConnectRoad(unitView: MapUnitView) {
         if (actualBestRoadAvailable == RoadStatus.None) return
 
         var currentTile = unitView.getTile()
@@ -42,7 +41,7 @@ class RoadToAutomation(val civInfo: Civilization) {
             return
         }
 
-        fun notify(msg: String) = unitView.tryAddNotification(msg, NotificationCategory.Units, NotificationIcon.Construction)
+        fun notify(msg: String) = unitView.tryAddNotification(msg, NotificationCategory.Units, NotificationIcons.Construction)
 
         // The path is rebuilt on every call, so it always starts from wherever the worker is now
         val pathToDest = unitView.getRoadPath(destinationTile)
@@ -69,20 +68,7 @@ class RoadToAutomation(val civInfo: Civilization) {
             }
 
             if (currTileIndex < pathToDest.size - 1) { // Try to move to the next tile in the path
-                var nextTile = currentTile
-
-                // Create a new list with tiles where the index is greater than currTileIndex
-                val futureTiles = pathToDest.asSequence().drop(currTileIndex + 1)
-
-                for (futureTile in futureTiles) { // Find the furthest tile we can reach in this turn, move to, and does not have a road
-                    if (unitView.canReachInCurrentTurn(futureTile) && unitView.canMoveTo(futureTile)) { // We can at least move to this tile
-                        nextTile = futureTile
-                        if (shouldBuildRoadOnTile(futureTile)) {
-                            break // Stop on this tile
-                        }
-                    }
-                }
-
+                val nextTile = findNextReachableRoadTile(unitView, pathToDest, currTileIndex, currentTile)
                 if (nextTile != currentTile) {
                     unitView.tryMoveToTile(nextTile)
                     currentTile = unitView.getTile()
@@ -118,5 +104,25 @@ class RoadToAutomation(val civInfo: Civilization) {
             // Special case for civs that treat forest/jungles as roads (inside their territory). We shouldn't build if railroads aren't unlocked.
             && !(tile.hasConnection() && actualBestRoadAvailable == RoadStatus.Road)
             && tile.roadStatus != actualBestRoadAvailable // Build (upgrade) if possible
+    }
+
+    @Readonly
+    private fun findNextReachableRoadTile(
+        unitView: MapUnitView,
+        pathToDest: List<TileView>,
+        currTileIndex: Int,
+        currentTile: TileView
+    ): TileView {
+        var nextTile = currentTile
+        val futureTiles = pathToDest.asSequence().drop(currTileIndex + 1)
+        for (futureTile in futureTiles) { // Find the furthest tile we can reach in this turn, move to, and does not have a road
+            if (unitView.canReachInCurrentTurn(futureTile) && unitView.canMoveTo(futureTile)) { // We can at least move to this tile
+                nextTile = futureTile
+                if (shouldBuildRoadOnTile(futureTile)) {
+                    break // Stop on this tile
+                }
+            }
+        }
+        return nextTile
     }
 }

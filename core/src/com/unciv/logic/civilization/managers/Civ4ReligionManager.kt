@@ -4,7 +4,7 @@ import com.unciv.logic.IsPartOfGameInfoSerialization
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.models.ruleset.unique.UniqueType
 import yairm210.purity.annotations.Readonly
 import kotlin.random.Random
@@ -77,7 +77,7 @@ class Civ4ReligionManager : IsPartOfGameInfoSerialization {
                 "[$religionName] has been founded in [${targetCity.name}]!",
                 targetCity.location,
                 NotificationCategory.Religion,
-                NotificationIcon.Faith
+                NotificationIcons.Faith
             )
         }
         return targetCity
@@ -167,7 +167,7 @@ class Civ4ReligionManager : IsPartOfGameInfoSerialization {
                             "[$religion] has spread to [${city.name}]!",
                             city.location,
                             NotificationCategory.Religion,
-                            NotificationIcon.Faith
+                            NotificationIcons.Faith
                         )
                     }
                     break

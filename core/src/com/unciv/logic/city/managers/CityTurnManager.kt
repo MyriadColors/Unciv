@@ -7,7 +7,7 @@ import com.unciv.logic.city.CityFocus
 import com.unciv.logic.civilization.CityAction
 import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.OverviewAction
 import com.unciv.models.ruleset.Building
 import com.unciv.models.ruleset.INonPerpetualConstruction
@@ -92,7 +92,7 @@ class CityTurnManager(val city: City) {
         city.removeFlag(CityFlags.ResourceDemand)
         city.civ.addNotification(
             "Because they have [${city.demandedResource}], the citizens of [${city.name}] are celebrating We Love The King Day!",
-            CityAction.withLocation(city), NotificationCategory.General, NotificationIcon.City, NotificationIcon.Happiness)
+            CityAction.withLocation(city), NotificationCategory.General, NotificationIcons.City, NotificationIcons.Happiness)
     }
 
     // cf DiplomacyManager nextTurnFlags
@@ -114,7 +114,7 @@ class CityTurnManager(val city: City) {
                     CityFlags.WeLoveTheKing.name -> {
                         city.civ.addNotification(
                             "We Love The King Day in [${city.name}] has ended.",
-                            CityAction.withLocation(city), NotificationCategory.General, NotificationIcon.City)
+                            CityAction.withLocation(city), NotificationCategory.General, NotificationIcons.City)
                         demandNewResource()
                     }
                     CityFlags.Resistance.name -> {
@@ -153,7 +153,7 @@ class CityTurnManager(val city: City) {
         if (city.demandedResource != "") // Failed to get a valid resource, try again some time later
             city.civ.addNotification("[${city.name}] demands [${city.demandedResource}]!",
                 listOf(LocationAction(city.location), OverviewAction(EmpireOverviewCategories.Resources)),
-                NotificationCategory.General, NotificationIcon.City, "ResourceIcons/${city.demandedResource}")
+                NotificationCategory.General, NotificationIcons.City, "ResourceIcons/${city.demandedResource}")
     }
 
 

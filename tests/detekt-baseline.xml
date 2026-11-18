@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:OjhBenchmark.kt:OjhBenchmark.FpsRun$private fun advance</ID>
+    <ID>CyclomaticComplexMethod:TranslationTests.kt:TranslationTests$private fun translateAndHashCivilopedia: Triple&lt;Int, Duration, StringBuilder&gt;</ID>
+    <ID>ExplicitGarbageCollectionCall:MemorySnaphots.kt:MemorySnaphots$gc()</ID>
+    <ID>LargeClass:GlobalUniquesTests.kt:GlobalUniquesTests</ID>
+    <ID>LargeClass:PathfindingTests.kt:PathfindingTests</ID>
+    <ID>LargeClass:TranslationTests.kt:TranslationTests</ID>
+    <ID>LargeClass:UnitMovementTests.kt:UnitMovementTests</ID>
+    <ID>MatchingDeclarationName:TestParcours.kt:TestCase&lt;T, R&gt;</ID>
+    <ID>MatchingDeclarationName:VictoryMilestoneTests.kt:HaveCountableMilestoneTests</ID>
+    <ID>NestedBlockDepth:SaveLocationTest.kt:SaveLocationTest$@Test fun availableStoragePreservesExistingSaveAndPreferenceSelection</ID>
+    <ID>NestedBlockDepth:ViewPurityTest.kt:ViewPurityTest$private fun findViewClasses: List&lt;KClass&lt;*&gt;&gt;</ID>
+    <ID>SwallowedException:ViewPurityTest.kt:ViewPurityTest$e: Throwable</ID>
+  </CurrentIssues>
+</SmellBaseline>

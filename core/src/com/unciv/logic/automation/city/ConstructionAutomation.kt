@@ -10,7 +10,7 @@ import com.unciv.logic.automation.unit.WorkerAutomation
 import com.unciv.logic.city.CityConstructions
 import com.unciv.logic.civilization.CityAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.map.BFS
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
@@ -150,7 +150,7 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
             "[${city.name}] has started working on [${chosenConstruction.name}]",
             CityAction.withLocation(city),
             NotificationCategory.Production,
-            NotificationIcon.Construction
+            NotificationIcons.Construction
         )
     }
 

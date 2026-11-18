@@ -388,9 +388,6 @@ data class FormattedLine (
         }
     }
 
-    override fun hashCode() = throw IllegalStateException("FormattedLine isn't supposed to be compared or used as hash key")
-    override fun equals(other: Any?) = throw IllegalStateException("FormattedLine isn't supposed to be compared or used as hash key")
-
     // region Helpers to crop an image to content
     private fun TextureRegionDrawable.cropToContent(): Image {
         val rect = getContentSize()

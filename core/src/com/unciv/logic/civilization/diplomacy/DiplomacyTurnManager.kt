@@ -4,7 +4,7 @@ import com.unciv.Constants
 import com.unciv.logic.automation.Timers.Companion.timeThis
 import com.unciv.logic.civilization.DiplomacyAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.trade.Trade
 import com.unciv.logic.trade.TradeOffer
 import com.unciv.logic.trade.TradeOfferType
@@ -53,10 +53,10 @@ object DiplomacyTurnManager {
 
                     civInfo.addNotification("One of our trades with [${otherCiv.civName}] has been cut short",
                         DiplomacyAction(otherCiv, true),
-                        NotificationCategory.Trade, NotificationIcon.Trade, otherCiv.civName)
+                        NotificationCategory.Trade, NotificationIcons.Trade, otherCiv.civName)
                     otherCiv.addNotification("One of our trades with [${civInfo.civName}] has been cut short",
                         DiplomacyAction(civInfo, true),
-                        NotificationCategory.Trade, NotificationIcon.Trade, civInfo.civName)
+                        NotificationCategory.Trade, NotificationIcons.Trade, civInfo.civName)
                     // If you cut a trade short, we're not going to trust you with per-turn trades for a while
                     otherCivDiplomacy().setFlag(DiplomacyFlags.ResourceTradesCutShort, civInfo.gameInfo.speed.dealDuration * 2)
                     civInfo.cache.updateCivResources()
@@ -106,12 +106,12 @@ object DiplomacyTurnManager {
             val notificationActions = civInfo.cityStateFunctions.getNotificationActions()
             if (getTurnsToRelationshipChange() == 1) {
                 val text = "Your relationship with [${civInfo.civName}] is about to degrade"
-                otherCiv.addNotification(text, notificationActions, NotificationCategory.Diplomacy, civInfo.civName, NotificationIcon.Diplomacy)
+                otherCiv.addNotification(text, notificationActions, NotificationCategory.Diplomacy, civInfo.civName, NotificationIcons.Diplomacy)
             }
 
             if (initialRelationshipLevel >= RelationshipLevel.Friend && initialRelationshipLevel != relationshipIgnoreAfraid()) {
                 val text = "Your relationship with [${civInfo.civName}] degraded"
-                otherCiv.addNotification(text, notificationActions, NotificationCategory.Diplomacy, civInfo.civName, NotificationIcon.Diplomacy)
+                otherCiv.addNotification(text, notificationActions, NotificationCategory.Diplomacy, civInfo.civName, NotificationIcons.Diplomacy)
             }
 
             // Potentially notify about afraid status
@@ -122,7 +122,7 @@ object DiplomacyTurnManager {
             ) {
                 setFlag(DiplomacyFlags.NotifiedAfraid, 20)  // Wait 20 turns until next reminder
                 val text = "[${civInfo.civName}] is afraid of your military power!"
-                otherCiv.addNotification(text, notificationActions, NotificationCategory.Diplomacy, civInfo.civName, NotificationIcon.Diplomacy)
+                otherCiv.addNotification(text, notificationActions, NotificationCategory.Diplomacy, civInfo.civName, NotificationIcons.Diplomacy)
             }
         }
     }
@@ -155,14 +155,7 @@ object DiplomacyTurnManager {
             // If we have uniques that make city states grant military units faster when at war with a common enemy, add higher numbers to this flag
             if (flag == DiplomacyFlags.ProvideMilitaryUnit.name && civInfo.isMajorCiv && otherCiv.isCityState &&
                 civInfo.gameInfo.civilizations.any { civInfo.isAtWarWith(it) && otherCiv.isAtWarWith(it) }) {
-                for (unique in civInfo.getMatchingUniques(UniqueType.CityStateMoreGiftedUnits)) {
-                    flagsCountdown[DiplomacyFlags.ProvideMilitaryUnit.name] =
-                        flagsCountdown[DiplomacyFlags.ProvideMilitaryUnit.name]!! - unique.params[0].toInt() + 1
-                    if (flagsCountdown[DiplomacyFlags.ProvideMilitaryUnit.name]!! <= 0) {
-                        flagsCountdown[DiplomacyFlags.ProvideMilitaryUnit.name] = 0
-                        break
-                    }
-                }
+                decrementProvideMilitaryUnitCountdown()
             }
 
             // At the end of every turn
@@ -183,53 +176,65 @@ object DiplomacyTurnManager {
 
             // Only when flag is expired
             if (flagsCountdown[flag] == 0) {
-                when (flag) {
-                    DiplomacyFlags.ResearchAgreement.name -> {
-                        if (!otherCivDiplomacy().hasFlag(DiplomacyFlags.ResearchAgreement))
-                            scienceFromResearchAgreement()
-                    }
-                    DiplomacyFlags.DefensivePact.name -> {
-                        diplomaticStatus = DiplomaticStatus.Peace
-                    }
-                    // This is confusingly named - in fact, the civ that has the flag set is the MAJOR civ
-                    DiplomacyFlags.ProvideMilitaryUnit.name -> {
-                        // Do not unset the flag - they may return soon, and we'll continue from that point on
-                        if (civInfo.cities.isEmpty() || otherCiv.cities.isEmpty())
-                            continue@loop
-                        else
-                            otherCiv.cityStateFunctions.giveMilitaryUnitToPatron(civInfo)
-                    }
-                    
-                    DiplomacyFlags.RecentlyAttacked.name -> {
-                        civInfo.cityStateFunctions.askForUnitGifts(otherCiv)
-                    }
-                    // These modifiers don't tick down normally, instead there is a threshold number of turns
-                    DiplomacyFlags.RememberDestroyedProtectedMinor.name -> {    // 125
-                        removeModifier(DiplomaticModifiers.DestroyedProtectedMinor)
-                    }
-                    DiplomacyFlags.RememberAttackedProtectedMinor.name -> {     // 75
-                        removeModifier(DiplomaticModifiers.AttackedProtectedMinor)
-                    }
-                    DiplomacyFlags.RememberBulliedProtectedMinor.name -> {      // 75
-                        removeModifier(DiplomaticModifiers.BulliedProtectedMinor)
-                    }
-                    DiplomacyFlags.RememberSidedWithProtectedMinor.name -> {      // 25
-                        removeModifier(DiplomaticModifiers.SidedWithProtectedMinor)
-                    }
-                    else -> {
-                        for (demand in Demand.entries){
-                            if (demand.agreedToDemand.name == flag) addModifier(demand.fulfilledPromiseDiplomacyModifier, 10f)
-                        }
-                    }
-                }
-
-                flagsCountdown.remove(flag)
+                if (handleExpiredFlag(flag)) flagsCountdown.remove(flag)
             } else if (flag == DiplomacyFlags.WaryOf.name && flagsCountdown[flag]!! < -10) {
                 // Used in DeclareWarTargetAutomation.declarePlannedWar to count the number of turns preparing
                 // If we have been preparing for over 10 turns then cancel our attack plan
                 flagsCountdown.remove(flag)
             }
         }
+    }
+
+    private fun DiplomacyManager.decrementProvideMilitaryUnitCountdown() {
+        for (unique in civInfo.getMatchingUniques(UniqueType.CityStateMoreGiftedUnits)) {
+            flagsCountdown[DiplomacyFlags.ProvideMilitaryUnit.name] =
+                flagsCountdown[DiplomacyFlags.ProvideMilitaryUnit.name]!! - unique.params[0].toInt() + 1
+            if (flagsCountdown[DiplomacyFlags.ProvideMilitaryUnit.name]!! <= 0) {
+                flagsCountdown[DiplomacyFlags.ProvideMilitaryUnit.name] = 0
+                break
+            }
+        }
+    }
+
+    private fun DiplomacyManager.handleExpiredFlag(flag: String): Boolean {
+        when (flag) {
+            DiplomacyFlags.ResearchAgreement.name -> {
+                if (!otherCivDiplomacy().hasFlag(DiplomacyFlags.ResearchAgreement))
+                    scienceFromResearchAgreement()
+            }
+            DiplomacyFlags.DefensivePact.name -> {
+                diplomaticStatus = DiplomaticStatus.Peace
+            }
+            // This is confusingly named - in fact, the civ that has the flag set is the MAJOR civ
+            DiplomacyFlags.ProvideMilitaryUnit.name -> {
+                // Do not unset the flag - they may return soon, and we'll continue from that point on
+                if (civInfo.cities.isEmpty() || otherCiv.cities.isEmpty())
+                    return false
+                otherCiv.cityStateFunctions.giveMilitaryUnitToPatron(civInfo)
+            }
+            DiplomacyFlags.RecentlyAttacked.name -> {
+                civInfo.cityStateFunctions.askForUnitGifts(otherCiv)
+            }
+            // These modifiers don't tick down normally, instead there is a threshold number of turns
+            DiplomacyFlags.RememberDestroyedProtectedMinor.name -> {    // 125
+                removeModifier(DiplomaticModifiers.DestroyedProtectedMinor)
+            }
+            DiplomacyFlags.RememberAttackedProtectedMinor.name -> {     // 75
+                removeModifier(DiplomaticModifiers.AttackedProtectedMinor)
+            }
+            DiplomacyFlags.RememberBulliedProtectedMinor.name -> {      // 75
+                removeModifier(DiplomaticModifiers.BulliedProtectedMinor)
+            }
+            DiplomacyFlags.RememberSidedWithProtectedMinor.name -> {      // 25
+                removeModifier(DiplomaticModifiers.SidedWithProtectedMinor)
+            }
+            else -> {
+                for (demand in Demand.entries) {
+                    if (demand.agreedToDemand.name == flag) addModifier(demand.fulfilledPromiseDiplomacyModifier, 10f)
+                }
+            }
+        }
+        return true
     }
 
 
@@ -254,7 +259,7 @@ object DiplomacyTurnManager {
                     val direction = if (offer in trade.theirOffers) "from" else "to"
                     civInfo.addNotification("[${offer.name}] $direction [${otherCiv.civName}] has ended",
                         DiplomacyAction(otherCiv, true),
-                        NotificationCategory.Trade, otherCiv.civName, NotificationIcon.Trade)
+                        NotificationCategory.Trade, otherCiv.civName, NotificationIcons.Trade)
 
                     civInfo.updateStatsForNextTurn() // if they were bringing us gold per turn
                     if (trade.theirOffers.union(trade.ourOffers) // if resources were involved
@@ -268,11 +273,11 @@ object DiplomacyTurnManager {
                 if (offer.duration == 3)
                     civInfo.addNotification("[${offer.name}] from [${otherCiv.civName}] will end in [3] turns",
                         DiplomacyAction(otherCiv, true),
-                        NotificationCategory.Trade, otherCiv.civName, NotificationIcon.Trade)
+                        NotificationCategory.Trade, otherCiv.civName, NotificationIcons.Trade)
                 else if (offer.duration == 1)
                     civInfo.addNotification("[${offer.name}] from [${otherCiv.civName}] will end next turn",
                         DiplomacyAction(otherCiv, true),
-                        NotificationCategory.Trade, otherCiv.civName, NotificationIcon.Trade)
+                        NotificationCategory.Trade, otherCiv.civName, NotificationIcons.Trade)
             }
         }
     }

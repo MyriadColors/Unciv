@@ -110,29 +110,36 @@ object ImageGetter {
             val file = folder.child("$fileName.atlas")
             if (!file.exists()) continue
             val extraAtlas = if (mod.isEmpty()) fileName else if (fileName == "game") mod else "$mod/$fileName"
-            var tempAtlas = atlases[extraAtlas]  // fetch if cached
-            if (tempAtlas == null) {
-                try {
-                    debug("Loading %s = %s", extraAtlas, file.path())
-                    tempAtlas = TextureAtlas(file)  // load if not
-                    if (Gdx.app.type == ApplicationType.WebGL)
-                        tempAtlas.textures.forEach { it.setFilter(it.minFilter, TextureFilter.Linear) }
-                    atlases[extraAtlas] = tempAtlas  // cache the freshly loaded
-                } catch (ex: Exception) {
-                    debug("Could not load file $file")
-                    continue
-                }
-            }
-            for (region in tempAtlas.regions) {
-                if (region.name.startsWith("Skins")) {
-                    // TODO: give user a mod warning that the image names has to be [name].9.png
-                    //      if this throws an exception
-                    val ninePatch = tempAtlas.createPatch(region.name)
-                    ninePatchDrawables[region.name] = NinePatchDrawable(ninePatch)
-                } else {
-                    val drawable = TextureRegionDrawable(region)
-                    textureRegionDrawables[region.name] = drawable
-                }
+            val tempAtlas = loadOrCacheAtlas(extraAtlas, file) ?: continue
+            registerAtlasRegions(tempAtlas)
+        }
+    }
+
+    private fun loadOrCacheAtlas(extraAtlas: String, file: FileHandle): TextureAtlas? {
+        atlases[extraAtlas]?.let { return it }
+        return try {
+            debug("Loading %s = %s", extraAtlas, file.path())
+            val atlas = TextureAtlas(file)
+            if (Gdx.app.type == ApplicationType.WebGL)
+                atlas.textures.forEach { it.setFilter(it.minFilter, TextureFilter.Linear) }
+            atlases[extraAtlas] = atlas
+            atlas
+        } catch (ex: Exception) {
+            debug("Could not load file $file", ex)
+            null
+        }
+    }
+
+    private fun registerAtlasRegions(atlas: TextureAtlas) {
+        for (region in atlas.regions) {
+            if (region.name.startsWith("Skins")) {
+                // TODO: give user a mod warning that the image names has to be [name].9.png
+                //      if this throws an exception
+                val ninePatch = atlas.createPatch(region.name)
+                ninePatchDrawables[region.name] = NinePatchDrawable(ninePatch)
+            } else {
+                val drawable = TextureRegionDrawable(region)
+                textureRegionDrawables[region.name] = drawable
             }
         }
     }

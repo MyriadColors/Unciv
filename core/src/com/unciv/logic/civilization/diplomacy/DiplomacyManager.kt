@@ -6,7 +6,7 @@ import com.unciv.logic.IsPartOfGameInfoSerialization
 import com.unciv.logic.civilization.AlertType
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.PopupAlert
 import com.unciv.logic.trade.Trade
 import com.unciv.logic.trade.TradeEvaluation
@@ -636,7 +636,7 @@ class DiplomacyManager() : IsPartOfGameInfoSerialization {
         for (civ in getCommonKnownCivsWithSpectators()) {
             civ.addNotification(
                     "[${civInfo.civName}] and [${otherCiv.civName}] have signed a Peace Treaty!",
-                    NotificationCategory.Diplomacy, civInfo.civName, NotificationIcon.Diplomacy, otherCiv.civName
+                    NotificationCategory.Diplomacy, civInfo.civName, NotificationIcons.Diplomacy, otherCiv.civName
             )
         }
         
@@ -723,7 +723,7 @@ class DiplomacyManager() : IsPartOfGameInfoSerialization {
 
         for (thirdCiv in getCommonKnownCivsWithSpectators()) {
             thirdCiv.addNotification("[${civInfo.civName}] and [${otherCiv.civName}] have signed a Declaration of Friendship!",
-                NotificationCategory.Diplomacy, civInfo.civName, NotificationIcon.Diplomacy, otherCiv.civName)
+                NotificationCategory.Diplomacy, civInfo.civName, NotificationIcons.Diplomacy, otherCiv.civName)
             if (thirdCiv.isSpectator) continue
             thirdCiv.getDiplomacyManager(civInfo)!!.setFriendshipBasedModifier()
             thirdCiv.getDiplomacyManager(otherCiv)!!.setFriendshipBasedModifier()
@@ -776,7 +776,7 @@ class DiplomacyManager() : IsPartOfGameInfoSerialization {
 
         for (thirdCiv in getCommonKnownCivsWithSpectators()) {
             thirdCiv.addNotification("[${civInfo.civName}] and [${otherCiv.civName}] have signed a Defensive Pact!",
-                NotificationCategory.Diplomacy, civInfo.civName, NotificationIcon.Diplomacy, otherCiv.civName)
+                NotificationCategory.Diplomacy, civInfo.civName, NotificationIcons.Diplomacy, otherCiv.civName)
             if (thirdCiv.isSpectator) return
             thirdCiv.getDiplomacyManager(civInfo)!!.setDefensivePactBasedModifier()
         }
@@ -883,7 +883,7 @@ class DiplomacyManager() : IsPartOfGameInfoSerialization {
         otherCiv.addNotification(
             "[${civInfo.civName}] has denounced us!",
             NotificationCategory.Diplomacy,
-            NotificationIcon.Diplomacy, civInfo.civName
+            NotificationIcons.Diplomacy, civInfo.civName
         )
         
         // Denounciation results in removal of embasies for both sides
@@ -894,7 +894,7 @@ class DiplomacyManager() : IsPartOfGameInfoSerialization {
             thirdCiv.addNotification(
                 "[${civInfo.civName}] has denounced [${otherCiv.civName}]!",
                 NotificationCategory.Diplomacy,
-                civInfo.civName, NotificationIcon.Diplomacy, otherCiv.civName
+                civInfo.civName, NotificationIcons.Diplomacy, otherCiv.civName
             )
             
             if (thirdCiv.isSpectator)
@@ -927,7 +927,7 @@ class DiplomacyManager() : IsPartOfGameInfoSerialization {
         otherCivDiplomacy().setFlag(demand.agreedToDemand, 100, true)
         addModifier(DiplomaticModifiers.UnacceptableDemands, -10f)
         val text = demand.agreedToDemandText.fillPlaceholders(civInfo.civName)
-        otherCiv.addNotification(text, NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, civInfo.civName)
+        otherCiv.addNotification(text, NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, civInfo.civName)
         queueOtherCivPopupIfUnique(PopupAlert(AlertType.AcceptingDemand, civInfo.civID))
     }
     
@@ -935,7 +935,7 @@ class DiplomacyManager() : IsPartOfGameInfoSerialization {
         addModifier(DiplomaticModifiers.UnacceptableDemands, -20f)
         otherCivDiplomacy().setFlag(demand.willIgnoreViolation, 100, true)
         val text = demand.refusedDemandText.fillPlaceholders(civInfo.civName)
-        otherCiv.addNotification(text, NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, civInfo.civName)
+        otherCiv.addNotification(text, NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, civInfo.civName)
         queueOtherCivPopupIfUnique(PopupAlert(AlertType.RejectingDemand, civInfo.civID))
         if (demand == Demand.DoNotAttackUs)
             // no modifier penalty for refusal, they respect our honesty

@@ -34,13 +34,13 @@ import kotlin.collections.get
  * `PathingMap` is a class that coordinates the pathing caches and calculations.
  *
  * For the most part, all this class really does is manage the [PathingMapCache] automatically.
- * When pathing is requested, it builds an [AStarPathfinder], which does the actual pathfinding, and
+ * When pathing is requested, it builds an [PathingMapAStarPathfinder], which does the actual pathfinding, and
  * then the `PathingMap` merges the results back into its [PathingMapCache].
  *
  * To calculate with different moveThroughPredicate, cost, or other conditions would invalidate the
  * cached "Node"s, so require a separate `PathingMap`.
  *
- * The [AStarPathfinder] algorithm is used here because each tile is calculated exactly once, and the
+ * The [PathingMapAStarPathfinder] algorithm is used here because each tile is calculated exactly once, and the
  * resulting "Node" data can be reused for all subsequent pathfinding, even when pathfinding to
  * different targets.  This introduces a *very* minor bias in later paths toward earlier paths, but
  * only among routes of otherwise equal priority.
@@ -399,7 +399,7 @@ class PathingMap(
      * Use AStar algorithm to calculate the route to the destination, in thread-safe way
      **/
     private fun aStarStepUntilDestination(cache: PathingMapCache, destination: Tile?, timeLimitTurns: Int) {
-        val finder = AStarPathfinder(
+        val finder = PathingMapAStarPathfinder(
             debugId,
             debugMapType,
             destination,
@@ -426,7 +426,7 @@ class PathingMap(
      **/
     // @IgnorableReturnValue
     private fun bfsStepUntilDestination(cache: PathingMapCache, endSearchPredicate: EndSearchPredicate, timeLimitTurns: Int): Tile? {
-        val finder = AStarPathfinder(
+        val finder = PathingMapAStarPathfinder(
             debugId,
             debugMapType,
             null,

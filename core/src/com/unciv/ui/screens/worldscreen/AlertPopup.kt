@@ -13,7 +13,7 @@ import com.unciv.logic.civilization.CivilopediaAction
 import com.unciv.logic.civilization.DiplomacyAction
 import com.unciv.logic.civilization.LocationAction
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.PopupAlert
 import com.unciv.logic.civilization.diplomacy.*
 import com.unciv.logic.map.GridCoord
@@ -457,7 +457,7 @@ class AlertPopup(
                 yield(DiplomacyAction(captor))
                 yield(CivilopediaAction("Tutorial/Barbarians"))
             }
-            originalOwner.addNotification("Your captured [${unitName}] has been returned by [${captor.civName}]", notificationSequence, NotificationCategory.Diplomacy, NotificationIcon.Trade, unitName, captor.civName)
+            originalOwner.addNotification("Your captured [${unitName}] has been returned by [${captor.civName}]", notificationSequence, NotificationCategory.Diplomacy, NotificationIcons.Trade, unitName, captor.civName)
         }
         addCloseButton(Constants.no, KeyboardBinding.Cancel) {
             // Take it for ourselves

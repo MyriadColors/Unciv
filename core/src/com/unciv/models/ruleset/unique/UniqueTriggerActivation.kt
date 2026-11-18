@@ -172,7 +172,7 @@ object UniqueTriggerActivation {
                 return {
                     civInfo.leaderTitle = unique.params[0]
                     if (notification != null)
-                        civInfo.addNotification(notification, NotificationCategory.Diplomacy, NotificationIcon.Diplomacy)
+                        civInfo.addNotification(notification, NotificationCategory.Diplomacy, NotificationIcons.Diplomacy)
                     true
                 }
             }
@@ -410,7 +410,7 @@ object UniqueTriggerActivation {
                     val notificationText = getNotificationText(notification, triggerNotificationText,
                         "You may choose a free Policy")
                     if (notificationText != null)
-                        civInfo.addNotification(notificationText, PolicyAction(), NotificationCategory.General, NotificationIcon.Culture)
+                        civInfo.addNotification(notificationText, PolicyAction(), NotificationCategory.General, NotificationIcons.Culture)
                     true
                 }
             }
@@ -426,7 +426,7 @@ object UniqueTriggerActivation {
                         "You may choose [$newFreePolicies] free Policies"
                     )
                     if (notificationText != null)
-                        civInfo.addNotification(notificationText, PolicyAction(), NotificationCategory.General, NotificationIcon.Culture)
+                        civInfo.addNotification(notificationText, PolicyAction(), NotificationCategory.General, NotificationIcons.Culture)
                     true
                 }
             }
@@ -439,14 +439,14 @@ object UniqueTriggerActivation {
                         civInfo.policies.freePolicies++
                         civInfo.policies.adopt(policy)
                         getNotificationText(notification, triggerNotificationText, "You gain the [$name] Policy")?.let {
-                            civInfo.addNotification(it, PolicyAction(name), NotificationCategory.General, NotificationIcon.Culture)
+                            civInfo.addNotification(it, PolicyAction(name), NotificationCategory.General, NotificationIcons.Culture)
                         }
                         true
                     }
                     belief != null && civInfo.religionManager.religion?.hasBelief(name) == false -> return {
                         civInfo.religionManager.chooseBeliefs(listOf(belief))
                         getNotificationText(notification, triggerNotificationText, "You gain the [$name] Belief")?.let {
-                            civInfo.addNotification(it, NotificationCategory.Religion, NotificationIcon.Faith)
+                            civInfo.addNotification(it, NotificationCategory.Religion, NotificationIcons.Faith)
                         }
                         true
                     }
@@ -469,7 +469,7 @@ object UniqueTriggerActivation {
                             "You lose the [${policy.name}] Policy"
                         )
                         if (notificationText != null)
-                            civInfo.addNotification(notificationText, PolicyAction(policy.name), NotificationCategory.General, NotificationIcon.Culture)
+                            civInfo.addNotification(notificationText, PolicyAction(policy.name), NotificationCategory.General, NotificationIcons.Culture)
                     }
                     true
                 }
@@ -497,7 +497,7 @@ object UniqueTriggerActivation {
                         val notificationText =
                             getNotificationText(notification, triggerNotificationText, effectNotificationText)
                         if (notificationText != null)
-                            civInfo.addNotification(notificationText, PolicyAction(policy.key.name), NotificationCategory.General, NotificationIcon.Culture)
+                            civInfo.addNotification(notificationText, PolicyAction(policy.key.name), NotificationCategory.General, NotificationIcons.Culture)
                     }
                     true
                 }
@@ -513,7 +513,7 @@ object UniqueTriggerActivation {
                         "You enter a Golden Age"
                     )
                     if (notificationText != null)
-                        civInfo.addNotification(notificationText, NotificationCategory.General, NotificationIcon.Happiness)
+                        civInfo.addNotification(notificationText, NotificationCategory.General, NotificationIcons.Happiness)
                     true
                 }
             }
@@ -545,7 +545,7 @@ object UniqueTriggerActivation {
                             notification,
                             LocationAction(applicableCities.map { it.location.toGridCoord() }),
                             NotificationCategory.Cities,
-                            NotificationIcon.Population
+                            NotificationIcons.Population
                         )
                     true
                 }
@@ -564,7 +564,7 @@ object UniqueTriggerActivation {
                             notificationText,
                             LocationAction(randomCity.location.toGridCoord(), tile?.position),
                             NotificationCategory.Cities,
-                            NotificationIcon.Population
+                            NotificationIcons.Population
                         )
                     }
                     true
@@ -576,7 +576,7 @@ object UniqueTriggerActivation {
                 return {
                     civInfo.tech.freeTechs += 1
                     if (notification != null)
-                        civInfo.addNotification(notification, NotificationCategory.General, NotificationIcon.Science)
+                        civInfo.addNotification(notification, NotificationCategory.General, NotificationIcons.Science)
                     true
                 }
             }
@@ -585,7 +585,7 @@ object UniqueTriggerActivation {
                 return {
                     civInfo.tech.freeTechs += unique.params[0].toInt()
                     if (notification != null)
-                        civInfo.addNotification(notification, NotificationCategory.General, NotificationIcon.Science)
+                        civInfo.addNotification(notification, NotificationCategory.General, NotificationIcons.Science)
                     true
                 }
             }
@@ -615,7 +615,7 @@ object UniqueTriggerActivation {
                             LocationAction(tile?.position) + TechAction(techsToResearch.first().name)
                         civInfo.addNotification(
                             notificationText, notificationActions,
-                            NotificationCategory.General, NotificationIcon.Science
+                            NotificationCategory.General, NotificationIcons.Science
                         )
                     }
                     true
@@ -632,7 +632,7 @@ object UniqueTriggerActivation {
                         "You have discovered the secrets of [$techName]"
                     )
                     if (notificationText != null)
-                        civInfo.addNotification(notificationText, TechAction(techName), NotificationCategory.General, NotificationIcon.Science)
+                        civInfo.addNotification(notificationText, TechAction(techName), NotificationCategory.General, NotificationIcons.Science)
                     true
                 }
             }
@@ -787,7 +787,7 @@ object UniqueTriggerActivation {
                         civInfo.cityStateFunctions.turnsForGreatPersonFromCityState() / 2
                     )
                     if (notification != null)
-                        civInfo.addNotification(notification, NotificationCategory.Diplomacy, NotificationIcon.CityState)
+                        civInfo.addNotification(notification, NotificationCategory.Diplomacy, NotificationIcons.CityState)
                     true
                 }
             }
@@ -866,7 +866,7 @@ object UniqueTriggerActivation {
                             if (notification.hasPlaceholderParameters())
                                 notification.fillPlaceholders(gainedFaith.tr())
                             else notification
-                        civInfo.addNotification(notificationText, LocationAction(tile?.position), NotificationCategory.Religion, NotificationIcon.Faith)
+                        civInfo.addNotification(notificationText, LocationAction(tile?.position), NotificationCategory.Religion, NotificationIcons.Faith)
                     }
                     true
                 }
@@ -885,7 +885,7 @@ object UniqueTriggerActivation {
                             if (notification.hasPlaceholderParameters())
                                 notification.fillPlaceholders(gainedFaith.tr())
                             else notification
-                        civInfo.addNotification(notificationText, LocationAction(tile?.position), NotificationCategory.Religion, NotificationIcon.Faith)
+                        civInfo.addNotification(notificationText, LocationAction(tile?.position), NotificationCategory.Religion, NotificationIcons.Faith)
                     }
                     true
                 }
@@ -913,7 +913,7 @@ object UniqueTriggerActivation {
                         "You have gained [$scienceGain] Science towards researching [$tech]"
                     )
 
-                    civInfo.addNotification(notificationText!!, LocationAction(tile?.position), NotificationCategory.General, NotificationIcon.Science)
+                    civInfo.addNotification(notificationText!!, LocationAction(tile?.position), NotificationCategory.General, NotificationIcons.Science)
 
                     true
                 }
@@ -942,7 +942,7 @@ object UniqueTriggerActivation {
                         civInfo.addNotification(
                             notification,
                             NotificationCategory.Religion,
-                            NotificationIcon.Faith,
+                            NotificationIcons.Faith,
                             "ReligionIcons/${religionIcon}"
                         )
                     }
@@ -953,7 +953,7 @@ object UniqueTriggerActivation {
             UniqueType.OneTimeRevealEntireMap -> {
                 return {
                     if (notification != null) {
-                        civInfo.addNotification(notification, LocationAction(tile?.position), NotificationCategory.General, NotificationIcon.Scout)
+                        civInfo.addNotification(notification, LocationAction(tile?.position), NotificationCategory.General, NotificationIcons.Scout)
                     }
                     val tiles = civInfo.gameInfo.tileMap.values
                     tiles.forEach { it.setExplored(civInfo, true) }
@@ -995,7 +995,7 @@ object UniqueTriggerActivation {
                             LocationAction(positions.asSequence()),
                             NotificationCategory.War,
                             if (unique.params[1] == Constants.barbarianEncampment)
-                                NotificationIcon.Barbarians else NotificationIcon.Scout
+                                NotificationIcons.Barbarians else NotificationIcons.Scout
                         )
                     }
                     true
@@ -1026,7 +1026,7 @@ object UniqueTriggerActivation {
                             notification,
                             tile.position,
                             NotificationCategory.General,
-                            NotificationIcon.Ruins
+                            NotificationIcons.Ruins
                         )
                     true
                 }
@@ -1041,7 +1041,7 @@ object UniqueTriggerActivation {
                                 civInfo.getTurnsBetweenDiplomaticVotes()
                             )
                     if (notification != null)
-                        civInfo.addNotification(notification, NotificationCategory.General, NotificationIcon.Diplomacy)
+                        civInfo.addNotification(notification, NotificationCategory.General, NotificationIcons.Diplomacy)
                     true
                 }
             }
@@ -1102,7 +1102,7 @@ object UniqueTriggerActivation {
                         }
                     }
                     if (notification != null)
-                        civInfo.addNotification(notification, LocationAction(applicableCities.map { it.location.toGridCoord() }), NotificationCategory.Cities, NotificationIcon.City)
+                        civInfo.addNotification(notification, LocationAction(applicableCities.map { it.location.toGridCoord() }), NotificationCategory.Cities, NotificationIcons.City)
                     true
                 }
             }
@@ -1153,7 +1153,7 @@ object UniqueTriggerActivation {
                             notification,
                             LocationAction(applicableCities.map { it.location.toGridCoord() }),
                             NotificationCategory.Cities,
-                            NotificationIcon.Construction
+                            NotificationIcons.Construction
                         )
                     true
                 }
@@ -1176,7 +1176,7 @@ object UniqueTriggerActivation {
                             notification,
                             LocationAction(applicableCities.map { it.location.toGridCoord() }),
                             NotificationCategory.Cities,
-                            NotificationIcon.Gold
+                            NotificationIcons.Gold
                         )
                     true
                 }
@@ -1414,7 +1414,7 @@ object UniqueTriggerActivation {
 
                     for (otherCiv in civsToNotify)
                         otherCiv.addNotification("Your territory has been stolen by [$civInfo]!",
-                            tile.position, NotificationCategory.Cities, civInfo.civName, NotificationIcon.War)
+                            tile.position, NotificationCategory.Cities, civInfo.civName, NotificationIcons.War)
 
                     true
                 }

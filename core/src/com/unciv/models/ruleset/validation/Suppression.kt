@@ -119,12 +119,16 @@ object Suppression {
         // This is brute-force, but adapting a public "longest-common-substring" algorithm was complex and still slooow.
         // Using the knowledge that we're only interested in the common length exceeding a threshold saves time.
         // This uses the fact that Int.until will _not_ throw on upper < lower.
-        (0 until x.length - minCommonLength).forEach { xIndex ->
+        var xIndex = 0
+        while (xIndex < x.length - minCommonLength) {
             val xSub = x.substring(xIndex)
-            (0 until y.length - minCommonLength).forEach { yIndex ->
+            var yIndex = 0
+            while (yIndex < y.length - minCommonLength) {
                 if (xSub.commonPrefixWith(y.substring(yIndex), true).length >= minCommonLength)
                     return true
+                yIndex++
             }
+            xIndex++
         }
         return false
     }

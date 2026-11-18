@@ -101,4 +101,7 @@ class TileHistory(
             state == other.history[turn]
         }
     }
+
+    @Readonly
+    override fun hashCode(): Int = history.hashCode()
 }

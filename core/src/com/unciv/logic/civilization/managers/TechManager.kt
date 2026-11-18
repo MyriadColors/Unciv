@@ -252,7 +252,7 @@ class TechManager : IsPartOfGameInfoSerialization {
             scienceFromResearchAgreements = 0
             civInfo.addNotification("We gained [$scienceBoost] Science from Research Agreement",
                 NotificationCategory.General,
-                NotificationIcon.Science)
+                NotificationIcons.Science)
         }
         if (overflowScience != 0) {
             finalScienceToAdd += getOverflowScience()
@@ -322,7 +322,7 @@ class TechManager : IsPartOfGameInfoSerialization {
         if (!civInfo.isSpectator && showNotification)
             civInfo.addNotification("Research of [$techName] has completed!", TechAction(techName),
                 NotificationCategory.General,
-                NotificationIcon.Science)
+                NotificationIcons.Science)
         if (isNewTech)
             civInfo.popupAlerts.add(PopupAlert(AlertType.TechResearched, techName))
 
@@ -435,8 +435,8 @@ class TechManager : IsPartOfGameInfoSerialization {
                 "[$unit] has become obsolete and was removed from the queue in $cityText!"
                 else "$cityText changed production from [$unit] to [$newUnit]"
             val icons = if (newUnit == null)
-                arrayOf(NotificationIcon.Construction)
-                else arrayOf(unit, NotificationIcon.Construction, newUnit)
+                arrayOf(NotificationIcons.Construction)
+                else arrayOf(unit, NotificationIcons.Construction, newUnit)
             civInfo.addNotification(text, locationAction, NotificationCategory.Production, *icons)
         }
     }
@@ -452,13 +452,13 @@ class TechManager : IsPartOfGameInfoSerialization {
                 civInfo.addNotification(
                     "You have entered the [$currentEra]!",
                     NotificationCategory.General,
-                    NotificationIcon.Science
+                    NotificationIcons.Science
                 )
             if (civInfo.isMajorCiv) {
                 for (knownCiv in civInfo.getKnownCivsWithSpectators()) {
                     knownCiv.addNotification(
                         "[${civInfo.civName}] has entered the [$currentEra]!",
-                        NotificationCategory.General, civInfo.civName, NotificationIcon.Science
+                        NotificationCategory.General, civInfo.civName, NotificationIcons.Science
                     )
                 }
             }
@@ -471,7 +471,7 @@ class TechManager : IsPartOfGameInfoSerialization {
                         "[${policyBranch.name}] policy branch unlocked!",
                         PolicyAction(policyBranch.name),
                         NotificationCategory.General,
-                        NotificationIcon.Culture
+                        NotificationIcons.Culture
                     )
             }
         }

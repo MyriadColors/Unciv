@@ -42,15 +42,15 @@ private object ObsoleteRegexes {
 }
 
 /** Affects scanning in [String.translatePlaceholders], [String.getPlaceholderParameters] and [String.getPlaceholderText] */
-private const val supportNestingSquare = true
+private const val SUPPORT_NESTING_SQUARE = true
 /** Affects the replacement in [String.translatePlaceholders]: `false` can replace the result of previous substitutions, `true` is single-pass and cannot. */
-private const val supportNestingSquareReplacement = true
+private const val SUPPORT_NESTING_SQUARE_REPLACEMENT = true
 /** Affects [String.translatePartial] */
-private const val supportNestingCurly = true
+private const val SUPPORT_NESTING_CURLY = true
 /** Affects [String.translateConditionals], [String.removeConditionals], [String.getModifiers] */
-private const val supportNestingPointy = true
+private const val SUPPORT_NESTING_POINTY = true
 /** Affects [String.fillPlaceholders] */
-private const val supportNestingHelpers = true
+private const val SUPPORT_NESTING_HELPERS = true
 
 
 /**
@@ -76,7 +76,7 @@ fun String.tr(hideIcons: Boolean = false, hideStats: Boolean = false) =
 @Readonly
 fun String.tr(language: String, hideIcons: Boolean = false, hideStats: Boolean = false): String {
     // '<' and '>' checks for quick 'no' answer.
-    if (supportNestingPointy) {
+    if (SUPPORT_NESTING_POINTY) {
         val ltIndex = findNextTopLevel(this, 0, '<')
         if (ltIndex >= 0)
             return translateConditionals(language, hideIcons, ltIndex)
@@ -91,7 +91,7 @@ fun String.tr(language: String, hideIcons: Boolean = false, hideStats: Boolean =
 @Readonly
 private fun String.trNoConditionals(language: String, hideIcons: Boolean = false, hideStats: Boolean = false): String {
     // '<' and '>' checks for quick 'no' answer.
-    if (supportNestingPointy) {
+    if (SUPPORT_NESTING_POINTY) {
         val ltIndex = findNextTopLevel(this, 0, '<')
         if (ltIndex >= 0 && findMatchingAnyKind(this, ltIndex) >= 0)
             return translateConditionals(language, hideIcons, ltIndex)
@@ -227,7 +227,7 @@ private fun StringBuilder.trimEnd() {
 private fun String.translatePartial(language: String, hideIcons: Boolean, firstPos: Int): String {
     @LocalState
     val sb = StringBuilder(length + 16)
-    parsePairs('{', '}', firstPos, supportNestingCurly,
+    parsePairs('{', '}', firstPos, SUPPORT_NESTING_CURLY,
         emitInside = { start, end -> sb.append( substring(start, end).tr(language, hideIcons) ) },
         emitOutside = { start, end -> sb.append(this, start, end) }
     )
@@ -251,7 +251,7 @@ private fun String.translatePlaceholders(language: String, hideIcons: Boolean, f
     @LocalState val key = StringBuilder(length)
     // Collect the terms in the message, WITHOUT square brackets
     @LocalState val termsInMessage = mutableListOf<String>()
-    parsePairs('[', ']', firstPos, supportNestingSquare,
+    parsePairs('[', ']', firstPos, SUPPORT_NESTING_SQUARE,
         emitInside = { start, end ->
             termsInMessage += substring(start, end)
             key.append("[]")
@@ -277,7 +277,7 @@ private fun String.translatePlaceholders(language: String, hideIcons: Boolean, f
 
     // Take the terms from the placeholder - same helper as above but discarding the parts outside the [] brackets
     @LocalState val termsInTranslationPlaceholder = mutableListOf<String>()
-    originalWithPlaceholders.parsePairs('[', ']', supportNesting = supportNestingSquare,
+    originalWithPlaceholders.parsePairs('[', ']', supportNesting = SUPPORT_NESTING_SQUARE,
         emitInside = { start, end -> termsInTranslationPlaceholder += substring(start, end) },
         emitOutside = { _, _ -> }
     )
@@ -287,7 +287,7 @@ private fun String.translatePlaceholders(language: String, hideIcons: Boolean, f
     if (termsInMessage.size != termsInTranslationPlaceholder.size)
         throw Exception("Message $this has a different number of terms than the placeholder $translationEntry!")
 
-    if (supportNestingSquareReplacement) {
+    if (SUPPORT_NESTING_SQUARE_REPLACEMENT) {
         val substitutions = HashMap<String, String>()
         for (i in termsInMessage.indices) {
             val translated = termsInMessage[i].tr(language, hideIcons)
@@ -308,7 +308,7 @@ private fun String.translatePlaceholders(language: String, hideIcons: Boolean, f
         return sb.toString()
     } else {
         // TODO Legacy implementation, has the weakness that a later replacement can hit the result of an earlier replacement in weird cases.
-        //      Remove this else and the `supportNestingSquareReplacement` when nesting support is turned on and changes ot unit tests are checked.
+        //      Remove this else and the `SUPPORT_NESTING_SQUARE_REPLACEMENT` when nesting support is turned on and changes ot unit tests are checked.
         var languageSpecificPlaceholder = translatedWithPlaceholders
         for (i in termsInMessage.indices) {
             languageSpecificPlaceholder = languageSpecificPlaceholder.replace(
@@ -345,7 +345,7 @@ private fun String.translateConditionals(language: String, hideIcons: Boolean, f
     // Parse the text into base and modifiers
     val conditionalContents = mutableListOf<String>()
     val base = StringBuilder(length)
-    parsePairs('<', '>', firstPos, supportNestingPointy,
+    parsePairs('<', '>', firstPos, SUPPORT_NESTING_POINTY,
         emitInside = { start, end -> conditionalContents += substring(start, end) },
         emitOutside = { start, end -> base.appendTrimming(this, start, end) }
     )
@@ -432,7 +432,7 @@ fun String.getPlaceholderParameters(): List<String> {
     if (firstPos < 0) return emptyList()
 
     @LocalState val parameters = mutableListOf<String>()
-    stringToParse.parsePairs('[', ']', firstPos, supportNestingSquare,
+    stringToParse.parsePairs('[', ']', firstPos, SUPPORT_NESTING_SQUARE,
         emitInside = { start, end -> parameters += substring(start, end) },
         emitOutside = { _, _ ->  }
     )
@@ -452,7 +452,7 @@ fun String.getPlaceholderText(): String {
     if (firstPos < 0) return stringToParse
 
     @LocalState val key = StringBuilder(length)
-    stringToParse.parsePairs('[', ']', supportNesting = supportNestingSquare,
+    stringToParse.parsePairs('[', ']', supportNesting = SUPPORT_NESTING_SQUARE,
         emitInside = { _, _ -> key.append("[]") },
         emitOutside = { start, end -> key.append(this, start, end) }
     )
@@ -501,7 +501,7 @@ fun String.fillPlaceholders(vararg strings: String): String {
         }
         index++
     }
-    parsePairs('[', ']', supportNesting = supportNestingHelpers,
+    parsePairs('[', ']', supportNesting = SUPPORT_NESTING_HELPERS,
         emitInside = { _, _ -> substituteNext() },
         emitOutside = { start, end -> sb.append(this, start, end) }
     )
@@ -514,7 +514,7 @@ fun String.fillPlaceholders(vararg strings: String): String {
 @VisibleForTesting
 fun String.getPartsInsideCurlies(): List<String> {
     @LocalState val result = mutableListOf<String>()
-    parsePairs('{', '}', supportNesting = supportNestingCurly,
+    parsePairs('{', '}', supportNesting = SUPPORT_NESTING_CURLY,
         emitInside = { start, end -> result.add(substring(start, end)) },
         emitOutside = { _, _ -> }
     )
@@ -524,7 +524,7 @@ fun String.getPartsInsideCurlies(): List<String> {
 /** @return Modifier texts as Sequence. Supports nesting `<>` inside `[]`. */
 @VisibleForTesting
 fun String.getModifierTexts() = sequence {
-    parsePairs('<', '>', supportNesting = supportNestingPointy,
+    parsePairs('<', '>', supportNesting = SUPPORT_NESTING_POINTY,
         emitInside = { start, end -> yield(substring(start, end)) },
         emitOutside = { _, _ -> }
     )
@@ -533,13 +533,13 @@ fun String.getModifierTexts() = sequence {
 /**
  *  @return Modifiers (parts between `<` and `>`) in `this` translated to [Unique]s.
  *  @see removeConditionals
- *  @see supportNestingPointy
+ *  @see SUPPORT_NESTING_POINTY
  */
 @Readonly
 fun String.getModifiers(): List<Unique> {
     // Could be mapped from getModifierTexts, but let's save one SequenceBuilder and one Sequence allocation
     @LocalState val result = mutableListOf<Unique>()
-    parsePairs('<', '>', supportNesting = supportNestingPointy,
+    parsePairs('<', '>', supportNesting = SUPPORT_NESTING_POINTY,
         emitInside = { start, end -> result.add(Unique(substring(start, end))) },
         emitOutside = { _, _ -> }
     )
@@ -551,14 +551,14 @@ fun String.getModifiers(): List<Unique> {
  *  Any Spaces to the right of a modifier are removed during scanning
  *  (affects output only if the rule to place conditionals only at the end wasn't followed)
  *  @see getModifiers
- *  @see supportNestingPointy
+ *  @see SUPPORT_NESTING_POINTY
  */
 @Readonly
 fun String.removeConditionals(): String {
-    val firstPos = if (supportNestingPointy) findNextTopLevel(this, 0, '<') else indexOf('<')
+    val firstPos = if (SUPPORT_NESTING_POINTY) findNextTopLevel(this, 0, '<') else indexOf('<')
     if (firstPos < 0) return this
     @LocalState val sb = StringBuilder(length)
-    parsePairs('<', '>', firstPos, supportNesting = supportNestingPointy,
+    parsePairs('<', '>', firstPos, supportNesting = SUPPORT_NESTING_POINTY,
         emitInside = { _, _ -> },
         emitOutside = { start, end -> sb.appendTrimming(this, start, end) }
     )

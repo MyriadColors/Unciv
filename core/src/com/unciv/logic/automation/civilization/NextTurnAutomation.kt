@@ -18,7 +18,7 @@ import com.unciv.logic.city.City
 import com.unciv.logic.civilization.AlertType
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.PopupAlert
 import com.unciv.logic.civilization.diplomacy.*
 import com.unciv.logic.map.mapunit.MapUnit
@@ -157,10 +157,10 @@ object NextTurnAutomation {
         if (civInfo.diplomacyFunctions.canSignDeclarationOfFriendshipWith(requestingCiv)
             && DiplomacyAutomation.wantsToSignDeclarationOfFrienship(civView, requestingCiv)) {
             diploManager.signDeclarationOfFriendship()
-            requestingCiv.addNotification("We have signed a Declaration of Friendship with [${civView.civName}]!", NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, civView.civName)
+            requestingCiv.addNotification("We have signed a Declaration of Friendship with [${civView.civName}]!", NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, civView.civName)
         } else {
             diploManager.otherCivDiplomacy().setFlag(DiplomacyFlags.DeclinedDeclarationOfFriendship, 10)
-            requestingCiv.addNotification("[${civView.civName}] has denied our Declaration of Friendship!", NotificationCategory.Diplomacy, NotificationIcon.Diplomacy, civView.civName)
+            requestingCiv.addNotification("[${civView.civName}] has denied our Declaration of Friendship!", NotificationCategory.Diplomacy, NotificationIcons.Diplomacy, civView.civName)
         }
     }
 

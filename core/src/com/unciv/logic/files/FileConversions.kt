@@ -54,7 +54,7 @@ object FileConversions {
             buffered.mark(1024) // "Keep this many in the buffer befre resetting". Enough for the base64-encoded gzip header, which is all that's consumed before failure is detected
             val reader = try {
                 unzippedInputStream(buffered).reader(Charsets.UTF_8)
-            } catch (ex: Exception) {
+            } catch (_: Exception) {
                 buffered.reset()
                 buffered.reader(Charsets.UTF_8)
             }

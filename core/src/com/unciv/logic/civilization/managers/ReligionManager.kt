@@ -4,7 +4,7 @@ import com.unciv.logic.IsPartOfGameInfoSerialization
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.civilization.Notification
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.ReligionAction
 import com.unciv.logic.map.mapunit.MapUnit
 import com.unciv.logic.map.tile.Tile
@@ -155,7 +155,7 @@ class ReligionManager : IsPartOfGameInfoSerialization {
             else "[An unknown civilization]"
 
             civ.addNotification(text + " has founded pantheon [${beliefName}]!",
-                ReligionAction(beliefName), Notification.NotificationCategory.Religion, NotificationIcon.Faith)
+                ReligionAction(beliefName), Notification.NotificationCategory.Religion, NotificationIcons.Faith)
         }
     }
 
@@ -358,7 +358,7 @@ class ReligionManager : IsPartOfGameInfoSerialization {
             else "[An unknown civilization]"
 
             civ.addNotification(text + " has enhanced [${religion.displayName}]!",
-                ReligionAction(religion.displayName), Notification.NotificationCategory.Religion, NotificationIcon.Faith)
+                ReligionAction(religion.displayName), Notification.NotificationCategory.Religion, NotificationIcons.Faith)
         }
     }
 
@@ -501,12 +501,12 @@ class ReligionManager : IsPartOfGameInfoSerialization {
                 if (civ.hasExplored(holyCity.getCenterTile()))
                     civ.addNotification("[${civInfo.civName}] has founded [$displayName] in [${holyCity.name}]!",
                         ReligionAction.withLocation(holyCity.location.toGridCoord(), name),
-                        Notification.NotificationCategory.Religion, NotificationIcon.Faith)
+                        Notification.NotificationCategory.Religion, NotificationIcons.Faith)
                 else civ.addNotification("[${civInfo.civName}] has founded [$displayName]!",
-                    ReligionAction(name), Notification.NotificationCategory.Religion, NotificationIcon.Faith)
+                    ReligionAction(name), Notification.NotificationCategory.Religion, NotificationIcons.Faith)
             }
             else civ.addNotification("[An unknown civilization] has founded [$displayName]!",
-                ReligionAction(name), Notification.NotificationCategory.Religion, NotificationIcon.Faith)
+                ReligionAction(name), Notification.NotificationCategory.Religion, NotificationIcons.Faith)
         }
     }
 

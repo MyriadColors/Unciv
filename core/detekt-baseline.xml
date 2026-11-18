@@ -1,0 +1,150 @@
+<?xml version="1.0" ?>
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CyclomaticComplexMethod:Automation.kt:Automation$@Readonly fun chooseMilitaryUnit: BaseUnit?</ID>
+    <ID>CyclomaticComplexMethod:Automation.kt:Automation$@Readonly fun rankStatsForCityWork: Float</ID>
+    <ID>CyclomaticComplexMethod:BarbarianManager.kt:BarbarianManager$fun placeBarbarianEncampment</ID>
+    <ID>CyclomaticComplexMethod:BaseRulesetValidator.kt:BaseRulesetValidator$override fun checkUnit</ID>
+    <ID>CyclomaticComplexMethod:BaseRulesetValidator.kt:BaseRulesetValidator$private fun checkEventCircularTriggers</ID>
+    <ID>CyclomaticComplexMethod:BaseRulesetValidator.kt:BaseRulesetValidator$private fun checkPromotionCircularReferences</ID>
+    <ID>CyclomaticComplexMethod:BaseUnit.kt:BaseUnit$@Readonly fun getRejectionReasons: Sequence&lt;RejectionReason&gt;</ID>
+    <ID>CyclomaticComplexMethod:BaseUnit.kt:BaseUnit$@Readonly fun matchesSingleFilter: Boolean</ID>
+    <ID>CyclomaticComplexMethod:BaseUnit.kt:BaseUnit$@Readonly private fun evaluateForce: Int</ID>
+    <ID>CyclomaticComplexMethod:BaseUnitDescriptions.kt:BaseUnitDescriptions$fun BaseUnit.getBaseUnitCivilopediaTextLines</ID>
+    <ID>CyclomaticComplexMethod:Battle.kt:Battle$fun attack: DamageDealt</ID>
+    <ID>CyclomaticComplexMethod:Battle.kt:Battle$internal fun takeDamage: DamageDealt</ID>
+    <ID>CyclomaticComplexMethod:BattleTable.kt:BattleTable$private fun simulateBattle</ID>
+    <ID>CyclomaticComplexMethod:Building.kt:Building$override fun getRejectionReasons: Sequence&lt;RejectionReason&gt;</ID>
+    <ID>CyclomaticComplexMethod:BuildingDescriptions.kt:BuildingDescriptions$@Readonly fun getDescription: String</ID>
+    <ID>CyclomaticComplexMethod:BuildingDescriptions.kt:BuildingDescriptions$fun Building.getBuildingCivilopediaTextLines: List&lt;FormattedLine&gt;</ID>
+    <ID>CyclomaticComplexMethod:City.kt:City$@Readonly fun getHealthBreakdown: CityHealthBreakdown</ID>
+    <ID>CyclomaticComplexMethod:City.kt:City$@Readonly private fun matchesSingleFilter: Boolean</ID>
+    <ID>CyclomaticComplexMethod:CityConstructions.kt:CityConstructions$fun purchaseConstruction: Boolean</ID>
+    <ID>CyclomaticComplexMethod:CityConstructionsTable.kt:CityConstructionsTable$private fun getConstructionButton: Table</ID>
+    <ID>CyclomaticComplexMethod:CityScreen.kt:CityScreen$private fun updateTileGroups</ID>
+    <ID>CyclomaticComplexMethod:CityStateDiplomacyTable.kt:CityStateDiplomacyTable$private fun getCityStateDiplomacyTableHeader: Table</ID>
+    <ID>CyclomaticComplexMethod:CityStateFunctions.kt:CityStateFunctions$@Readonly fun getTributeModifiers: HashMap&lt;String, Int&gt;</ID>
+    <ID>CyclomaticComplexMethod:CityStateFunctions.kt:CityStateFunctions$private fun makeOtherCityStatesWaryOfAttacker</ID>
+    <ID>CyclomaticComplexMethod:CityStats.kt:CityStats$private fun updateFinalStatList</ID>
+    <ID>CyclomaticComplexMethod:CityStatsTable.kt:CityStatsTable$private fun addText</ID>
+    <ID>CyclomaticComplexMethod:CityTileGroup.kt:CityTileGroup$override fun update</ID>
+    <ID>CyclomaticComplexMethod:CivInfoTransientCache.kt:CivInfoTransientCache$fun updateProximity: Proximity</ID>
+    <ID>CyclomaticComplexMethod:CivilianUnitAutomation.kt:CivilianUnitAutomation$fun automateCivilianUnit: Unit</ID>
+    <ID>CyclomaticComplexMethod:CivilopediaSearchPopup.kt:CivilopediaSearchPopup$private fun CoroutineScope.searchLoop</ID>
+    <ID>CyclomaticComplexMethod:Conditionals.kt:Conditionals$@Readonly fun conditionalApplies: Boolean</ID>
+    <ID>CyclomaticComplexMethod:ConstructionAutomation.kt:ConstructionAutomation$@Readonly private fun getOnetimeUniqueBonuses: Float</ID>
+    <ID>CyclomaticComplexMethod:DetailedStatsPopup.kt:DetailedStatsPopup$private fun traverseTree</ID>
+    <ID>CyclomaticComplexMethod:DetailedStatsPopup.kt:DetailedStatsPopup$private fun update</ID>
+    <ID>CyclomaticComplexMethod:DiplomacyAutomation.kt:DiplomacyAutomation$internal fun offerPeaceTreaty</ID>
+    <ID>CyclomaticComplexMethod:DiplomacyTurnManager.kt:DiplomacyTurnManager$private fun DiplomacyManager.nextTurnDiplomaticModifiers</ID>
+    <ID>CyclomaticComplexMethod:EspionageAutomation.kt:EspionageAutomation$fun automateSpies</ID>
+    <ID>CyclomaticComplexMethod:FormattedLine.kt:FormattedLine$fun unsupportedReasons</ID>
+    <ID>CyclomaticComplexMethod:GameInfo.kt:GameInfo$fun nextTurn: Unit</ID>
+    <ID>CyclomaticComplexMethod:GameInfo.kt:GameInfo$fun setTransients</ID>
+    <ID>CyclomaticComplexMethod:GithubAPI.kt:GithubAPI$suspend fun Repo.downloadAndExtract: FileHandle?</ID>
+    <ID>CyclomaticComplexMethod:GlobalPoliticsOverviewTable.kt:GlobalPoliticsOverviewTable$private fun updateDiagram</ID>
+    <ID>CyclomaticComplexMethod:ImprovementDescriptions.kt:ImprovementDescriptions$fun getCivilopediaTextLines: List&lt;FormattedLine&gt;</ID>
+    <ID>CyclomaticComplexMethod:ImprovementPickerScreen.kt:ImprovementPickerScreen$private fun Table.addImprovementRow</ID>
+    <ID>CyclomaticComplexMethod:ImprovementPickerScreen.kt:ImprovementPickerScreen$private fun getProblemReport: ProblemReport?</ID>
+    <ID>CyclomaticComplexMethod:LineChart.kt:LineChart$private fun prepareForDraw</ID>
+    <ID>CyclomaticComplexMethod:MapElevationGenerator.kt:MapElevationGenerator$private fun cellularHills</ID>
+    <ID>CyclomaticComplexMethod:MapElevationGenerator.kt:MapElevationGenerator$private fun cellularMountainRanges</ID>
+    <ID>CyclomaticComplexMethod:MapGenerator.kt:MapGenerator$private fun applyHumidityAndTemperature</ID>
+    <ID>CyclomaticComplexMethod:MapGenerator.kt:MapGenerator$private fun mirror</ID>
+    <ID>CyclomaticComplexMethod:MapRegions.kt:MapRegions$fun assignRegions</ID>
+    <ID>CyclomaticComplexMethod:MapUnit.kt:MapUnit$@Readonly fun healingAmountForTile: Int</ID>
+    <ID>CyclomaticComplexMethod:ModCheckTab.kt:ModCheckTab$private fun runModChecker</ID>
+    <ID>CyclomaticComplexMethod:MotivationToAttackAutomation.kt:MotivationToAttackAutomation$@Readonly fun hasAtLeastMotivationToAttack: Float</ID>
+    <ID>CyclomaticComplexMethod:MovementCost.kt:MovementCost$@Readonly fun getMovementCostBetweenAdjacentTiles: Float</ID>
+    <ID>CyclomaticComplexMethod:MultiplayerTab.kt:MultiplayerTab$private fun addMultiplayerServerOptions</ID>
+    <ID>CyclomaticComplexMethod:NaturalWonderGenerator.kt:NaturalWonderGenerator.Companion$fun placeNaturalWonder</ID>
+    <ID>CyclomaticComplexMethod:NextTurnAutomation.kt:NextTurnAutomation$private fun trainSettler</ID>
+    <ID>CyclomaticComplexMethod:Nuke.kt:Nuke$private fun doNukeExplosionForTile</ID>
+    <ID>CyclomaticComplexMethod:OdMapExport.kt:OdMapExport$fun write</ID>
+    <ID>CyclomaticComplexMethod:OffersListScroll.kt:OffersListScroll$fun update</ID>
+    <ID>CyclomaticComplexMethod:Policy.kt:Policy$override fun getCivilopediaTextLines: List&lt;FormattedLine&gt;</ID>
+    <ID>CyclomaticComplexMethod:PromotionPickerScreen.kt:PromotionPickerScreen$private fun addConnectingLines</ID>
+    <ID>CyclomaticComplexMethod:PromotionTree.kt:PromotionTree$fun update</ID>
+    <ID>CyclomaticComplexMethod:ReligionAutomation.kt:ReligionAutomation$@Readonly private fun beliefBonusForCity: Float</ID>
+    <ID>CyclomaticComplexMethod:ReligionAutomation.kt:ReligionAutomation$@Readonly private fun beliefBonusForPlayer: Float</ID>
+    <ID>CyclomaticComplexMethod:ReligiousUnitAutomation.kt:ReligiousUnitAutomation$fun automateInquisitor</ID>
+    <ID>CyclomaticComplexMethod:ResourceDescriptions.kt:ResourceDescriptions$fun getCivilopediaTextLines: List&lt;FormattedLine&gt;</ID>
+    <ID>CyclomaticComplexMethod:ResourcesOverviewTab.kt:ResourcesOverviewTab$private fun getExtraDrilldown: ResourceSupplyList</ID>
+    <ID>CyclomaticComplexMethod:RiverGenerator.kt:RiverGenerator.RiverCoordinate$fun paintTo</ID>
+    <ID>CyclomaticComplexMethod:RoadBetweenCitiesAutomation.kt:RoadBetweenCitiesAutomation$@Readonly @Suppress("purity") private fun getRoadsToBuildFromCity: List&lt;RoadPlan&gt;</ID>
+    <ID>CyclomaticComplexMethod:Ruleset.kt:Ruleset$fun load</ID>
+    <ID>CyclomaticComplexMethod:Ruleset.kt:Ruleset$private fun mergeTechnologies</ID>
+    <ID>CyclomaticComplexMethod:SkinStrings.kt:SkinStrings$fun getUiBackground: NinePatchDrawable</ID>
+    <ID>CyclomaticComplexMethod:SpecificUnitAutomation.kt:SpecificUnitAutomation$fun automateImprovementPlacer : Boolean</ID>
+    <ID>CyclomaticComplexMethod:SpecificUnitAutomation.kt:SpecificUnitAutomation$fun automateSettlerActions</ID>
+    <ID>CyclomaticComplexMethod:Spy.kt:Spy$fun endTurn</ID>
+    <ID>CyclomaticComplexMethod:StartNormalizer.kt:StartNormalizer$private fun calculateFoodBonusesNeeded: Int</ID>
+    <ID>CyclomaticComplexMethod:StartNormalizer.kt:StartNormalizer$private fun normalizeProduction</ID>
+    <ID>CyclomaticComplexMethod:StartNormalizer.kt:StartNormalizer$private fun placeFoodBonuses</ID>
+    <ID>CyclomaticComplexMethod:TargetHelper.kt:TargetHelper$@Readonly fun containsAttackableEnemy: Boolean</ID>
+    <ID>CyclomaticComplexMethod:TargetHelper.kt:TargetHelper$@Readonly fun getAttackableEnemies: ArrayList&lt;AttackableTile&gt;</ID>
+    <ID>CyclomaticComplexMethod:TechnologyDescriptions.kt:TechnologyDescriptions$@Readonly @Suppress("purity") // only mutates the locally-built index maps/lists it returns fun buildTechIconsIndex: TechIconsIndex</ID>
+    <ID>CyclomaticComplexMethod:TechnologyDescriptions.kt:TechnologyDescriptions$@Readonly fun getTechEnabledIcons</ID>
+    <ID>CyclomaticComplexMethod:TechnologyDescriptions.kt:TechnologyDescriptions$fun getCivilopediaTextLines: List&lt;FormattedLine&gt;</ID>
+    <ID>CyclomaticComplexMethod:Terrain.kt:Terrain$override fun getCivilopediaTextLines: List&lt;FormattedLine&gt;</ID>
+    <ID>CyclomaticComplexMethod:Tile.kt:Tile$@Readonly private fun matchesSingleTerrainFilter: Boolean</ID>
+    <ID>CyclomaticComplexMethod:TileDescription.kt:TileDescription$@Readonly fun toMarkup: ArrayList&lt;FormattedLine&gt;</ID>
+    <ID>CyclomaticComplexMethod:TileImprovementFunctions.kt:TileImprovementFunctions$@Readonly internal fun canImprovementBeBuiltHere: Boolean</ID>
+    <ID>CyclomaticComplexMethod:TileImprovementFunctions.kt:TileImprovementFunctions$fun setImprovement</ID>
+    <ID>CyclomaticComplexMethod:TileLayerBorders.kt:TileLayerBorders$private fun updateBorders</ID>
+    <ID>CyclomaticComplexMethod:TileLayerTerrain.kt:TileLayerTerrain$private fun getTileBaseImageLocations: List&lt;String&gt;</ID>
+    <ID>CyclomaticComplexMethod:TileNormalizer.kt:TileNormalizer$fun normalizeToRuleset</ID>
+    <ID>CyclomaticComplexMethod:TileStatFunctions.kt:TileStatFunctions$@Readonly fun getTileStatsBreakdown: List&lt;Pair&lt;String, Stats&gt;&gt;</ID>
+    <ID>CyclomaticComplexMethod:Tokenizer.kt:Tokenizer$@Readonly fun String.tokenize</ID>
+    <ID>CyclomaticComplexMethod:TradeAutomation.kt:TradeAutomation$private fun getCounteroffer: TradeRequest?</ID>
+    <ID>CyclomaticComplexMethod:TradeEvaluation.kt:TradeEvaluation$@Readonly private fun evaluateBuyCost: Int</ID>
+    <ID>CyclomaticComplexMethod:TradeEvaluation.kt:TradeEvaluation$@Readonly private fun evaluateSellCost: Int</ID>
+    <ID>CyclomaticComplexMethod:TradeEvaluation.kt:TradeEvaluation$@Readonly private fun isOfferValid: Boolean</ID>
+    <ID>CyclomaticComplexMethod:TradeLogic.kt:TradeLogic$@Readonly private fun getAvailableOffers: TradeOffersList</ID>
+    <ID>CyclomaticComplexMethod:TradeLogic.kt:TradeLogic$fun acceptTrade</ID>
+    <ID>CyclomaticComplexMethod:TranslationFileWriter.kt:TranslationFileWriter.GenerateStringsFromJSONs$fun serializeElement</ID>
+    <ID>CyclomaticComplexMethod:TranslationFileWriter.kt:TranslationFileWriter.GenerateStringsFromJSONs.Companion$private fun getJavaClassByName: Class&lt;Any&gt;?</ID>
+    <ID>CyclomaticComplexMethod:TurnManager.kt:TurnManager$fun endTurn:Unit</ID>
+    <ID>CyclomaticComplexMethod:TurnManager.kt:TurnManager$fun startTurn:Unit</ID>
+    <ID>CyclomaticComplexMethod:UiUnitAction.kt:UiUnitAction$fun getIcon: Actor</ID>
+    <ID>CyclomaticComplexMethod:Unique.kt:Unique$@Readonly fun getReplacementText: String</ID>
+    <ID>CyclomaticComplexMethod:UniqueTriggerActivation.kt:UniqueTriggerActivation$fun getTriggerFunction: (()-&gt;Boolean)?</ID>
+    <ID>CyclomaticComplexMethod:UniqueValidator.kt:UniqueValidator$@Readonly fun checkUnique: RulesetErrorList</ID>
+    <ID>CyclomaticComplexMethod:UnitActionsFromUniques.kt:UnitActionsFromUniques$internal fun getTriggerUniqueActions</ID>
+    <ID>CyclomaticComplexMethod:UnitActionsTable.kt:UnitActionsTable$fun update</ID>
+    <ID>CyclomaticComplexMethod:UnitAutomation.kt:UnitAutomation$fun automateUnitMoves:Unit</ID>
+    <ID>CyclomaticComplexMethod:UnitAutomation.kt:UnitAutomation$private fun tryRetreat: Boolean</ID>
+    <ID>CyclomaticComplexMethod:UnitMovement.kt:UnitMovement$@Readonly @Suppress("purity") // mutates passed parameter fun getMovementToTilesAtPosition: PathsToTilesWithinTurn</ID>
+    <ID>CyclomaticComplexMethod:UnitMovement.kt:UnitMovement$@Readonly fun cannotPassThroughReason: CannotMoveToReason?</ID>
+    <ID>CyclomaticComplexMethod:UnitMovement.kt:UnitMovement$@Readonly fun getCannotMoveToReason: CannotMoveToReason?</ID>
+    <ID>CyclomaticComplexMethod:UnitMovement.kt:UnitMovement$@Readonly fun getShortestPath: List&lt;Tile&gt;</ID>
+    <ID>CyclomaticComplexMethod:UnitMovement.kt:UnitMovement$fun moveToTile: Unit</ID>
+    <ID>CyclomaticComplexMethod:UnitTable.kt:UnitTable$fun tileSelected</ID>
+    <ID>CyclomaticComplexMethod:UnitTurnManager.kt:UnitTurnManager$fun endTurn</ID>
+    <ID>CyclomaticComplexMethod:Victory.kt:Milestone$@Readonly fun getVictoryScreenButtonHeaderText: String</ID>
+    <ID>CyclomaticComplexMethod:Victory.kt:Milestone$fun getVictoryScreenButtons: List&lt;TextButton&gt;</ID>
+    <ID>CyclomaticComplexMethod:VictoryScreenIllustrations.kt:VictoryScreenIllustrations$private fun victoryCompletePercent: Int</ID>
+    <ID>CyclomaticComplexMethod:WonderOverviewTab.kt:WonderInfo$fun collectInfo: Array&lt;WonderInfo&gt;</ID>
+    <ID>CyclomaticComplexMethod:WorkerAutomation.kt:WorkerAutomation$@Readonly private fun chooseImprovement: TileImprovement?</ID>
+    <ID>CyclomaticComplexMethod:WorkerAutomation.kt:WorkerAutomation$@Readonly private fun findTileToWork: TileView?</ID>
+    <ID>CyclomaticComplexMethod:WorkerAutomation.kt:WorkerAutomation$@Readonly private fun getImprovementRanking: Float</ID>
+    <ID>CyclomaticComplexMethod:WorldMapHolder.kt:WorldMapHolder$fun onTileClicked</ID>
+    <ID>CyclomaticComplexMethod:WorldMapHolder.kt:WorldMapHolder$internal fun updateMovementOverlay</ID>
+    <ID>CyclomaticComplexMethod:WorldMapTileUpdater.kt:WorldMapTileUpdater$private fun WorldMapHolder.updateTilesForSelectedUnit</ID>
+    <ID>CyclomaticComplexMethod:WorldScreen.kt:WorldScreen$private fun update</ID>
+    <ID>LargeClass:Battle.kt:Battle</ID>
+    <ID>LargeClass:City.kt:City : IsPartOfGameInfoSerializationINamed</ID>
+    <ID>LargeClass:CityConstructions.kt:CityConstructions : IsPartOfGameInfoSerialization</ID>
+    <ID>LargeClass:CityConstructionsTable.kt:CityConstructionsTable</ID>
+    <ID>LargeClass:CityStateFunctions.kt:CityStateFunctions</ID>
+    <ID>LargeClass:Civilization.kt:Civilization : IsPartOfGameInfoSerialization</ID>
+    <ID>LargeClass:DiplomacyManager.kt:DiplomacyManager : IsPartOfGameInfoSerialization</ID>
+    <ID>LargeClass:MapUnit.kt:MapUnit : IsPartOfGameInfoSerialization</ID>
+    <ID>LargeClass:RulesetValidator.kt:RulesetValidator</ID>
+    <ID>LargeClass:Tile.kt:Tile : IsPartOfGameInfoSerializationTileInterface</ID>
+    <ID>LargeClass:UniqueTriggerActivation.kt:UniqueTriggerActivation</ID>
+    <ID>LargeClass:UnitMovement.kt:UnitMovement</ID>
+    <ID>NestedBlockDepth:ApiV2.kt:ApiV2$private fun startPingJob</ID>
+  </CurrentIssues>
+</SmellBaseline>
