@@ -12,6 +12,8 @@ The works listed in this document fall under various licenses. Here’s a list o
 
 ## Icon Credits
 
+Civ IV icons (improvement, nation, resource, unit promotion, construction, and tech/policy icons) are from [yairm210/Civ-IV](https://github.com/yairm210/Civ-IV).
+
 Flag Icons made by [Freepik](https://www.flaticon.com/authors/freepik) from [www.flaticon.com](https://www.flaticon.com) and licensed under CC BY 3.0, except for:
 
 -   [Bangladeshi flag] InkScaped by touhidurrr licensed under CC BY-SA 4.0. Original SVG, [here.](https://github.com/touhidurrr/artworks/blob/4cd5db12ac1a042ed82a515fed35d1a4971b5e9b/Bangladeshi%20Flag%20Circular.svg)

@@ -251,6 +251,14 @@ for (platform in Platform.entries) {
 
     }
 
+    tasks.register("package$platform") {
+        description = "Build dist jar and run packr for $platform"
+        dependsOn("dist", "packr$platform")
+    }
+    tasks.named("packr$platform") {
+        mustRunAfter("dist")
+    }
+
     tasks.register<Zip>("zip$platform") {
         dependsOn("packr$platform")
         description = "Zip packr output for $platform into a distribution archive"

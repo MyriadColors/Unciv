@@ -1280,6 +1280,12 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 ??? example  "No Anarchy when switching Civics or State Religion"
 	Applicable to: Global
 
+??? example  "Can sacrifice population to finish production"
+	Applicable to: Global
+
+??? example  "Can spend Gold to finish production"
+	Applicable to: Global
+
 ??? example  "[relativeAmount]% Civic upkeep"
 	Example: "[+20]% Civic upkeep"
 
@@ -1292,6 +1298,27 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 
 ??? example  "Removes unhealthiness from buildings"
 	Applicable to: Global, Building
+
+??? example  "Prevents spread of non-state religions"
+	Applicable to: Global, Civic
+
+??? example  "[relativeAmount]% passive religion spread chance"
+	Example: "[+20]% passive religion spread chance"
+
+	Applicable to: Global, Building
+
+??? example  "[amount] Happiness in cities with state religion"
+	Example: "[3] Happiness in cities with state religion"
+
+	Applicable to: Global, Building
+
+??? example  "Cannot adopt a State Religion"
+	Applicable to: Global, Civic
+
+??? example  "[amount] Happiness per religion present in the city"
+	Example: "[3] Happiness per religion present in the city"
+
+	Applicable to: Global, Civic, Building
 
 ## Nation uniques
 ??? example  "Starts with [tech]"
@@ -1414,6 +1441,11 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
 
+??? example  "Founds [religionFilter] if not yet founded"
+	Example: "Founds [major] if not yet founded"
+
+	Applicable to: Tech
+
 ## Policy uniques
 ??? example  "Only available"
 	Meant to be used together with conditionals, like "Only available &lt;after adopting [policy]&gt; &lt;while the empire is happy&gt;". Only allows Building when ALL conditionals are met. Will also block Upgrade and Transform actions. See also CanOnlyBeBuiltWhen
@@ -1468,6 +1500,17 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 	Example: "Comment [comment]"
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
+
+??? example  "Prevents spread of non-state religions"
+	Applicable to: Global, Civic
+
+??? example  "Cannot adopt a State Religion"
+	Applicable to: Global, Civic
+
+??? example  "[amount] Happiness per religion present in the city"
+	Example: "[3] Happiness per religion present in the city"
+
+	Applicable to: Global, Civic, Building
 
 ## FounderBelief uniques
 !!! note ""
@@ -2042,6 +2085,26 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 ??? example  "Removes unhealthiness from buildings"
 	Applicable to: Global, Building
 
+??? example  "[relativeAmount]% passive religion spread chance"
+	Example: "[+20]% passive religion spread chance"
+
+	Applicable to: Global, Building
+
+??? example  "[amount] Happiness in cities with state religion"
+	Example: "[3] Happiness in cities with state religion"
+
+	Applicable to: Global, Building
+
+??? example  "[amount] Gold for each city following [religionFilter]"
+	Example: "[3] Gold for each city following [major]"
+
+	Applicable to: Building
+
+??? example  "[amount] Happiness per religion present in the city"
+	Example: "[3] Happiness per religion present in the city"
+
+	Applicable to: Global, Civic, Building
+
 ## UnitAction uniques
 !!! note ""
 
@@ -2074,6 +2137,11 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 	By default consumes all movement
 
 	Example: "Can transform to [Musketman]"
+
+	Applicable to: UnitAction
+
+??? example  "Can spread [religionFilter]"
+	Example: "Can spread [major]"
 
 	Applicable to: UnitAction
 
@@ -2721,6 +2789,16 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
 
+??? example  "[amount] First Strikes"
+	Example: "[3] First Strikes"
+
+	Applicable to: Unit, Promotion
+
+??? example  "Flank attack against [mapUnitFilter]"
+	Example: "Flank attack against [Wounded]"
+
+	Applicable to: Unit, Promotion
+
 ## UnitType uniques
 ??? example  "Will not be displayed in Civilopedia"
 	Supports conditionals that need only a Game as context and nothing else.
@@ -2799,6 +2877,16 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 	Example: "Comment [comment]"
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
+
+??? example  "[amount] First Strikes"
+	Example: "[3] First Strikes"
+
+	Applicable to: Unit, Promotion
+
+??? example  "Flank attack against [mapUnitFilter]"
+	Example: "Flank attack against [Wounded]"
+
+	Applicable to: Unit, Promotion
 
 ## Terrain uniques
 ??? example  "[stats]"
@@ -3581,6 +3669,11 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 	Applicable to: ModOptions
 
 ??? example  "Uses Civ IV City Health"
+	This unique does not support conditionals.
+
+	Applicable to: ModOptions
+
+??? example  "Uses Civ IV Religion"
 	This unique does not support conditionals.
 
 	Applicable to: ModOptions

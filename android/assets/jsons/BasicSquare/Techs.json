@@ -1020,58 +1020,29 @@
 			{
 				"name": "Composites",
 				"cost": 7500,
-				"row": 3,
+				"row": 1,
 				"prerequisites": ["Satellites", "Plastics"],
 				"quote": "\"The whole is greater than the sum of its parts.\" - Aristotle"
 			},
 			{
 				"name": "Fiber Optics",
 				"cost": 7500,
-				"row": 5,
-				"prerequisites": ["Computers"],
-				"uniques": [
-					"Unavailable <before discovering [Plastics]> <before discovering [Satellites]> <hidden from users>"
-				],
-				"civilopediaText": [
-					{
-						"text": "Requires Plastics...",
-						"link": "Technologies/Plastics"
-					},
-					{
-						"text": "...or Satellites",
-						"link": "Technologies/Satellites"
-					}
-				],
+				"row": 3,
+				"prerequisites": ["Computers", "Plastics", "Satellites"],
 				"quote": "\"There is a single light of science and to brighten it anywhere is to brighten it everywhere.\" - Isaac Asimov"
 			},
 			{
 				"name": "Ecology",
 				"cost": 5500,
-				"row": 15,
-				"prerequisites": ["Biology"],
-				"uniques": [
-					"Unavailable <before discovering [Plastics]> <before discovering [Fission]> <hidden from users>"
-				],
-				"civilopediaText": [
-					{
-						"text": "Requires Plastics...",
-						"link": "Technologies/Plastics"
-					},
-					{
-						"text": "...or Fission",
-						"link": "Technologies/Fission"
-					}
-				],
+				"row": 5,
+				"prerequisites": ["Biology", "Plastics", "Fission"],
 				"quote": "\"We do not inherit the earth from our ancestors, we borrow it from our children' - Native American proverb"
 			},
 			{
 				"name": "Robotics",
 				"cost": 8000,
 				"row": 9,
-				"prerequisites": ["Computers"],
-				"uniques": [
-					"Only available <after discovering [Plastics]>"
-				],
+				"prerequisites": ["Computers", "Plastics"],
 				"quote": "\"The real problem is not whether machines think but whether men do.\" - B. F. Skinner"
 			}
 		]
@@ -1082,24 +1053,24 @@
 		"era": "Future era",
 		"techs": [
 			{
+				"name": "Fusion",
+				"cost": 8000,
+				"row": 3,
+				"prerequisites": ["Fission", "Fiber Optics"],
+				"uniques": [
+					"Free [Great Engineer] appears <if no other Civilization has researched this>"
+				],
+				"quote": "\"Any sufficiently advanced technology is indistinguishable from magic.\" - Arthur C. Clarke"
+			},
+			{
 				"name": "Genetics",
 				"cost": 7000,
-				"row": 1,
+				"row": 9,
 				"prerequisites": ["Refrigeration", "Computers"],
 				"uniques": [
 					"[+3] Health" // +3 Health to all cities
 				],
 				"quote": "\"Soon it will be a sin for parents to have a child that carries the heavy burden of genetic disease.\" - Bob Edwards"
-			},
-			{
-				"name": "Fusion",
-				"cost": 8000,
-				"row": 7,
-				"prerequisites": ["Fission" ,"Fiber Optics"],
-				"uniques": [
-					"Free [Great Engineer] appears <if no other Civilization has researched this>"
-				],
-				"quote": "\"Any sufficiently advanced technology is indistinguishable from magic.\" - Arthur C. Clarke"
 			}
 		]
 	},
@@ -1111,7 +1082,7 @@
 			{
 				"name": "Future Tech",
 				"cost": 10000,
-				"row": 3,
+				"row": 9,
 				"prerequisites": ["Composites", "Genetics"],
 				"uniques": [
 					"Can be continually researched",
