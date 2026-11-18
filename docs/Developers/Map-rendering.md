@@ -2,56 +2,51 @@
 
 ## Introduction - how does LibGDX render images?
 
-Images in LibGDX are displayed on screen by a SpriteBatch, which uses GL to bind textures to load them in-memory, and can then very quickly display them on-screen.
-The actual rendering is then very fast, but the binding process is slow.
-Therefore, ideally we'd want as little bindings as possible, so the textures should contain as many images as possible.
-This is why we compile images (ImagePacker.packImages()) into large PNGs.
+Images in LibGDX are displayed on screen by a `SpriteBatch` (`TextureArraySpriteBatch`), which uses OpenGL to bind texture atlases in memory and draw quads on screen.
+The actual drawing is very fast, whereas texture state changes are comparatively expensive.
+Therefore, we pack source images (`ImagePacker.packImages()`) into 2048×2048 texture atlases per category (`android/Images.Icons`, `android/Images.Tilesets`, `android/Images.Flags`, `android/Images.Tech`, etc., plus unpacked icons under `android/assets/Images/`) and use `TextureArraySpriteBatch` (an LFU multi-texture unit cache) to batch draw calls across multiple bound texture units.
 
-However, due to limitations in different chipsets etc, these images are limited to a maximum size of 2048*2048 pixels, and the game contains more images than would fit into a single square of that size.
-What we do, then, is separate them by category, and thus rendering proximity.
-The 'android' folder contains Images, but also various sub-categories - Images.Flags, Images.Tech, etc.
-Each of these sub-categories are compiled into a separate PNG file in the 'android/assets' folder.
+## Orthogonal Square Grid Geometry
 
-When rendering, the major time-sink is in rebinding textures. We therefore need to be careful to minimize the number of rebinds, or 'swapping between different categories'.
+Unciv renders an orthogonal 8-direction square map (`GridMath.kt`):
+
+- **Square Tile Dimensions**: Each `TileGroup` has `groupSize = 50f` (`tileImageSize = groupSize`, `tileImageOrigin = groupSize / 2f`, `setSize(groupSize, groupSize)`).
+- **World Coordinates**: `TileGroupMap` positions tiles using `GridMath.grid2WorldCoords(tile.position) * groupSize` (`(coord.x * 50f, coord.y * 50f)`).
+- **Descending-Y Z-Order**: Tiles in `TileGroupMap` and `TileLayerTerrain` are sorted descending by `position().y` so overlapping terrain and feature sprites layer consistently from top to bottom.
+- **Cardinal Borders & Square-Edge Rivers**:
+  - `TileLayerBorders` draws borders along the 4 cardinal neighbor edges (skipping diagonal neighbors where `relativeWorldPosition.x != 0f && relativeWorldPosition.y != 0f`) with 0°/90°/180°/-90° rotations.
+  - `TileLayerTerrain` renders rivers on the right and bottom tile edges (`rightRiverImage` for `tile.hasRightRiver`, `bottomRiverImage` for `tile.hasBottomRiver`).
+- **Tileset Lookup**: `TileSetStrings` resolves `"Square"` / `"CrosshatchSquare"` sprites from `SquareBasic` (with fallback to `"Hexagon"` / `"CrosshatchHexagon"` for legacy compatibility).
 
 ## Layering
 
-Each map tile is comprised of several layers, and for *visual clarity*, each layer needs to be rendered for all tiles before the next layer is.
-For example, we don't want one tile's unit sprite to be overlaid by another's improvement.
+Each map tile is comprised of several layers, and for *visual clarity* and *batching performance*, each layer is rendered across all visible tiles before the next layer begins.
 
-This layering is done in TileGroupMap, where we take the individual parts for all tiles, separate them into the layers, and add them all to one big group.
+The `TileLayer` subclasses are plain Kotlin classes (not scene-graph actors) that own the `Image` / `Actor` objects for a single tile and maintain a dirty-check cache key (`TileLayer.getUpdateKey` / `UpdateKey` / `invalidate`) so layers only rebuild their actors when visible tile state actually changes.
 
-This also has a massive *performance advantage*, since e.g. text and construction images in the various city buttons are not rendered until the very end, and therefore swap per the number of cities and not for every single tile.
-This also means that mods which add their own tilesets or unit sprites have better performance than 'render entire tile' would provide, since we first render all terrains, then all improvements, etc,
-so if my tileset provides all terrains, it won't be swapped out until we're done.
-
-### Understanding Tilegroups
-
-From a technical perspective, the TileGroup *creates* the layers - but when actually rendering, we take them to the *large map*. Why is this?
-
-Well, to start with, we have 2 use-cases - rendering a single tile, and rendering a map. For Civilopedia and the map editor, we need to render a single tile without an underlying map.
-The simplest way to do this is to add them together, so TileGroup is a single tile with all layers.
-
-But as stated above, this doesn't work for the entire map, where we need to render all of layer A across all tiles before we get to layer B.
-So we create the layers in the same way but we "steal" the images to the large map.
-
-The `TileLayer` subclasses are plain Kotlin classes (not scene-graph actors). They own the `Image` objects for their tile and know the tile's position. 
-When a `TileGroup` is used standalone, its images are added directly to the `TileGroup`. 
-When placed in a `TileGroupMap`, the images are moved into shared `TileMapLayer` containers — one container per layer type, each holding the flat list of images for all tiles in that layer.
+- When a `TileGroup` is used standalone (such as in the Civilopedia or Map Editor brush preview), its images are added directly to the `TileGroup`.
+- When placed in a `TileGroupMap`, the images are moved into shared `TileMapLayer` containers — one container per layer type, in fixed render order:
 
 ```
-TileGroup (standalone)          TileGroupMap (full map)
-  └── terrain images              ├── TileMapLayer<TileLayerTerrain>
-  └── border images               │     └── all terrain images, all tiles
-  └── …                           ├── TileMapLayer<TileLayerBorders>
-                                  ├── …
-                                  └── tileGroupLayer (TileGroups, click-detection only)
+TileGroup (standalone)          TileGroupMap (full map, in render order)
+  └── all tile actors             ├── 1. TerrainMapLayer      (TileLayerTerrain: base terrain, features, rivers)
+                                  ├── 2. FeaturesMapLayer     (TileLayerFeatures: roads & railroads)
+                                  ├── 3. BordersMapLayer      (TileLayerBorders: 4-cardinal cultural borders)
+                                  ├── 4. ResourceMapLayer     (TileLayerResource: resource icons)
+                                  ├── 5. ImprovementMapLayer  (TileLayerImprovement: tile improvements)
+                                  ├── 6. tileGroupLayer       (TileGroups: click detection, below MiscMapLayer)
+                                  ├── 7. MiscMapLayer         (TileLayerMisc: worked icons, arrows, overlays)
+                                  ├── 8. YieldMapLayer        (TileLayerYield: food/prod/gold yield badges)
+                                  ├── 9. UnitSpriteMapLayer   (TileLayerUnitSprite: pixel unit sprites)
+                                  ├── 10. OverlayMapLayer     (TileLayerOverlay: fog of war, unexplored, crosshair)
+                                  ├── 11. UnitFlagMapLayer    (TileLayerUnitFlag: unit icons & stack count badges)
+                                  └── 12. CityButtonMapLayer  (TileLayerCityButton: city name/pop/health/religion bar)
 ```
+
+Notice that `tileGroupLayer` sits below `MiscMapLayer` so that interactive elements in `MiscMapLayer` (such as citizen `workedIcon` toggles in `CityScreen`) receive pointer hits before the underlying tile group. `BordersMapLayer` and `CityButtonMapLayer` also use an expanded frustum culling margin (`groupSize * 1.5f`) so city bars and border segments extending outside a tile's 50×50 bounds are not clipped during camera panning.
 
 ## Debugging
 
 Android Studio's built-in profiler has a CPU profiler which is perfect for this.
-Boot up the game on your Android device, open a game, start recording CPU, move the screen around a bit, and stop recording.
-Select the "GL Thread" from the list of threads, and change visualization to a flame graph. You'll then see what's actually taking rendering time.
-
-You can find various games to test on [here](https://github.com/yairm210/Unciv/issues?q=label%3A%22Contains+Saved+Game%22) - [This](https://github.com/yairm210/Unciv/issues/4840) for example is a crowded one.
+Boot up the game on your Android device or Desktop, open a game, start recording CPU, pan and zoom the map (`WorldMapHolder.setupZoomPanListeners` disables `shouldAct` and `shouldHit` while panning/zooming), and stop recording.
+Select the "GL Thread" from the list of threads, and change visualization to a flame graph to inspect rendering hotspots.

@@ -147,10 +147,14 @@ object CityLocationTileRanker {
         }
 
         var tiles = 0
-        for (i in 0..2) {
+        val constants = newCityTile.getRuleset().modOptions.constants
+        val workRange = constants.cityWorkRange.coerceAtMost(2)
+        val excludeCorners = constants.cityWorkRangeExcludeCorners && workRange >= 2
+        for (i in 0..workRange) {
             //Ideally, we shouldn't really count the center tile, as it's converted into 1 production 2 food anyways with special cases treated above, but doing so can lead to AI moving settler back and forth until forever
             val tilesAtDistance = if (i == 0) sequenceOf(newCityTile) else newCityTile.getExploredTilesAtDistance(i)
             for (nearbyTile in tilesAtDistance) {
+                if (isExcludedFatCrossCorner(nearbyTile, newCityTile, i, workRange, excludeCorners)) continue
                 tiles++
                 tileValue += rankTile(nearbyTile, civ, onCoast, newUniqueLuxuryResources, baseTileMap) * (3f / (i + 1))
                 //Tiles close to the city can be worked more quickly, and thus should gain higher weight.
@@ -162,8 +166,25 @@ object CityLocationTileRanker {
         }
 
         // Placing cities on the edge of the map is bad, we can't even build improvements on them!
-        tileValue -= (GridMath.getNumberOfTilesInSquareRadius(2) - tiles) * 2.4f
+        val expectedTiles = GridMath.getNumberOfTilesInSquareRadius(workRange) - (if (excludeCorners) 4 else 0)
+        tileValue -= (expectedTiles - tiles).coerceAtLeast(0) * 2.4f
         return tileValue
+    }
+
+    @Readonly
+    private fun isExcludedFatCrossCorner(
+        nearbyTile: TileView,
+        centerTile: TileView,
+        distance: Int,
+        workRange: Int,
+        excludeCorners: Boolean
+    ): Boolean {
+        if (!excludeCorners || distance != workRange) return false
+        val pos = nearbyTile.position()
+        val centerPos = centerTile.position()
+        val dx = kotlin.math.abs(pos.x - centerPos.x)
+        val dy = kotlin.math.abs(pos.y - centerPos.y)
+        return dx + dy > 2 * workRange - 1
     }
 
     @Readonly

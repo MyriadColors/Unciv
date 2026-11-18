@@ -78,8 +78,10 @@ object ModCompatibility {
         return isAudioVisualGuessed(mod) || folder.child("Skins").let { it.exists() && it.isDirectory && it.list().isNotEmpty() }
     }
 
+    private var allowExtensionMods = false
+
     @Readonly
-    fun isExtensionMod(mod: Ruleset) = false
+    fun isExtensionMod(mod: Ruleset): Boolean = allowExtensionMods && !mod.modOptions.isBaseRuleset
 
     @Readonly
     fun isConstantsOnly(mod: Ruleset): Boolean {

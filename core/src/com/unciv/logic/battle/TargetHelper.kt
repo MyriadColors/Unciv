@@ -57,7 +57,7 @@ object TargetHelper {
                         if (Nuke.mayUseNuke(MapUnitCombatant(unit), tile))
                             attackableTiles += AttackableTile(
                                 reachableTile, tile, movementLeft,
-                                Battle.getMapCombatantOfTile(tile)
+                                Battle.getMapCombatantOfTile(tile, MapUnitCombatant(unit))
                             )
                     }
 
@@ -65,14 +65,14 @@ object TargetHelper {
                         reachableTile,
                         tile,
                         movementLeft,
-                        Battle.getMapCombatantOfTile(tile)
+                        Battle.getMapCombatantOfTile(tile, MapUnitCombatant(unit))
                     )
                     tile in tilesWithoutEnemies -> continue // avoid checking the same empty tile multiple times
                     tileContainsAttackableEnemy(unit, tile, tilesToCheck) || unit.isPreparingAirSweep() -> {
                         tilesWithEnemies += tile
                         attackableTiles += AttackableTile(
                             reachableTile, tile, movementLeft,
-                            Battle.getMapCombatantOfTile(tile)
+                            Battle.getMapCombatantOfTile(tile, MapUnitCombatant(unit))
                         )
                     }
                     else -> tilesWithoutEnemies += tile
@@ -106,7 +106,7 @@ object TargetHelper {
     private fun tileContainsAttackableEnemy(unit: MapUnit, tile: Tile, tilesToCheck: List<Tile>?): Boolean {
         if (tile !in (tilesToCheck ?: unit.civ.viewableTiles) || !containsAttackableEnemy(tile, MapUnitCombatant(unit)) )
             return false
-        val mapCombatant = Battle.getMapCombatantOfTile(tile)
+        val mapCombatant = Battle.getMapCombatantOfTile(tile, MapUnitCombatant(unit))
 
         return (!unit.baseUnit.isMelee() || mapCombatant !is MapUnitCombatant || !mapCombatant.unit.isCivilian() || unit.movement.canPassThrough(tile))
     }
@@ -119,7 +119,7 @@ object TargetHelper {
                 return false
         }
 
-        val tileCombatant = Battle.getMapCombatantOfTile(tile) ?: return false
+        val tileCombatant = Battle.getMapCombatantOfTile(tile, combatant) ?: return false
         if (tileCombatant.getCivInfo() == combatant.getCivInfo()) return false
         // If the user automates units, one may capture the city before the user had a chance to decide what to do with it,
         //  and then the next unit should not attack that city

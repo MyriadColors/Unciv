@@ -56,27 +56,36 @@ object Automation {
     @Readonly
     private fun getFoodModWeight(city: City, surplusFood: Float): Float {
         val speed = city.civ.gameInfo.speed.modifier
-        // Zero out Growth if close to Unhappiness limit
-        if (city.civ.getHappiness() < -8)
+        val modOptions = city.civ.gameInfo.ruleset.modOptions
+        if (modOptions.useCiv4LocalHappiness) {
+            if (city.getAngryCitizens() > 0) return 0f
+            val localNetHappiness = city.cityStats.happinessList.values.sum()
+            if (localNetHappiness <= 0f) return 0.5f
+        } else if (city.civ.getHappiness() < -8) {
+            // Zero out Growth if close to Unhappiness limit
             return 0f
+        }
+        val healthMultiplier = if (modOptions.hasUnique(UniqueType.CityHealthMode) && city.getHealthBreakdown().netHealth < 0)
+            0.75f
+        else 1.0f
         if (city.civ.isAI()) {
             // Value 1 Growth at less than 2 Production, but above 1 Production + 1 Gold
-            return 1.5f
+            return 1.5f * healthMultiplier
         }
         // Human weights. May be different since AI Happiness is always "easier"
         // Only apply these for Default to not interfere with Focus weights
         if (city.getCityFocus() == CityFocus.NoFocus) {
             if (city.population.population < 5)
-                return 2f
+                return 2f * healthMultiplier
             if (surplusFood > city.population.getFoodToNextPopulation() / (10 * speed))
-                return 0.75f // get Growth just under Production
+                return 0.75f * healthMultiplier // get Growth just under Production
         }
 
-        return 1f
+        return 1f * healthMultiplier
     }
 
     @Readonly
-    fun rankStatsForCityWork(stats: Stats, city: City, areWeRankingSpecialist: Boolean): Float
+    fun rankStatsForCityWork(stats: Stats, city: City, areWeRankingSpecialist: Boolean, tile: Tile? = null): Float
         = timeThis("Automation.rankStatsForCityWork") {
         val cityAIFocus = city.getCityFocus()
         val yieldStats = stats.clone()
@@ -183,7 +192,14 @@ object Automation {
             yieldStats[stat] = currentStat * statMultiplier
         }
 
-        return yieldStats.sum()
+        var totalRank = yieldStats.sum()
+        if (!areWeRankingSpecialist && tile != null && !starving) {
+            val tileImprovement = tile.getUnpillagedTileImprovement()
+            if (tileImprovement != null && tileImprovement.hasUnique(UniqueType.ImprovementUpgradesAfterTurns, tile.stateThisTile)) {
+                totalRank += 12f
+            }
+        }
+        return totalRank
     }
 
     fun tryTrainMilitaryUnit(city: City) {
@@ -257,6 +273,15 @@ object Automation {
                 .maxBy { it.cost }
         }
         else { // randomize type of unit and take the strongest of its kind
+            val civ4StackCombat = city.civ.gameInfo.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat)
+            if (civ4StackCombat) {
+                val ownMilitary = city.civ.units.getCivUnits().filter { it.baseUnit.isMilitary && it.baseUnit.isLandUnit }.toList()
+                val siegeCount = ownMilitary.count { it.baseUnit.isProbablySiegeUnit() }
+                val availableSiege = militaryUnits.filter { it.isLandUnit && it.isProbablySiegeUnit() }.toList()
+                if (availableSiege.isNotEmpty() && ownMilitary.size >= 3 && siegeCount * 4 < ownMilitary.size) {
+                    return availableSiege.maxBy { it.getForceEvaluation() }
+                }
+            }
             val bestUnitsForType = hashMapOf<String, BaseUnit>()
             for (unit in militaryUnits) {
                 if (bestUnitsForType[unit.unitType] == null

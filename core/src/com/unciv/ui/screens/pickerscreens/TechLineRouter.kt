@@ -104,27 +104,9 @@ class TechLineRouter(
             for (d in dirs.indices) {
                 val nx = cur.gx + dirs[d].first
                 val ny = cur.gy + dirs[d].second
+                if (!isValidStep(cur.gx, nx, ny, dirs[d].first, maxGy)) continue
 
-                if (nx < 0 || nx > columns || ny < 0 || ny > maxGy) continue
-
-                // Check if horizontal move passes through an occupied cell
-                if (dirs[d].first != 0) {
-                    // Moving horizontally at ny: if ny is odd, it's row (ny - 1) / 2
-                    if (ny % 2 == 1) {
-                        val row = (ny - 1) / 2
-                        val col = minOf(cur.gx, nx)
-                        if (col in 0 until columns && row in 0 until rows && isOccupied(col, row)) {
-                            continue
-                        }
-                    }
-                }
-
-                val stepCost = 10
-                val bendCost = if (cur.dir != -1 && cur.dir != d) 15 else 0
-                val key = EdgeKey.of(LatticePoint(cur.gx, cur.gy), LatticePoint(nx, ny))
-                val congestionCost = (edgeUsage[key] ?: 0) * 6
-                val nextCost = curCost + stepCost + bendCost + congestionCost
-
+                val nextCost = curCost + computeStepCost(cur.gx, cur.gy, cur.dir, nx, ny, d)
                 val nextState = State(nx, ny, d)
                 if (nextCost < (dist[nextState] ?: Int.MAX_VALUE)) {
                     dist[nextState] = nextCost
@@ -142,13 +124,34 @@ class TechLineRouter(
         }
         rawPoints.reverse()
 
-        // Record edge usage for congestion avoidance
+        return buildRoutedEdge(id, sourceKey, rawPoints)
+    }
+
+    private fun isValidStep(curGx: Int, nx: Int, ny: Int, dx: Int, maxGy: Int): Boolean {
+        if (nx !in 0..columns || ny !in 0..maxGy) return false
+        return !isBlockedHorizontalStep(curGx, nx, ny, dx)
+    }
+
+    private fun computeStepCost(curGx: Int, curGy: Int, curDir: Int, nx: Int, ny: Int, d: Int): Int {
+        val stepCost = 10
+        val bendCost = if (curDir != -1 && curDir != d) 15 else 0
+        val key = EdgeKey.of(LatticePoint(curGx, curGy), LatticePoint(nx, ny))
+        val congestionCost = (edgeUsage[key] ?: 0) * 6
+        return stepCost + bendCost + congestionCost
+    }
+
+    private fun isBlockedHorizontalStep(curGx: Int, nx: Int, ny: Int, dx: Int): Boolean {
+        if (dx == 0 || ny % 2 != 1) return false
+        val row = (ny - 1) / 2
+        val col = minOf(curGx, nx)
+        return col in 0 until columns && row in 0 until rows && isOccupied(col, row)
+    }
+
+    private fun buildRoutedEdge(id: String, sourceKey: String, rawPoints: List<LatticePoint>): RoutedEdge {
         for (i in 0 until rawPoints.size - 1) {
             val key = EdgeKey.of(rawPoints[i], rawPoints[i + 1])
             edgeUsage[key] = (edgeUsage[key] ?: 0) + 1
         }
-
-        // Simplify collinear points into segments
         val simplified = simplifyPoints(rawPoints)
         val segments = ArrayList<RoutedSegment>()
         for (i in 0 until simplified.size - 1) {

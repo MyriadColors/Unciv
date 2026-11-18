@@ -2,7 +2,7 @@
 
 ## Terrains.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/Terrains.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Terrains.json)
 
 This file contains the base terrains, terrain features and natural wonders that can appear on the map.
 
@@ -55,11 +55,11 @@ A region not fulfilling any criteria is classified as "Hybrid"
 
 ## TileImprovements.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/TileImprovements.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/TileImprovements.json)
 
 This file lists the improvements that can be constructed or created on a map tile by a unit having the appropriate unique.
 
-Note that improvements have two visual representations - icon and pixel graphic in the tileset. Omitting the icon results in a horribly ugly user interface, while omitting tileset graphics will just miss out on an _optional_ visualization. If you provide a pixel graphic for FantasyHex, please be aware of the layering system and the ruleVariants in the tileset json. A single graphic may suffice if it has lots of transparency, as it will be drawn on top of all other terrain elements.
+Note that improvements have two visual representations - icon and pixel graphic in the tileset. Omitting the icon results in a horribly ugly user interface, while omitting tileset graphics will just miss out on an _optional_ visualization. If you provide a pixel graphic for SquareBasic, please be aware of the layering system and the ruleVariants in the tileset json. A single graphic may suffice if it has lots of transparency, as it will be drawn on top of all other terrain elements.
 
 Each improvement has the following structure:
 
@@ -83,13 +83,13 @@ Each improvement has the following structure:
 
 ## TileResources.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/TileResources.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/TileResources.json)
 
 This file lists the resources that a map tile can have.
 
 Note the predefined `resourceType` enum cannot be altered in a json.
 
-Note also that resources have two visual representations - icon and pixel graphic in the tileset. Omitting the icon results in a horribly ugly user interface, while omitting tileset graphics will miss out on a visualization on the map. If you provide a pixel graphic for FantasyHex, please be aware of the layering system and the ruleVariants in the tileset json. A single graphic may suffice if it has lots of transparency, as it will be drawn on top of terrain and features but below an improvement - if the single improvement graphic exists at all.
+Note also that resources have two visual representations - icon and pixel graphic in the tileset. Omitting the icon results in a horribly ugly user interface, while omitting tileset graphics will miss out on a visualization on the map. If you provide a pixel graphic for SquareBasic, please be aware of the layering system and the ruleVariants in the tileset json. A single graphic may suffice if it has lots of transparency, as it will be drawn on top of terrain and features but below an improvement - if the single improvement graphic exists at all.
 
 Each resource has the following structure:
 
@@ -103,12 +103,12 @@ Each resource has the following structure:
 | revealedBy           | String          | none     | The technology name required to see, work and improve this resource                                                                         |
 | improvedBy           | List of strings | empty    | The improvements required for obtaining this resource. Must be in [TileImprovements.json](#tileimprovementsjson)                            |
 | improvement          | String          | none     | The improvement required to obtain this resource. Must be in [TileImprovements.json](#tileimprovementsjson) (redundant due to `improvedBy`) |
-| unique               | List of Strings | empty    | List of [unique abilities](../uniques.md) this resource has                                                                                 |
+| uniques              | List of Strings | empty    | List of [unique abilities](../uniques.md) this resource has                                                                                 |
 | civilopediaText      | List            | empty    | See [civilopediaText chapter](5-Miscellaneous-JSON-files.md#civilopedia-text)                                                               |
 
 ## Ruins.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/Ruins.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Ruins.json)
 
 This optional file contains the possible rewards ancient ruins give.
 
@@ -154,19 +154,19 @@ A few uniques can be added to ancient ruin effects to modify when they can be ea
 
 ## [Tileset-specific json](../Creating-a-custom-tileset.md)
 
-[Link to original FantasyHex](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/TileSets/FantasyHex.json)
+[Link to original SquareBasic](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/TileSets/SquareBasic.json)
 
-A mod can define new Tilesets or add to existing ones, namely FantasyHex. There is one json file per Tileset, named same as the Tileset, and placed in a subfolder named "TileSets" relative to the other json files. This is called TileSetConfig and has the following structure:
+A mod can define new Tilesets or add to existing ones, namely SquareBasic. There is one json file per Tileset, named same as the Tileset, and placed in a subfolder named "TileSets" relative to the other json files. This is called TileSetConfig and has the following structure:
 
-| Attribute                                                                      | Type    | Default      | Notes                                                                                                                                |
-|--------------------------------------------------------------------------------|---------|--------------|--------------------------------------------------------------------------------------------------------------------------------------|
-| [useColorAsBaseTerrain](../Creating-a-custom-tileset.md#usecolorasbaseterrain) | Boolean | false        |                                                                                                                                      |
-| [useSummaryImages](../Creating-a-custom-tileset.md#usesummaryimages)           | Boolean | false        |                                                                                                                                      |
-| [fogOfWarColor](../Creating-a-custom-tileset.md#fogofwarcolor)                 | Color   | Black        | `{"r":0,"g":0,"b":0,"a":1}`                                                                                                          |
-| [fallbackTileSet](../Creating-a-custom-tileset.md#fallbacktileset)             | String  | "FantasyHex" | null to disable                                                                                                                      |
-| [tileScale](../Creating-a-custom-tileset.md#tilescale)                         | Float   | 1.0          | The scale of all tiles. Can be used to increase or decrease the size of every tile                                                   |
-| [tileScales](../Creating-a-custom-tileset.md#tilescales)                       | Object  | empty        | Used by the "Minimal" tileset to scale all its tiles except the base terrain down. Overrides `tileScale` value for specified terrain |
-| [ruleVariants](../Creating-a-custom-tileset.md#rulevariants)                   | Object  | empty        | [See here](#layering-images)                                                                                                         |
+| Attribute                                                                      | Type    | Default       | Notes                                                                                                                                |
+|--------------------------------------------------------------------------------|---------|---------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| [useColorAsBaseTerrain](../Creating-a-custom-tileset.md#usecolorasbaseterrain) | Boolean | false         |                                                                                                                                      |
+| [useSummaryImages](../Creating-a-custom-tileset.md#usesummaryimages)           | Boolean | false         |                                                                                                                                      |
+| [fogOfWarColor](../Creating-a-custom-tileset.md#fogofwarcolor)                 | Color   | Black         | `{"r":0,"g":0,"b":0,"a":1}`                                                                                                          |
+| [fallbackTileSet](../Creating-a-custom-tileset.md#fallbacktileset)             | String  | "SquareBasic" | null to disable                                                                                                                      |
+| [tileScale](../Creating-a-custom-tileset.md#tilescale)                         | Float   | 1.0           | The scale of all tiles. Can be used to increase or decrease the size of every tile                                                   |
+| [tileScales](../Creating-a-custom-tileset.md#tilescales)                       | Object  | empty         | Used by the "Minimal" tileset to scale all its tiles except the base terrain down. Overrides `tileScale` value for specified terrain |
+| [ruleVariants](../Creating-a-custom-tileset.md#rulevariants)                   | Object  | empty         | [See here](#layering-images)                                                                                                         |
 
 ### Layering images
 

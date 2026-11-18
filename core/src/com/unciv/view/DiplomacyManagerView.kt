@@ -12,6 +12,7 @@ class DiplomacyManagerView(private val diplomacyManager: DiplomacyManager, viewe
                            gameView: GameView) : GameBasedView<DiplomacyManager>(diplomacyManager, viewer, spectatorMode, gameView) {
 
     @Readonly fun canDeclareWar(): Boolean = diplomacyManager.canDeclareWar()
+    @Readonly fun hasOpenBorders(): Boolean = diplomacyManager.hasOpenBorders
     @Readonly fun hasFlag(flag: DiplomacyFlags): Boolean = diplomacyManager.hasFlag(flag)
     @Readonly fun hasModifier(modifier: DiplomaticModifiers): Boolean = diplomacyManager.hasModifier(modifier)
     @Readonly fun getFlag(flag: DiplomacyFlags): Int = diplomacyManager.getFlag(flag)

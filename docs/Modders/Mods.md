@@ -1,5 +1,8 @@
 # Introduction to Mods
 
+> [!IMPORTANT]
+> **Current Mod Compatibility Policy**: External gameplay/ruleset mods (`isBaseRuleset`, extension JSON mods) and custom tileset mods are currently disabled in `ModCompatibility.kt`. Only **asset-only audiovisual/skin mods** (`ModCompatibility.isAssetOnlyMod` — graphics, audio, and UI skins that do not alter ruleset JSONs or tilesets) can be enabled as Permanent Audiovisual Mods. The JSON file documentation in this section serves as the reference for the built-in `BasicSquare` ruleset and future ruleset development.
+
 ## What are mods?
 
 Everyone has that thing they wish could be in the game.

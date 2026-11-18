@@ -277,16 +277,7 @@ class TechPickerScreen(
 
         lines.clear()
         edgeToActors.clear()
-
-        for (eraLabel in eraLabels) {
-            val coords = Vector2(0f, 0f)
-            eraLabel.localToStageCoordinates(coords)
-            techTable.stageToLocalCoordinates(coords)
-            val line = ImageGetter.getLine(coords.x-1f, coords.y, coords.x-1f, coords.y - 1000f, 1f)
-            line.color = Color.GRAY.cpy().apply { a = 0.6f }
-            line.toBack()
-            lines.addActor(line)
-        }
+        addEraDividerLines()
 
         val cols = cellTables.size
         val numRows = if (cols > 0) cellTables[0].size else 0
@@ -299,32 +290,22 @@ class TechPickerScreen(
         val routedInputs = ArrayList<TechLineRouter.RoutedEdge>()
 
         for (tech in ruleset.technologies.values) {
-            val techButton = techNameToButton[tech.name]
-            if (techButton == null) {
+            if (techNameToButton[tech.name] == null) {
                 ToastPopup("Tech ${tech.name} appears to be missing - perhaps two techs have the same row & column", this)
                 continue
             }
+            val to = techGridCoords[tech.name] ?: continue
             for (prerequisite in tech.prerequisites) {
                 if (techNameToButton[prerequisite] == null) {
                     ToastPopup("Tech $prerequisite. prerequisite of ${tech.name}, appears to be missing - perhaps two techs have the same row & column", this)
                     continue
                 }
                 val from = techGridCoords[prerequisite] ?: continue
-                val to = techGridCoords[tech.name] ?: continue
                 edgeSpecs.add(EdgeSpec(prerequisite, tech, isOr = false))
                 routedInputs.add(router.route("${prerequisite}->${tech.name}", prerequisite, from.first, from.second, to.first, to.second))
             }
-            val orPrerequisites = tech.uniqueObjects
-                .filter { it.type == com.unciv.models.ruleset.unique.UniqueType.Unavailable }
-                .flatMap { it.modifiers }
-                .filter { it.type == com.unciv.models.ruleset.unique.UniqueType.ConditionalNoTech }
-                .map { it.params[0] }
-                .distinct()
-                .filter { it !in tech.prerequisites }
-            for (prerequisite in orPrerequisites) {
-                if (techNameToButton[prerequisite] == null) continue
+            for (prerequisite in getOrPrerequisites(tech)) {
                 val from = techGridCoords[prerequisite] ?: continue
-                val to = techGridCoords[tech.name] ?: continue
                 edgeSpecs.add(EdgeSpec(prerequisite, tech, isOr = true))
                 routedInputs.add(router.route("${prerequisite}->${tech.name}", prerequisite, from.first, from.second, to.first, to.second))
             }
@@ -338,6 +319,27 @@ class TechPickerScreen(
         lines.setSize(techTable.width, techTable.height)
         updateLineFocusHighlighting()
     }
+
+    private fun addEraDividerLines() {
+        for (eraLabel in eraLabels) {
+            val coords = Vector2(0f, 0f)
+            eraLabel.localToStageCoordinates(coords)
+            techTable.stageToLocalCoordinates(coords)
+            val line = ImageGetter.getLine(coords.x - 1f, coords.y, coords.x - 1f, coords.y - 1000f, 1f)
+            line.color = Color.GRAY.cpy().apply { a = 0.6f }
+            line.toBack()
+            lines.addActor(line)
+        }
+    }
+
+    private fun getOrPrerequisites(tech: Technology): List<String> =
+        tech.uniqueObjects
+            .filter { it.type == com.unciv.models.ruleset.unique.UniqueType.Unavailable }
+            .flatMap { it.modifiers }
+            .filter { it.type == com.unciv.models.ruleset.unique.UniqueType.ConditionalNoTech }
+            .map { it.params[0] }
+            .distinct()
+            .filter { it !in tech.prerequisites && techNameToButton[it] != null }
 
     private fun gutterX(gx: Int): Float {
         if (cellTables.isEmpty()) return 0f
@@ -394,6 +396,30 @@ class TechPickerScreen(
         }
     }
 
+    private fun buildEdgeWaypoints(
+        startPt: Vector2,
+        endPt: Vector2,
+        routed: TechLineRouter.RoutedEdge
+    ): ArrayList<Vector2> {
+        val laneSpacing = 4f
+        val waypoints = ArrayList<Vector2>()
+        waypoints.add(startPt)
+        for (segIdx in routed.segments.indices) {
+            val seg = routed.segments[segIdx]
+            val offset = seg.lane * laneSpacing
+            val x1 = gutterX(seg.start.gx) + if (seg.isVertical) offset else 0f
+            val y1 = latticeY(seg.start.gy) + if (seg.isHorizontal) offset else 0f
+            val x2 = gutterX(seg.end.gx) + if (seg.isVertical) offset else 0f
+            val y2 = latticeY(seg.end.gy) + if (seg.isHorizontal) offset else 0f
+            if (segIdx == 0) waypoints.add(Vector2(x1, startPt.y))
+            waypoints.add(Vector2(x1, y1))
+            waypoints.add(Vector2(x2, y2))
+            if (segIdx == routed.segments.lastIndex) waypoints.add(Vector2(x2, endPt.y))
+        }
+        waypoints.add(endPt)
+        return waypoints
+    }
+
     private fun drawRoutedEdge(
         tech: Technology,
         prerequisite: String,
@@ -419,29 +445,7 @@ class TechPickerScreen(
             else -> defaultColor
         }
         val lineSize = if (tempTechsToResearch.contains(tech.name) && !civTech.isResearched(prerequisite)) 4f else 2f
-
-        val laneSpacing = 4f
-        val waypoints = ArrayList<Vector2>()
-        waypoints.add(startPt)
-
-        if (routed.segments.isEmpty()) {
-            waypoints.add(endPt)
-        } else {
-            for (segIdx in routed.segments.indices) {
-                val seg = routed.segments[segIdx]
-                val offset = seg.lane * laneSpacing
-                val x1 = gutterX(seg.start.gx) + if (seg.isVertical) offset else 0f
-                val y1 = latticeY(seg.start.gy) + if (seg.isHorizontal) offset else 0f
-                val x2 = gutterX(seg.end.gx) + if (seg.isVertical) offset else 0f
-                val y2 = latticeY(seg.end.gy) + if (seg.isHorizontal) offset else 0f
-                if (segIdx == 0) waypoints.add(Vector2(x1, startPt.y))
-                waypoints.add(Vector2(x1, y1))
-                waypoints.add(Vector2(x2, y2))
-                if (segIdx == routed.segments.lastIndex) waypoints.add(Vector2(x2, endPt.y))
-            }
-            waypoints.add(endPt)
-        }
-
+        val waypoints = buildEdgeWaypoints(startPt, endPt, routed)
         val actors = edgeToActors.getOrPut(prerequisite to tech.name) { ArrayList() }
         for (i in 0 until waypoints.size - 1) {
             val a = waypoints[i]

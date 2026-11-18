@@ -1,0 +1,71 @@
+{
+  "$id": "https://raw.githubusercontent.com/yairm210/Unciv/refs/heads/master/docs/Modders/schemas/Civics.schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Civics",
+  "description": "A list of Civic Categories and their selectable Civics.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string",
+        "title": "Category Name",
+        "description": "Name of the civic category",
+        "examples": ["Government", "Legal", "Labor", "Economy", "Religion"]
+      },
+      "defaultCivic": {
+        "type": "string",
+        "title": "Default Civic",
+        "description": "Name of the starting civic in this category",
+        "examples": ["Despotism", "Barbarism", "Tribalism", "Decentralization", "Paganism"]
+      },
+      "civics": {
+        "type": "array",
+        "title": "Civics",
+        "description": "Civics belonging to this category",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Civic Name",
+              "description": "Name of the civic",
+              "examples": ["Hereditary Rule", "Bureaucracy", "Slavery", "Free Market", "Free Religion"]
+            },
+            "upkeep": {
+              "type": "string",
+              "title": "Civic Upkeep",
+              "description": "Upkeep tier of the civic",
+              "enum": ["None", "Low", "Medium", "High"],
+              "default": "Low"
+            },
+            "requiredTech": {
+              "type": "string",
+              "title": "Required Tech",
+              "description": "Technology required to adopt this civic"
+            },
+            "priorities": {
+              "$ref": "refs/Priorities.schema.json"
+            },
+            "uniques": {
+              "$ref": "refs/Uniques.schema.json"
+            },
+            "civilopediaText": {
+              "$ref": "refs/CivilopediaText.schema.json"
+            }
+          },
+          "required": ["name"],
+          "additionalProperties": false
+        }
+      },
+      "uniques": {
+        "$ref": "refs/Uniques.schema.json"
+      },
+      "civilopediaText": {
+        "$ref": "refs/CivilopediaText.schema.json"
+      }
+    },
+    "required": ["name", "civics"],
+    "additionalProperties": false
+  }
+}

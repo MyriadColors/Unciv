@@ -2,13 +2,13 @@
 
 ![image](https://raw.githubusercontent.com/yairm210/Unciv/master/extraImages/GithubPreviewImage.jpg)
 
-[Unciv](https://github.com/yairm210/Unciv) is an open source, mod-friendly Android and Desktop remake of Civ V, made with LibGDX. Build your civilization, research technologies, expand your cities and defeat your foes!
+[Unciv](https://github.com/yairm210/Unciv) is an open-source Android and Desktop 4X strategy game made with LibGDX, featuring an 8-direction square grid and Civilization IV mechanics (`BasicSquare` ruleset). Build your civilization, research technologies, adopt civics, spread your state religion, expand your cities, and defeat your foes!
 
 ## How do I play?
 
-Unmodded gameplay is equal to Civ V, so any Civ V guide will suffice
+Gameplay follows Civilization IV mechanics on a square grid (21-tile city Fat Cross, unit stacking & collateral siege combat, 5-category Civics, City Health, State Religions, and Cottage growth).
 
-The game contains a tutorial to get you started
+The game contains in-game tutorials and a Civilopedia to get you started.
 
 ## How can I contribute?
 

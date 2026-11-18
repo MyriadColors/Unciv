@@ -112,6 +112,9 @@ object UnitAutomation {
         // if a embarked melee unit can land and attack next turn, do not attack from water.
         if (BattleHelper.tryDisembarkUnitToAttackPosition(unitView)) return
 
+        // Siege units adjacent to an enemy city with active defenses should bombard first
+        if (tryBombardCityDefenses(unitView)) return
+
         // if there is an attackable unit in the vicinity, attack!
         if (tryAttacking(unitView, cache)) return
 
@@ -143,8 +146,8 @@ object UnitAutomation {
             wander(unitView, stayInTerritory = true)
     }
 
-    /** Number of tiles within [radius] of a tile on an unbounded hex map, including the tile itself */
-    @Readonly private fun tilesInHexRadius(radius: Int) = 1 + 3 * radius * (radius + 1)
+    /** Number of tiles within [radius] of a tile on an unbounded square map, including the tile itself */
+    @Readonly private fun tilesInSquareRadius(radius: Int) = com.unciv.logic.map.GridMath.getNumberOfTilesInSquareRadius(radius)
 
     @Readonly
     private fun isGoodTileToExplore(unitView: MapUnitView, cache: AutomationCache, tile: TileView, unitVisibilityRange: Int): Boolean {
@@ -155,7 +158,7 @@ object UnitAutomation {
                 && unitView.getDamageFromTerrain(tile) <= 0    // Don't take unnecessary damage
                 // Some tile in range is unexplored. Since we can't know what tiles exist that we don't know about, this is a guess.
                 //   On map edges this will be wrong... Units may "hug edges". In practice this is not a big deal. 
-                && tile.getExploredTilesInDistance(unitVisibilityRange).count() < tilesInHexRadius(unitVisibilityRange)
+                && tile.getExploredTilesInDistance(unitVisibilityRange).count() < tilesInSquareRadius(unitVisibilityRange)
                 && ThreatManager.getDistanceToClosestEnemyUnit(civ, cache, tile, 3) > 3 // don't walk in range of enemy units
                 && unitView.canMoveTo(tile) // expensive, evaluate last
                 && unitView.canReach(tile) // expensive, evaluate last
@@ -204,7 +207,7 @@ object UnitAutomation {
         // Calculations below are quite expensive especially in the late game.
         val unitTile = unitView.getTile()
         val tilesInRange = unitTile.getExploredTilesInDistance(5).toList()
-        if (tilesInRange.size == tilesInHexRadius(5) && tilesInRange.all { it.isVisible() }) return false
+        if (tilesInRange.size == tilesInSquareRadius(5) && tilesInRange.all { it.isVisible() }) return false
 
         val rng = unitView.stateBasedRandom("UnitAutomation.tryFogBust")
         val reachableTilesThisTurn =
@@ -270,6 +273,35 @@ object UnitAutomation {
         return unitView.tryUpgradeTo(upgrade.upgradedUnit)
     }
 
+
+    /** @return true only if the unit has 0 movement left */
+    internal fun tryBombardCityDefenses(unitView: MapUnitView): Boolean {
+        if (!unitView.hasUnique(UniqueType.CanBombardCityDefenses)) return false
+        if (unitView.isEmbarked() || !unitView.hasMovement()) return false
+        val hasEnemyCityToBombard = unitView.getTile().getNeighbors().any { tile ->
+            val city = tile.getCity()
+            city != null && city.owningCiv().isAtWarWith(unitView.civ())
+                && city.getCityDefenseBonus() > 0
+                && tile.militaryUnits.isNotEmpty()
+        }
+        if (!hasEnemyCityToBombard) return false
+        if (unitView.tryInvokeUnitAction(com.unciv.models.UnitActionType.Bombard)) {
+            return !unitView.hasMovement()
+        }
+        return false
+    }
+
+    internal fun trySiegeBombardOrAttackCity(unit: com.unciv.logic.map.mapunit.MapUnit, city: City) {
+        if (unit.hasUnique(UniqueType.MustSetUp) && !unit.isSetUpForSiege()) return
+        val unitView = GameView(unit.civ.gameInfo, unit.civ).getMapUnitView(unit)
+        if (tryBombardCityDefenses(unitView)) return
+        val attackableTile = TargetHelper.getAttackableEnemies(
+            unit,
+            unit.movement.getDistanceToTiles(),
+            listOf(city.getCenterTile())
+        ).firstOrNull() ?: return
+        Battle.moveAndAttack(MapUnitCombatant(unit), attackableTile)
+    }
 
     /** @return true only if the unit has 0 movement left */
     private fun tryAttacking(unitView: MapUnitView, cache: AutomationCache): Boolean {
@@ -552,7 +584,7 @@ object UnitAutomation {
                 it.isCivilian() &&
                         (it.hasUnique(UniqueType.FoundCity) || it.getMatchingUniques(UniqueType.GreatPerson).any())
                         && !it.hasUnique(UniqueType.StrengthBonusInRadius) // Exlude great generals, as they move independently after all military units
-                        && (tile == unitView.getTile() || tile.militaryUnits.isEmpty() && unitView.canMoveTo(tile))
+                        && (tile == unitView.getTile() || tile.militaryUnits.none { u -> u.civ() == unitView.civ() } && unitView.canMoveTo(tile))
                         && distanceToTiles.containsKey(tile)
             } ?: return false
         unitView.tryHeadTowards(settlerOrGreatPersonToAccompany.getTile())
@@ -636,27 +668,43 @@ object UnitAutomation {
 
     private fun tryGarrisoningLandUnit(unitView: MapUnitView): Boolean {
         if (unitView.getBaseUnit().isWaterUnit) return false // Water units don't count for Garrison bonus
-        val citiesWithoutGarrison = unitView.civ().cities().filter {
+        val allowStacking = unitView.getTile().getRuleset().modOptions.hasUnique(UniqueType.AllowUnitStacking)
+        val isAtWar = unitView.civ().isAtWar()
+        val totalCities = unitView.civ().cities().size.coerceAtLeast(1)
+        val totalMilitary = unitView.civ().getUnits().count { it.getBaseUnit().isMilitary }
+        val maxGarrisonPerCity = if (!allowStacking) 1 else when {
+            totalMilitary >= totalCities * 3 -> 3
+            totalMilitary >= totalCities * 2 -> 2
+            else -> 1
+        }
+
+        val citiesWithoutFullGarrison = unitView.civ().cities().filter {
             val centerTile = it.getCenterTile()
-            centerTile.militaryUnits.isEmpty()
+            val desiredCount = if (allowStacking && (it.isCapital() || (isAtWar && isCityThatNeedsDefendingInWartime(it))))
+                maxGarrisonPerCity
+            else 1
+            centerTile.militaryUnits.size < desiredCount
                     && unitView.canMoveTo(centerTile)
         }
 
         val unitTile = unitView.getTile()
-        val citiesToTry = if (!unitView.civ().isAtWar()) {
+        val citiesToTry = if (!isAtWar) {
             if (unitTile.isCityCenter()) return true // It's always good to have a unit in the city center, so if you haven't found anyone around to attack, forget it.
-            citiesWithoutGarrison.asSequence()
+            citiesWithoutFullGarrison.asSequence()
         } else {
             if (unitTile.isCityCenter() &&
                     isCityThatNeedsDefendingInWartime(unitTile.getCity()!!)) return true
-            val citiesWithoutGarrisonThatNeedDefending = citiesWithoutGarrison.asSequence()
+            val citiesWithoutGarrisonThatNeedDefending = citiesWithoutFullGarrison.asSequence()
                     .filter { isCityThatNeedsDefendingInWartime(it) }
             if (citiesWithoutGarrisonThatNeedDefending.any()) citiesWithoutGarrisonThatNeedDefending
-            else citiesWithoutGarrison.asSequence()
+            else citiesWithoutFullGarrison.asSequence()
         }
 
         val closestReachableCityNeedsDefending = citiesToTry
-            .sortedBy { it.getCenterTile().aerialDistanceTo(unitTile) }
+            .sortedWith(
+                compareBy<CityView> { it.getCenterTile().militaryUnits.size }
+                    .thenBy { it.getCenterTile().aerialDistanceTo(unitTile) }
+            )
             .firstOrNull { unitView.canReach(it.getCenterTile()) }
             ?: return false
         unitView.tryHeadTowards(closestReachableCityNeedsDefending.getCenterTile())

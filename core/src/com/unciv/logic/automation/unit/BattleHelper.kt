@@ -14,14 +14,13 @@ object BattleHelper {
         if (unitView.hasUnique(UniqueType.CannotAttack)) return false
         val distanceToTiles = unitView.getDistanceToTiles()
         val attackableEnemies = unitView.getAttackableEnemies(stayOnTile = stayOnTile)
-            // Only take enemies we can fight without dying or are made to die
+            // Only take enemies we can fight without dying or are made to die (or valid collateral siege sacrifice)
             .filter {
-                val defender = it.getTileToAttack().getCombatant()
+                val defender = it.getCombatant() ?: it.getTileToAttack().getCombatant()
                 unitView.hasUnique(UniqueType.SelfDestructs) || (defender != null &&
+                unitView.getDamageFromTerrain(it.getTileToAttackFrom()) <= 0 &&
                 (unitView.asCombatant().calculateDamageToAttacker(defender) < unitView.unitHealth
-                    && unitView.getDamageFromTerrain(it.getTileToAttackFrom()) <= 0))
-                    // For mounted units it is fine to attack from these tiles, but with current AI movement logic it is not easy to determine if our unit can meaningfully move away after attacking
-                    // Also, AI doesn't build tactical roads
+                    || canMakeSacrificialCollateralAttack(unitView, it, defender)))
             }
 
         val enemyTileToAttack = chooseAttackTarget(unitView, attackableEnemies)
@@ -47,7 +46,8 @@ object BattleHelper {
         val attackableEnemiesNextTurn = unitView.getAttackableEnemies()
                 // Only take enemies we can fight without dying
                 .filter {
-                    unitView.asCombatant().calculateDamageToAttacker(it.getTileToAttack().getCombatant()!!) < unitView.unitHealth
+                    val defender = it.getCombatant() ?: it.getTileToAttack().getCombatant()
+                    defender != null && unitView.asCombatant().calculateDamageToAttacker(defender) < unitView.unitHealth
                 }
                 .filter { it.getTileToAttackFrom().isLand }
 
@@ -72,7 +72,7 @@ object BattleHelper {
         for (attackableEnemy in attackableEnemies) {
             val tileToAttack = attackableEnemy.getTileToAttack()
             val tempAttackValue = if (tileToAttack.isCityCenter())
-                getCityAttackValue(unit, tileToAttack.getCity()!!)
+                getCityAttackValue(unit, tileToAttack.getCity()!!, attackableEnemy)
             else getUnitAttackValue(unit, attackableEnemy)
             if (tempAttackValue > highestAttackValue) {
                 highestAttackValue = tempAttackValue
@@ -84,17 +84,67 @@ object BattleHelper {
         return if (highestAttackValue > 30) attackTile else null
     }
 
+    @Readonly
+    private fun canMakeSacrificialCollateralAttack(
+        unitView: MapUnitView,
+        attackableTile: AttackableTileView,
+        defender: com.unciv.view.CombatantView
+    ): Boolean {
+        if (!unitView.hasUnique(UniqueType.CollateralDamage)) return false
+        val tileToAttack = attackableTile.getTileToAttack()
+        if (tileToAttack.militaryUnits.size < 3) return false
+        if (unitView.asCombatant().calculateDamageToDefender(defender) <= 0) return false
+        val civ = unitView.civ()
+        val friendlyAttackersNearby = tileToAttack.getExploredTilesInDistance(2)
+            .sumOf { tile -> tile.militaryUnits.count { u -> u.civ() == civ && u != unitView } }
+        return friendlyAttackersNearby >= 2
+    }
+
+    @Readonly
+    private fun getCollateralDamageBonus(attacker: MapUnitView, tileToAttack: com.unciv.view.TileView): Int {
+        val collateralUnique = attacker.getMatchingUniques(UniqueType.CollateralDamage).firstOrNull() ?: return 0
+        val extraDefenders = (tileToAttack.militaryUnits.size - 1).coerceAtLeast(0)
+        if (extraDefenders == 0) return 0
+        val maxTargets = collateralUnique.params[1].toIntOrNull() ?: 0
+        val hitTargets = extraDefenders.coerceAtMost(maxTargets)
+        return hitTargets * 25
+    }
+
+    @Readonly
+    private fun getCiv4CityAttackValue(
+        attacker: MapUnitView,
+        city: ForeignCityView,
+        attackableEnemy: AttackableTileView,
+        canCaptureCity: Boolean
+    ): Int {
+        val centerTile = city.getCenterTile()
+        if (centerTile.militaryUnits.isEmpty()) {
+            return if (canCaptureCity) 10000 else 0
+        }
+        val defender = attackableEnemy.getCombatant() ?: centerTile.getCombatant() ?: city.asCombatant()
+        val expectedDamage = attacker.asCombatant().calculateDamageToDefender(defender)
+        if (expectedDamage <= 0 && !attacker.hasUnique(UniqueType.CollateralDamage)) return 0
+        var attackValue = 140 - defender.getHealth() + expectedDamage + getCollateralDamageBonus(attacker, centerTile)
+        if (attacker.getBaseUnit().isProbablySiegeUnit()) attackValue += 100
+        return attackValue
+    }
+
     /**
      * Returns a value which represents the attacker's motivation to attack a city.
      * Siege units will almost always attack cities.
      * Base value is 100(Mele) 110(Ranged) standard deviation is around 80 to 130
      */
     @Readonly
-    private fun getCityAttackValue(attacker: MapUnitView, city: ForeignCityView): Int {
+    private fun getCityAttackValue(attacker: MapUnitView, city: ForeignCityView, attackableEnemy: AttackableTileView): Int {
+        val centerTile = city.getCenterTile()
+        val canCaptureCity = attacker.getBaseUnit().isMelee() && !attacker.hasUnique(UniqueType.CannotCaptureCities)
+        if (centerTile.getRuleset().modOptions.hasUnique(UniqueType.Civ4StackCombat)) {
+            return getCiv4CityAttackValue(attacker, city, attackableEnemy, canCaptureCity)
+        }
+
         val attackerUnit = attacker.asCombatant()
         val cityUnit = city.asCombatant()
         
-        val canCaptureCity = attacker.getBaseUnit().isMelee() && !attacker.hasUnique(UniqueType.CannotCaptureCities)
         if (city.getHealth() == 1)
             return if (canCaptureCity) 10000 // Capture the city immediately!
             else 0 // No reason to attack, we won't make any difference
@@ -108,10 +158,10 @@ object BattleHelper {
             if (attacker.unitHealth - battleDamage * 2 <= 0 && !attacker.hasUnique(UniqueType.SelfDestructs)) {
                 // The more fiendly units around the city, the more willing we should be to just attack the city
                 val friendlyUnitsAroundCity = city.getCenterTile().getExploredTilesInDistance(3)
-                    .count { it.militaryUnits.any { u -> u.civ() == attacker.civ() } }
+                    .sumOf { it.militaryUnits.count { u -> u.civ() == attacker.civ() } }
                 // If we have more than 4 other units around the city, go for it
                 if (friendlyUnitsAroundCity < 5) {
-                    val attackerHealthModifier = 1.0 + 1.0 / friendlyUnitsAroundCity
+                    val attackerHealthModifier = 1.0 + 1.0 / friendlyUnitsAroundCity.coerceAtLeast(1)
                     if (attacker.unitHealth - battleDamage * attackerHealthModifier <= 0)
                         return 0 // We'll probably die next turn if we attack the city
                 }
@@ -129,11 +179,12 @@ object BattleHelper {
         // Add value based on number of units around the city
         val defendingCityCiv = city.owningCiv()
         for (tile in city.getCenterTile().getExploredTilesInDistance(2)) {
-            val militaryUnit = tile.firstMilitaryUnit() ?: continue
-            if (militaryUnit.civ().isAtWarWith(attacker.civ()))
-                attackValue -= 5
-            if (militaryUnit.civ().isAtWarWith(defendingCityCiv))
-                attackValue += 15
+            for (militaryUnit in tile.militaryUnits) {
+                if (militaryUnit.civ().isAtWarWith(attacker.civ()))
+                    attackValue -= 5
+                if (militaryUnit.civ().isAtWarWith(defendingCityCiv))
+                    attackValue += 15
+            }
         }
 
         return attackValue
@@ -149,11 +200,15 @@ object BattleHelper {
         var attackValue = Int.MIN_VALUE
         // Prioritize attacking military
         val tileToAttack = attackTile.getTileToAttack()
+        val defenderCombatant = attackTile.getCombatant() ?: tileToAttack.getCombatant()
         val militaryUnit = tileToAttack.firstMilitaryUnit()
         val civilianUnit = tileToAttack.civilianUnit
-        if (militaryUnit != null) {
-            attackValue = 200 - militaryUnit.unitHealth + // continuously prioritise lower-health units
-                attacker.asCombatant().calculateDamageToDefender(militaryUnit.asCombatant())
+        if (militaryUnit != null && defenderCombatant != null) {
+            val expectedDamage = attacker.asCombatant().calculateDamageToDefender(defenderCombatant)
+            val collateralBonus = getCollateralDamageBonus(attacker, tileToAttack)
+            if (expectedDamage <= 0 && collateralBonus == 0) return 0
+            attackValue = 200 - defenderCombatant.getHealth() + // continuously prioritise lower-health units
+                expectedDamage + collateralBonus
         } else if (civilianUnit != null) {
             attackValue = 50
             // Only melee units should really attack/capture civilian units, ranged units may be able to capture by moving

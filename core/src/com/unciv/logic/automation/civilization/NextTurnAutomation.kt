@@ -62,7 +62,7 @@ object NextTurnAutomation {
                 DiplomacyAutomation.askForHelp(civView)
                 DiplomacyAutomation.offerDeclarationOfFriendship(civView)
             }
-            if (civView.isReligionEnabled()) {
+            if (civView.isReligionEnabled() && !civView.isCiv4ReligionEnabled()) {
                 ReligionAutomation.spendFaithOnReligion(civInfo)
             }
 
@@ -76,6 +76,9 @@ object NextTurnAutomation {
             
             issueRequests(civView)
             adoptPolicy(civView)  // todo can take a second - why?
+            if (civView.ruleset.modOptions.hasUnique(UniqueType.CivicsMode)) {
+                civInfo.civics.automateCivics()
+            }
             freeUpSpaceResources(civView)
         } else if (civView.isCityState) {
             civInfo.cityStateFunctions.getFreeTechForCityState()
@@ -93,7 +96,7 @@ object NextTurnAutomation {
         automateUnits(civView, cache)  // this is the most expensive part
 
         if (tradeAndChangeState && civInfo.isMajorCiv) {
-            if (civView.isReligionEnabled()) {
+            if (civView.isReligionEnabled() && !civView.isCiv4ReligionEnabled()) {
                 // Can only be done now, as the prophet first has to decide to found/enhance a religion
                 ReligionAutomation.chooseReligiousBeliefs(civInfo)
             }
@@ -104,7 +107,10 @@ object NextTurnAutomation {
         }
 
         automateCities(civView)  // second most expensive
-        if (tradeAndChangeState) trainSettler(civView)
+        if (tradeAndChangeState) {
+            civInfo.civics.automateSlaveryWhip()
+            trainSettler(civView)
+        }
         // I'm not sure what will happen if we *don't* vote when we can, so automate vote even when forced automation
         tryVoteForDiplomaticVictory(civView)
     }
@@ -514,13 +520,9 @@ object NextTurnAutomation {
         for (unit in ourUnitsInRange(7).filter { it.baseUnit.isAirUnit() })
             UnitAutomation.automateUnitMoves(GameView(civInfo.gameInfo, civInfo).getMapUnitView(unit), cache)
         
-        // First off, any siege unit that can attack the city, should - as long as it's not defeated
-        if (city.health != 1) {
-            val seigeUnits = ourUnitsInRange(4).filter { it.baseUnit.isProbablySiegeUnit() }
-            for (unit in seigeUnits) {
-                if (!unit.hasUnique(UniqueType.MustSetUp) || unit.isSetUpForSiege())
-                    attackIfPossible(unit, city.getCenterTile())
-            }
+        // First off, any siege unit that can bombard or attack the city, should - as long as it's not defeated
+        for (unit in ourUnitsInRange(4).filter { it.baseUnit.isProbablySiegeUnit() }) {
+            UnitAutomation.trySiegeBombardOrAttackCity(unit, city)
         }
         
         // Melee units should focus on getting rid of enemy units that threaten the siege units
@@ -537,7 +539,7 @@ object NextTurnAutomation {
             if (attackableEnemies.isEmpty()) continue
             val mostSurroundedEnemy = attackableEnemies.maxBy {
                 var count = 0
-                it.tileToAttack.forEachTileAtDistance(1) { tile -> if (tile.militaryUnits.any { u -> u.civ == unit.civ }) count++ }
+                it.tileToAttack.forEachTileAtDistance(1) { tile -> count += tile.militaryUnits.count { u -> u.civ == unit.civ } }
                 count
             } // aims to maximize flanking bonus and number of hits in order to get kills
 
@@ -588,6 +590,7 @@ object NextTurnAutomation {
         val distance = if (!isAtWar) 0 else ThreatManager.getDistanceToClosestEnemyUnit(unit.civ(), cache, unit.getTile(), 6)
         // Lower health units should move earlier to swap with higher health units
         return distance + (unit.unitHealth / 10) - mapUnit.promotions.numberOfPromotions + when {
+            unit.hasUnique(UniqueType.CanBombardCityDefenses) || unit.hasUnique(UniqueType.CollateralDamage) -> 5
             unit.getBaseUnit().isRanged() -> 10
             unit.getBaseUnit().isMelee() -> 30
             mapUnit.isGreatPersonOfType("War") -> 100 // Generals move after military units

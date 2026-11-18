@@ -42,6 +42,8 @@ open class ForeignCityView(protected open val city: City,
     // Data retrieval
     @Readonly fun getHealth(): Int = city.health
     @Readonly fun getMaxHealth(): Int = city.getMaxHealth()
+    @Readonly fun getCityDefenseBonus(): Int = city.getCityDefenseBonus()
+    @Readonly fun getMaxCityDefenseBonus(): Int = city.getMaxCityDefenseBonus()
     @Readonly fun getDefendingStrength(): Int = CityCombatant(city).getDefendingStrength()
     @Readonly fun getAttackingStrength(): Int = CityCombatant(city).getAttackingStrength()
     @Readonly fun getBombardableTiles(): List<TileView> =
@@ -83,6 +85,8 @@ open class ForeignCityView(protected open val city: City,
     @Readonly fun getReligionThisIsTheHolyCityOf(): String? = city.religion.religionThisIsTheHolyCityOf
     @Readonly fun isBlockedHolyCity(): Boolean = city.religion.isBlockedHolyCity
     @Readonly fun isHolyCity(): Boolean = city.isHolyCity()
+    @Readonly fun getPresentReligions(): Set<String> = city.presentReligions
+    @Readonly fun getHolyCityReligions(): Set<String> = city.holyCityOfReligions
     /** `true` if a unit with [UniqueType.PreventSpreadingReligion] of a religion other than [fromReligion] (any, if `null`) stands next to this city, see [com.unciv.logic.city.managers.CityReligionManager.isProtectedByInquisitor] */
     @Readonly fun isProtectedByInquisitor(fromReligion: String? = null): Boolean = city.religion.isProtectedByInquisitor(fromReligion)
     /** Pressure of the majority religion minus pressure of [otherReligion] */

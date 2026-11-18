@@ -1,5 +1,8 @@
 # Multiplayer
 
+> [!WARNING]
+> **Current Status**: Online multiplayer is currently disabled (`PlatformSpecific.supportsOnlineMultiplayer = false`). The documentation below is retained for historical reference and local/future server architecture.
+
 Multiplayer in Unciv is based on simple save file up/download, which is why it is based on a free Dropbox account by default. However, a lot of people use this default, so it is uncertain if you'll actually be able to access it consistently. See [Hosting a Multiplayer server](#hosting-a-multiplayer-server) for hosting your own server.
 
 ## How to play

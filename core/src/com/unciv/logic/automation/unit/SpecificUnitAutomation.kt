@@ -56,8 +56,8 @@ object SpecificUnitAutomation {
 
         val militaryUnitTile = militaryUnitTilesInDistance.maxByOrNull { unitTile ->
             val nearbyTiles = unitTile.getExploredTilesInDistance(2).toList()
-            (2 * nearbyTiles.count { it.militaryUnits.any { u -> u.civ() == civ } }
-                - nearbyTiles.count { it.militaryUnits.any { u -> u.civ() != civ } }
+            (2 * nearbyTiles.sumOf { it.militaryUnits.count { u -> u.civ() == civ } }
+                - nearbyTiles.sumOf { it.militaryUnits.count { u -> u.civ() != civ } }
                 - if (closestReachableEnemyCityTile != null) 3 * unitTile.aerialDistanceTo(closestReachableEnemyCityTile) else 0)
             // Scoring here is found to help AI defeat former AI,
             // a more robust scoring may be necessary to avoid leaving generals en-prise,
@@ -229,69 +229,84 @@ object SpecificUnitAutomation {
     /** @return whether there was any progress in placing the improvement. A return value of `false`
      * can be interpreted as: the unit doesn't know where to place the improvement or is stuck. */
     fun automateImprovementPlacer(unit: MapUnitView) : Boolean {
-        val improvementBuildingUnique = unit.getMatchingUniques(UniqueType.ConstructImprovementInstantly).firstOrNull()
-            ?: return false
+        val improvementBuildingUniques = unit.getMatchingUniques(UniqueType.ConstructImprovementInstantly).toList()
+        if (improvementBuildingUniques.isEmpty()) return false
 
         val civ = unit.civ()
         val ruleset = unit.getTile().getRuleset()
-        val improvementName = improvementBuildingUnique.params[0]
-        val improvement = ruleset.tileImprovements[improvementName]
-            ?: return false
-        val relatedStat = improvement.maxByOrNull { it.value }?.key ?: Stat.Culture
-
-        val citiesByStatBoost = civ.cities().sortedByDescending {
-            it.getStatPercentBonusTree().totalStats[relatedStat]
-        }
 
         val averageTerrainStatsValue = ruleset.terrains.values.asSequence()
             .filter { it.type == TerrainType.Land }
             .map { Automation.rankStatsValue(it, civ) }
             .average()
 
-        for (city in citiesByStatBoost) {
-            val applicableTiles = city.getWorkableTiles().filter {
-                it.isLand && (it.getViewableResource(civ)?.isImprovedBy(improvementName) != false) && !it.isCityCenter()
-                    && (unit.getTile() == it || unit.canMoveTo(it))
-                    // okay if we replace regular improvements by great improvements, but not the other way around
-                    && (it.improvement == null || ruleset.tileImprovements[it.improvement!!]?.hasUnique(UniqueType.GreatImprovement) != true)
-                    && it.canBuildImprovement(improvement, unit)
-                    && (!improvement.hasUnique(UniqueType.GreatImprovement) || Automation.rankStatsValue(it.getBaseTerrain().cloneStats(), civ) > averageTerrainStatsValue)
-            }
+        for (improvementBuildingUnique in improvementBuildingUniques) {
+            val improvementName = improvementBuildingUnique.params[0]
+            val improvement = ruleset.tileImprovements[improvementName] ?: continue
+            val isShrineImprovement = improvementName.contains("Shrine") ||
+                improvement.uniqueObjects.any { it.text.contains("Shrine") }
+            val relatedStat = improvement.maxByOrNull { it.value }?.key ?: Stat.Culture
 
-            if (applicableTiles.none()) continue
-
-            val pathToCity = unit.getShortestPath(city.getCenterTile())
-
-            if (pathToCity.isEmpty()) continue
-            if (pathToCity.size > 2 && unit.getTile().getCity() != city) {
-                // Radius 5 is quite arbitrary. Few units have such a high movement radius although
-                // streets might modify it. Also there might be invisible units, so this is just an
-                // approximation for relative safety and simplicity.
-                val enemyUnitsNearby = unit.getTile().getExploredTilesInDistance(5).any { tileNearby ->
-                    tileNearby.getVisibleUnits().any { unitOnTileNearby ->
-                        unitOnTileNearby.isMilitary() && unitOnTileNearby.civ().isAtWarWith(civ)
-                    }
+            val citiesByStatBoost = civ.cities().sortedWith(
+                compareByDescending< com.unciv.view.CityView> {
+                    if (isShrineImprovement && it.isHolyCity()) 1 else 0
+                }.thenByDescending {
+                    if (isShrineImprovement && it.isCapital()) 1 else 0
+                }.thenByDescending {
+                    it.getStatPercentBonusTree().totalStats[relatedStat]
                 }
-                // Don't move until you're accompanied by a military unit if there are enemies nearby.
-                if (unit.getTile().militaryUnits.isEmpty() && enemyUnitsNearby) return true
-                unit.tryHeadTowards(city.getCenterTile())
-                return true
-            }
+            )
 
-            // if we got here, we're pretty close, start looking!
-            val chosenTile = applicableTiles.sortedByDescending { Automation.rankTile(it, civ) }
-                .firstOrNull { unit.canReach(it) }
-                ?: continue // to another city
+            for (city in citiesByStatBoost) {
+                val baseCandidates = city.getWorkableTiles().filter {
+                    it.isLand && (it.getViewableResource(civ)?.isImprovedBy(improvementName) != false) && !it.isCityCenter()
+                        && (unit.getTile() == it || unit.canMoveTo(it))
+                        // okay if we replace regular improvements by great improvements, but not the other way around
+                        && (it.improvement == null || ruleset.tileImprovements[it.improvement!!]?.hasUnique(UniqueType.GreatImprovement) != true)
+                        && it.canBuildImprovement(improvement, unit)
+                }.toList()
 
-            val unitTileBeforeMovement = unit.getTile()
-            unit.tryHeadTowards(chosenTile)
-            if (unit.getTile() == chosenTile) {
-                if (chosenTile.improvementIsPillaged || chosenTile.roadIsPillaged)
-                    unit.tryInvokeUnitAction(UnitActionType.Repair)
-                else unit.tryInvokeUnitAction(UnitActionType.CreateImprovement)
-                return true
+                if (baseCandidates.isEmpty()) continue
+
+                val preferredTiles = baseCandidates.filter {
+                    !improvement.hasUnique(UniqueType.GreatImprovement) ||
+                        Automation.rankStatsValue(it.getBaseTerrain().cloneStats(), civ) > averageTerrainStatsValue
+                }
+                val applicableTiles = if (preferredTiles.isNotEmpty()) preferredTiles else baseCandidates
+
+                val pathToCity = unit.getShortestPath(city.getCenterTile())
+
+                if (pathToCity.isEmpty()) continue
+                if (pathToCity.size > 2 && unit.getTile().getCity() != city) {
+                    // Radius 5 is quite arbitrary. Few units have such a high movement radius although
+                    // streets might modify it. Also there might be invisible units, so this is just an
+                    // approximation for relative safety and simplicity.
+                    val enemyUnitsNearby = unit.getTile().getExploredTilesInDistance(5).any { tileNearby ->
+                        tileNearby.getVisibleUnits().any { unitOnTileNearby ->
+                            unitOnTileNearby.isMilitary() && unitOnTileNearby.civ().isAtWarWith(civ)
+                        }
+                    }
+                    // Don't move until you're accompanied by a military unit if there are enemies nearby.
+                    if (unit.getTile().militaryUnits.isEmpty() && enemyUnitsNearby) return true
+                    unit.tryHeadTowards(city.getCenterTile())
+                    return true
+                }
+
+                // if we got here, we're pretty close, start looking!
+                val chosenTile = applicableTiles.sortedByDescending { Automation.rankTile(it, civ) }
+                    .firstOrNull { unit.canReach(it) }
+                    ?: continue // to another city
+
+                val unitTileBeforeMovement = unit.getTile()
+                unit.tryHeadTowards(chosenTile)
+                if (unit.getTile() == chosenTile) {
+                    if (chosenTile.improvementIsPillaged || chosenTile.roadIsPillaged)
+                        unit.tryInvokeUnitAction(UnitActionType.Repair)
+                    else unit.tryInvokeUnitAction(UnitActionType.CreateImprovement)
+                    return true
+                }
+                return unitTileBeforeMovement != unit.getTile()
             }
-            return unitTileBeforeMovement != unit.getTile()
         }
         // No city needs this improvement.
         return false

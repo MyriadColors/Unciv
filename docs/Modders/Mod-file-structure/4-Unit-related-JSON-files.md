@@ -2,7 +2,7 @@
 
 ## Units.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Units.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Units.json)
 
 This file should contain a list of all the units, both military and civilian, that you want to use in your mod.
 
@@ -34,7 +34,7 @@ Each unit has the following structure:
 
 ## UnitPromotions.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/UnitPromotions.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/UnitPromotions.json)
 
 This file lists the available unit promotions.
 
@@ -58,11 +58,10 @@ Each promotion has the following structure:
 
 ## UnitTypes.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/UnitTypes.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/UnitTypes.json)
 
 This optional file is used for defining new types of units. The names of these can be used in unitFilters, and these types determine what domain the unit moves in: over land, over water or through the air.
-For base ruleset Mods, if the file is omitted or contains an empty list, [all types from the Vanilla ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/UnitTypes.json) are automatically added:
-Civilian, Melee, Ranged, Scout, Mounted, Armor, Siege, WaterCivilian, WaterMelee, WaterRanged, WaterSubmarine, WaterAircraftCarrier, Fighter, Bomber, AtomicBomber, and Missile.
+For base ruleset Mods, if the file is omitted or contains an empty list, [all types from the BasicSquare ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/UnitTypes.json) are automatically added.
 
 Each unit type has the following structure:
 
@@ -75,7 +74,7 @@ Each unit type has the following structure:
 
 ## UnitNameGroups.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/UnitNameGroups.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/UnitNameGroups.json)
 
 Provides a list of names that can be applied to units. Once a name it taken, it will not be applied again.
 
@@ -84,6 +83,6 @@ Each Unit Name Group has the following structure:
 | Attribute       | Type           | Default  | Notes |
 |-----------------|----------------|----------|-------|
 | name            | String         | Required | A unique name for the unit name group (example: Scientist) |
-| names           | List of String | Required | A list of names that can be applied to the group (example: Alan Turing) |
+| unitNames       | List of String | Required | A list of names that can be applied to the group (example: Alan Turing) |
 | uniques         | List of String | none     | List of [triggerable uniques](../uniques.md#triggerable-uniques) that are applied to the unit on creation |
 | civilopediaText | List           | empty    | See [civilopediaText chapter](5-Miscellaneous-JSON-files.md#civilopedia-text) |

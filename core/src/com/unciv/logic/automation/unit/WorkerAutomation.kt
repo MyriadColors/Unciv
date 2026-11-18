@@ -3,6 +3,7 @@ package com.unciv.logic.automation.unit
 import com.unciv.logic.automation.civilization.AutomationCache
 import com.unciv.view.TileView
 import com.unciv.view.getUnpillagedRoad
+import com.unciv.view.getWorkableTiles
 import com.unciv.view.hasMovement
 import com.unciv.view.shortDisplayName
 import com.unciv.view.ForeignCityView
@@ -152,7 +153,7 @@ class WorkerAutomation(
                 .firstOrNull {
                     it != unitView.getTile().owningCity()
                     && workersPerCity[it] < workersPerCity[unitView.closestCity()]
-                    && it.getTiles().any { tile -> tile.isLand
+                    && it.getWorkableTiles().any { tile -> tile.isLand
                         && tile.getVisibleUnits().none { unit -> unit.hasUnique(UniqueType.BuildImprovements) }
                         && (tile.improvementIsPillaged || tile.roadIsPillaged || tileHasWorkToDo(tile, unitView)) }
                     && unitView.canReach(it.getCenterTile()) } //goto closest undeveloped city
@@ -306,12 +307,35 @@ class WorkerAutomation(
         if (tile.isCityCenter()) return false
         if (tile in roadBetweenCitiesAutomation.tilesOfRoadsMap) return true
         // Don't try to improve tiles we can't benefit from at all
-        val cityWorkRange = tile.getRuleset().modOptions.constants.cityWorkRange
-        if (tile.getViewableResource(civ) == null && civ.cities().none { it.getCenterTile().aerialDistanceTo(tile) <= cityWorkRange })
+        if (tile.getViewableResource(civ) == null && civ.cities().none { it.isTileInWorkRange(tile) })
             return false
         val improvement = tile.improvement?.let { tile.getRuleset().tileImprovements[it] }
         if (improvement?.hasUnique(UniqueType.AutomatedUnitsWillNotReplace) == true && !tile.improvementIsPillaged) return false
         return true
+    }
+
+    @Readonly
+    private fun isPartOfUpgradeChain(improvement: TileImprovement): Boolean {
+        if (improvement.hasUnique(UniqueType.ImprovementUpgradesAfterTurns)) return true
+        return ruleSet.tileImprovements.values.any { other ->
+            other.getMatchingUniques(UniqueType.ImprovementUpgradesAfterTurns, GameContext.IgnoreConditionals)
+                .any { it.params[0] == improvement.name }
+        }
+    }
+
+    @Readonly
+    private fun shouldPreserveUpgradingImprovement(
+        tile: TileView,
+        civ: CivView,
+        currentImprovement: TileImprovement,
+        candidateImprovement: TileImprovement?
+    ): Boolean {
+        if (tile.improvementIsPillaged) return false
+        if (!isPartOfUpgradeChain(currentImprovement)) return false
+        val resource = tile.getViewableResource(civ) ?: return true
+        if (resource.resourceType == ResourceType.Bonus) return true
+        if (resource.isImprovedBy(currentImprovement.name)) return true
+        return candidateImprovement == null || !resource.isImprovedBy(candidateImprovement.name)
     }
 
     /**
@@ -332,7 +356,11 @@ class WorkerAutomation(
             if (hasFalloutEquivalent(tile)) priority += 1
             if (tile.terrainFeatures.isNotEmpty()) {
                 val lastTerrain = tile.getAllTerrains().last()
-                if (lastTerrain.hasUnique(UniqueType.ProductionBonusWhenRemoved)) priority += 0.5f 
+                if (lastTerrain.hasUnique(UniqueType.ProductionBonusWhenRemoved)) {
+                    val cityHealthPenalty = ruleSet.modOptions.hasUnique(UniqueType.CityHealthMode) &&
+                        (tile.owningCity()?.tryGetCityView()?.getHealthBreakdown()?.netHealth ?: 1) <= 0
+                    if (!cityHealthPenalty) priority += 0.5f
+                }
                 else if (lastTerrain.hasUnique(UniqueType.Vegetation)) priority -= 0.3f
             } // Removing our forests is good for tempo, jungles not as much
             if (tile.getAllTerrains().any { it.hasUnique(UniqueType.FreshWater) }) priority += 1
@@ -492,6 +520,14 @@ class WorkerAutomation(
             bestBuildableImprovement == null -> null
 
             tile.improvement != null &&
+                shouldPreserveUpgradingImprovement(
+                    tile,
+                    civ,
+                    ruleSet.tileImprovements[tile.improvement!!]!!,
+                    bestBuildableImprovement
+                ) -> null
+
+            tile.improvement != null &&
                     getImprovementRanking(tile, unitView, ruleSet.tileImprovements[tile.improvement!!]!!, null, ignoreImprovements + potentialTileImprovements.values)
                     > getImprovementRanking(tile, unitView, bestBuildableImprovement, null, ignoreImprovements + potentialTileImprovements.values)
                 -> null // What we have is better, even if it's pillaged we should repair it
@@ -536,9 +572,9 @@ class WorkerAutomation(
             // Check if it is not an unowned neighboring tile that can be in city range
             (!improvement.hasUnique(UniqueType.CanBuildOutsideBorders) ||
                 tile.getNeighbors().none {
-                    val owningCity = it.owningCity()
+                    val owningCity = it.owningCity()?.tryGetCityView()
                     it.getOwner() == civ && owningCity != null &&
-                        tile.aerialDistanceTo(owningCity.getCenterTile()) <= tile.getRuleset().modOptions.constants.cityWorkRange
+                        owningCity.isTileInWorkRange(tile)
                 })
         )
             return 0f
@@ -567,8 +603,7 @@ class WorkerAutomation(
                     stats.add(statDiff)
                     // Take into account that the resource might be improved by the *final* improvement
                     isResourceImprovedByNewImprovement = newTile.getRawResource()?.isImprovedBy(wantedFinalImprovement.name) == true
-                    if (tile.terrainFeatures.isNotEmpty() && tile.getAllTerrains().last().hasUnique(UniqueType.ProductionBonusWhenRemoved))
-                        stats.add(Stat.Production, 0.5f) //We're gaining tempo by chopping the forest, adding an imaginary yield per turn is a way to correct for this
+                    stats.add(getRemovedFeatureChopBonus(tile, civ))
                 }
 
             }
@@ -579,6 +614,7 @@ class WorkerAutomation(
             stats.div(3f)
 
         var value = Automation.rankStatsValue(stats, civ)
+        value += getUpgradeChainBonus(tile, improvement, civ)
         // Calculate the bonus from gaining the resources, this isn't included in the stats above
         val resource = tile.getRawResource()
         val currentImprovement = tile.improvement?.let { ruleSet.tileImprovements[it] }
@@ -611,6 +647,79 @@ class WorkerAutomation(
             value /= 2
         }
         return value
+    }
+
+    @Readonly
+    private fun getRemovedFeatureChopBonus(tile: TileView, civ: CivView): Stats {
+        @LocalState val bonus = Stats()
+        if (tile.terrainFeatures.isEmpty() || !tile.getAllTerrains().last().hasUnique(UniqueType.ProductionBonusWhenRemoved)) return bonus
+        val owningCityView = tile.owningCity()?.tryGetCityView()
+        val causesHealthPenalty = ruleSet.modOptions.hasUnique(UniqueType.CityHealthMode)
+            && owningCityView != null
+            && tile.getViewableResource(civ) == null
+            && owningCityView.getHealthBreakdown().netHealth <= 0
+        if (causesHealthPenalty) {
+            bonus.add(Stat.Food, -1f)
+        } else {
+            bonus.add(Stat.Production, 0.5f)
+        }
+        return bonus
+    }
+
+    /**
+     * Amortized future-value bonus for improvements that upgrade over worked turns (e.g. Cottage -> Hamlet -> Village -> Town),
+     * balanced against the owning city's food surplus and [UniqueType.ConvertGoldToScience].
+     */
+    @Readonly
+    private fun getUpgradeChainBonus(tile: TileView, improvement: TileImprovement, civ: CivView): Float {
+        if (!isPartOfUpgradeChain(improvement)) return 0f
+
+        val convertsGoldToScience = ruleSet.modOptions.hasUnique(UniqueType.ConvertGoldToScience)
+        var growthRateBonusPercent = 0f
+        for (unique in civ.getMatchingUniques(UniqueType.ImprovementGrowthRate)) {
+            growthRateBonusPercent += unique.params[1].toFloatOrNull() ?: 0f
+        }
+        val growthMultiplier = ((100f + growthRateBonusPercent) / 100f).coerceAtLeast(1f)
+
+        var currentStage: TileImprovement? = improvement
+        var cumulativeTurns = 0f
+        var amortizedBonus = 0f
+        var depth = 0
+        val visited = HashSet<String>()
+
+        while (currentStage != null && depth < 4 && visited.add(currentStage.name)) {
+            val upgradeUnique = currentStage.getMatchingUniques(
+                UniqueType.ImprovementUpgradesAfterTurns,
+                GameContext.IgnoreConditionals
+            ).firstOrNull() ?: break
+            val nextName = upgradeUnique.params[0]
+            val turnsToUpgrade = (upgradeUnique.params[1].toFloatOrNull() ?: 10f) / growthMultiplier
+            val nextStage = ruleSet.tileImprovements[nextName] ?: break
+
+            cumulativeTurns += turnsToUpgrade
+            val discountFactor = (30f / (30f + cumulativeTurns)).coerceIn(0.25f, 0.9f)
+            val stageGain = (nextStage.gold - improvement.gold).coerceAtLeast(1f) +
+                (nextStage.production - improvement.production).coerceAtLeast(0f) +
+                (nextStage.science - improvement.science).coerceAtLeast(0f)
+            amortizedBonus += stageGain * discountFactor * 0.45f
+
+            currentStage = nextStage
+            depth++
+        }
+
+        if (convertsGoldToScience) {
+            // Compensate for rankStatsValue dividing immediate Gold by 3 when Gold converts to Science
+            amortizedBonus += (improvement.gold.coerceAtLeast(1f)) * 0.55f
+        }
+
+        // Balance against city food surplus: if the city is starving or low on food and the tile provides < 2 food, dampen cottage priority so Farms win
+        val owningCity = tile.owningCity()?.tryGetCityView()
+        val baseFood = tile.getAllTerrains().first().food
+        if (owningCity != null && owningCity.foodForNextTurn() < 2 && baseFood < 2f) {
+            amortizedBonus *= 0.35f
+        }
+
+        return if (tile.getOwner() != civ) amortizedBonus / 3f else amortizedBonus
     }
 
     @Readonly

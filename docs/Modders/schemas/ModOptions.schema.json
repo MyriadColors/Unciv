@@ -10,6 +10,18 @@
       "type": "boolean",
       "description": "Replaces vanilla ruleset if true."
     },
+    "useCiv4LocalHappiness": {
+      "title": "Use Civ IV Local Happiness",
+      "type": "boolean",
+      "default": true,
+      "description": "Uses Civ IV per-city local happiness and angry citizens when true."
+    },
+    "useCiv4CultureBorders": {
+      "title": "Use Civ IV Culture Borders",
+      "type": "boolean",
+      "default": true,
+      "description": "Uses Civ IV whole-ring cultural border expansion and tile culture flipping when true."
+    },
     "uniques": {
       "title": "Uniques",
       "$ref": "refs/Uniques.schema.json",
@@ -277,9 +289,15 @@
         "cityWorkRange": {
           "title": "City Work Range",
           "type": "integer",
-          "default": 3,
+          "default": 2,
           "description": "The tiles in distance that population in cities can work on.",
           "minimum": 0
+        },
+        "cityWorkRangeExcludeCorners": {
+          "title": "City Work Range Exclude Corners",
+          "type": "boolean",
+          "default": true,
+          "description": "Excludes the 4 outer corners at distance >= 2 to form the 21-tile Civ IV Fat Cross."
         },
         "cityExpandRange": {
           "title": "City Expand Range",
@@ -419,6 +437,12 @@
           "default": 37,
           "description": "Max tiles for workboat automation search."
         },
+        "minimumCityLocationTileValue": {
+          "title": "Minimum City Location Tile Value",
+          "type": "number",
+          "default": 53,
+          "description": "Minimum tile score threshold for AI settler city founding."
+        },
         "maxSpyRank": {
           "title": "Max Spy Rank",
           "type": "integer",
@@ -430,6 +454,18 @@
           "type": "number",
           "default": 30,
           "description": "Skill percent bonus per spy rank."
+        },
+        "spyRankStealPercentBonus": {
+          "title": "Spy Rank Steal Percent Bonus",
+          "type": "integer",
+          "default": 25,
+          "description": "Tech steal rate percent bonus per spy rank."
+        },
+        "spyTechStealCostModifier": {
+          "title": "Spy Tech Steal Cost Modifier",
+          "type": "number",
+          "default": 1.25,
+          "description": "Multiplier of most expensive stealable tech cost required to steal a tech."
         },
         "minimumWarDuration": {
           "title": "Minimum War Duration",
@@ -449,11 +485,41 @@
           "default": 15,
           "description": "Number of turns between city-state elections."
         },
+        "maxGoldTradeOffer": {
+          "title": "Max Gold Trade Offer",
+          "type": "integer",
+          "default": 10000,
+          "description": "Maximum lump-sum gold offer in trade negotiations."
+        },
+        "tributeGlobalModifier": {
+          "title": "Tribute Global Modifier",
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum points from global force ranking towards tribute willingness."
+        },
+        "tributeLocalModifier": {
+          "title": "Tribute Local Modifier",
+          "type": "integer",
+          "default": 100,
+          "description": "Maximum points from local military proximity towards tribute willingness."
+        },
+        "scoreFromPopulation": {
+          "title": "Score From Population",
+          "type": "integer",
+          "default": 3,
+          "description": "Score points granted per population point."
+        },
+        "scoreFromWonders": {
+          "title": "Score From Wonders",
+          "type": "integer",
+          "default": 40,
+          "description": "Score points granted per built Wonder."
+        },
         "maxImprovementTechErasForward": {
           "title": "Max Improvement Tech Eras Forward",
           "type": ["integer", "null"],
-          "default": null,
-          "description": "Improvement picker skips improvements whose tech requirement is more advanced than current Era + this value."
+          "default": -1,
+          "description": "Improvement picker skips improvements whose tech requirement is more advanced than current Era + this value (-1 disables)."
         },
         "goldGiftMultiplier": {
           "title": "Gold Gift Multiplier",

@@ -15,6 +15,10 @@ import yairm210.purity.annotations.Readonly
 object ReligiousUnitAutomation {
 
     fun automateMissionary(unitView: MapUnitView) {
+        if (unitView.civ().isCiv4ReligionEnabled()) {
+            automateCiv4Missionary(unitView)
+            return
+        }
         if (unitView.religion != unitView.civ().getReligion()?.name || unitView.religion == null) {
             unitView.tryDisband()
             return
@@ -71,6 +75,58 @@ object ReligiousUnitAutomation {
 
         // The action is only enabled if the unit may spread religion in the city it's standing in
         if (unitView.getTile() in city.getTiles()) {
+            unitView.tryInvokeUnitAction(UnitActionType.SpreadReligion)
+        }
+    }
+
+    private fun automateCiv4Missionary(unitView: MapUnitView) {
+        val civView = unitView.civ()
+        val spreadUnique = unitView.getMatchingUniques(UniqueType.CanSpreadCiv4Religion).firstOrNull() ?: return
+        val religionParam = spreadUnique.params[0]
+        val religionName = if (religionParam == "any") civView.getStateReligion() else religionParam
+        if (religionName == null) {
+            if (civView.hasUnique(UniqueType.NoStateReligion)) unitView.tryDisband()
+            return
+        }
+
+        val domesticTargets = civView.cities().filter {
+            religionName !in it.getPresentReligions()
+                && civView.canSpreadReligionToCity(religionName, it)
+        }
+
+        val targetCity: ForeignCityView? =
+            if (domesticTargets.isNotEmpty()) {
+                domesticTargets.minByOrNull { it.getCenterTile().aerialDistanceTo(unitView.getTile()) }
+            } else {
+                civView.getKnownCivs().asSequence()
+                    .filterNot { it.isAtWarWith(civView) }
+                    .filter { otherCiv ->
+                        val diplo = civView.getDiplomacyManagerWith(otherCiv)
+                        diplo != null && (diplo.hasOpenBorders() || otherCiv.isCityState)
+                    }
+                    .flatMap { it.cities() }
+                    .filter { foreignCity ->
+                        religionName !in foreignCity.getPresentReligions()
+                            && civView.canSpreadReligionToCity(religionName, foreignCity)
+                    }
+                    .minByOrNull { it.getCenterTile().aerialDistanceTo(unitView.getTile()) }
+            }
+
+        if (targetCity == null) return
+
+        val unitTile = unitView.getTile()
+        val centerTile = targetCity.getCenterTile()
+        if (unitTile == centerTile || unitTile in centerTile.getNeighbors()) {
+            if (unitView.tryInvokeUnitAction(UnitActionType.SpreadReligion)) return
+        }
+
+        val destination = (sequenceOf(centerTile) + centerTile.getNeighbors())
+            .filter { unitView.canMoveTo(it) || it == unitTile }
+            .sortedBy { it.aerialDistanceTo(unitTile) }
+            .firstOrNull { unitView.canReach(it) } ?: return
+
+        unitView.tryHeadTowards(destination)
+        if (unitView.getTile() == centerTile || unitView.getTile() in centerTile.getNeighbors()) {
             unitView.tryInvokeUnitAction(UnitActionType.SpreadReligion)
         }
     }

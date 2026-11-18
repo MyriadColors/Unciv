@@ -1,4 +1,4 @@
-# Unciv - Civ V remake for Android & Desktop
+# Unciv - Open-Source 4X Strategy for Android & Desktop
 
 ![](/extraImages/GithubPreviewImage.jpg)
 
@@ -18,7 +18,7 @@
 
 ## What is this?
 
-An open source, moddability-focused Android and Desktop remake of Civ V, made with [LibGDX](https://github.com/libgdx/libgdx).
+An open-source Android and Desktop 4X civilization-building strategy game made with [LibGDX](https://github.com/libgdx/libgdx), featuring an 8-direction square grid and Civilization IV-inspired mechanics (`BasicSquare` ruleset: unit stacking & collateral combat, 5-category Civics with Anarchy, tech-founded State Religions, City Health, local happiness, and auto-upgrading `Cottage -> Hamlet -> Village -> Town` improvements).
 
 ## Is this any good?
 

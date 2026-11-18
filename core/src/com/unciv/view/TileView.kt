@@ -86,6 +86,23 @@ class TileView internal constructor(private val tile: Tile, val tileMapView: Til
         if (viewer == null) return null
         if (!isExplored()) return null
         val gameView = tileMapView.gameView ?: return null
+        val civ4StackCombat = tile.ruleset.modOptions.hasUnique(UniqueType.Civ4StackCombat)
+        if (civ4StackCombat) {
+            var bestVisibleDefender: MapUnit? = null
+            var bestScore = Float.NEGATIVE_INFINITY
+            var bestHealth = -1
+            for (unit in tile.militaryUnits) {
+                if (!isVisible(unit)) continue
+                val score = unit.baseUnit.strength * (unit.health / 100f)
+                if (score > bestScore || (score == bestScore && unit.health > bestHealth)) {
+                    bestScore = score
+                    bestHealth = unit.health
+                    bestVisibleDefender = unit
+                }
+            }
+            if (bestVisibleDefender != null)
+                return toForeignMapUnitView(bestVisibleDefender).asCombatant()
+        }
         if (tile.isCityCenter())
             return gameView.getForeignCityView(tile.getCity()!!).asCombatant()
 

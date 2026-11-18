@@ -11,7 +11,9 @@ The JSON files that make up mods can have many different fields, and as not all 
     -   [Beliefs.json](2-Civilization-related-JSON-files.md#beliefsjson)
     -   [Buildings.json](2-Civilization-related-JSON-files.md#buildingsjson)
     -   [CityStateTypes.json](2-Civilization-related-JSON-files.md#citystatetypesjson)
+    -   [Civics.json](2-Civilization-related-JSON-files.md#civicsjson)
     -   [Nations.json](2-Civilization-related-JSON-files.md#nationsjson)
+    -   [Personalities.json](2-Civilization-related-JSON-files.md#personalitiesjson)
     -   [Policies.json](2-Civilization-related-JSON-files.md#policiesjson)
     -   [Quests.json](2-Civilization-related-JSON-files.md#questsjson)
     -   [Religions.json](2-Civilization-related-JSON-files.md#religionsjson)
@@ -31,6 +33,7 @@ The JSON files that make up mods can have many different fields, and as not all 
 -   [Miscellaneous JSON files](5-Miscellaneous-JSON-files.md)
     - [Difficulties.json](5-Miscellaneous-JSON-files.md#difficultiesjson)
     - [Eras.json](5-Miscellaneous-JSON-files.md#erasjson)
+    - [Events.json](5-Miscellaneous-JSON-files.md#eventsjson)
     - [ModOptions.json](5-Miscellaneous-JSON-files.md#modoptionsjson)
     - [GlobalUniques.json](5-Miscellaneous-JSON-files.md#globaluniquesjson)
     - [Speeds.json](5-Miscellaneous-JSON-files.md#speedsjson)
@@ -96,27 +99,31 @@ Base ruleset mods must be "complete" by themselves, but that does not mean they 
 |---------------------------------------------------------------------------|----------------|--------------------------|
 | [Beliefs](2-Civilization-related-JSON-files.md#beliefsjson)               | yes            | none                     |
 | [Buildings](2-Civilization-related-JSON-files.md#buildingsjson)           | no             | none                     |
-| [CityStateTypes](2-Civilization-related-JSON-files.md#citystatetypesjson) | no             | vanilla                  |
-| [Difficulties](5-Miscellaneous-JSON-files.md#difficultiesjson)            | no             | vanilla                  |
+| [CityStateTypes](2-Civilization-related-JSON-files.md#citystatetypesjson) | yes            | BasicSquare              |
+| [Civics](2-Civilization-related-JSON-files.md#civicsjson)                 | yes            | none                     |
+| [Difficulties](5-Miscellaneous-JSON-files.md#difficultiesjson)            | no             | BasicSquare              |
 | [Eras](5-Miscellaneous-JSON-files.md#erasjson)                            | no             | none                     |
-| [GlobalUniques](5-Miscellaneous-JSON-files.md#globaluniquesjson)          | yes            | vanilla                  |
+| [Events](5-Miscellaneous-JSON-files.md#eventsjson)                        | yes            | none                     |
+| [GlobalUniques](5-Miscellaneous-JSON-files.md#globaluniquesjson)          | yes            | BasicSquare              |
 | [ModOptions](5-Miscellaneous-JSON-files.md#modoptionsjson)                | yes            | generated on download    |
 | [Nations](2-Civilization-related-JSON-files.md#nationsjson)               | no             | none                     |
+| [Personalities](2-Civilization-related-JSON-files.md#personalitiesjson)   | yes            | none                     |
 | [Policies](2-Civilization-related-JSON-files.md#policiesjson)             | yes            | none                     |
 | [Quests](2-Civilization-related-JSON-files.md#questsjson)                 | yes            | none                     |
 | [Religions](2-Civilization-related-JSON-files.md#religionsjson)           | yes            | none                     |
-| [Ruins](3-Map-related-JSON-files.md#ruinsjson)                            | yes            | vanilla                  |
+| [Ruins](3-Map-related-JSON-files.md#ruinsjson)                            | yes            | BasicSquare              |
 | [Specialists](2-Civilization-related-JSON-files.md#specialistsjson)       | yes            | none                     |
-| [Speeds](5-Miscellaneous-JSON-files.md#speedsjson)                        | no             | vanilla                  |
+| [Speeds](5-Miscellaneous-JSON-files.md#speedsjson)                        | no             | BasicSquare              |
 | [Techs](2-Civilization-related-JSON-files.md#techsjson)                   | yes            | none                     |
 | [Terrains](3-Map-related-JSON-files.md#terrainsjson)                      | no             | none                     |
 | [TileImprovements](3-Map-related-JSON-files.md#tileimprovementsjson)      | yes            | none                     |
 | [TileResources](3-Map-related-JSON-files.md#tileresourcesjson)            | yes            | none                     |
 | [Tutorials](5-Miscellaneous-JSON-files.md#tutorialsjson)                  | yes            | builtin always displayed |
+| [UnitNameGroups](4-Unit-related-JSON-files.md#unitnamegroupsjson)         | yes            | none                     |
 | [UnitPromotions](4-Unit-related-JSON-files.md#unitpromotionsjson)         | yes            | none                     |
 | [Units](4-Unit-related-JSON-files.md#unitsjson)                           | no             | none                     |
-| [UnitTypes](4-Unit-related-JSON-files.md#unittypesjson)                   | no             | vanilla                  |
-| [VictoryTypes](5-Miscellaneous-JSON-files.md#victorytypesjson)            | no             | vanilla                  |
+| [UnitTypes](4-Unit-related-JSON-files.md#unittypesjson)                   | no             | BasicSquare              |
+| [VictoryTypes](5-Miscellaneous-JSON-files.md#victorytypesjson)            | no             | BasicSquare              |
 
 * Mod loading never fails due to missing files, they default to empty at first. Then the fallbacks mentioned above are applied for base rulesets only. Inconsistencies after that step would be reported by the Mod checker.
 * GlobalUniques has a fallback used when the file is missing. Therefore, a mod can intentionally define there are none by including one with empty content (`{}`).

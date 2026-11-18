@@ -515,9 +515,12 @@ class BaseUnit : RulesetObject(), INonPerpetualConstruction {
     @Readonly fun isAirUnit() = type.isAirUnit()
 
     @Readonly
-    fun isProbablySiegeUnit() = isRanged()
+    fun isProbablySiegeUnit() =
+        (isRanged()
             && getMatchingUniques(UniqueType.Strength, GameContext.IgnoreConditionals)
-                .any { it.params[0].toInt() > 0 && it.hasModifier(UniqueType.ConditionalVsCity) }
+                .any { it.params[0].toInt() > 0 && it.hasModifier(UniqueType.ConditionalVsCity) })
+        || hasUnique(UniqueType.CanBombardCityDefenses, GameContext.IgnoreConditionals)
+        || hasUnique(UniqueType.CollateralDamage, GameContext.IgnoreConditionals)
 
 
     @Transient @Cache

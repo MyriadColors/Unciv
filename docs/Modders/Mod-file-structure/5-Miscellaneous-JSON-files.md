@@ -2,11 +2,11 @@
 
 ## Difficulties.json
 
-[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/Civ%20V%20-%20Gods%20&%20Kings/Difficulties.json)
+[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/BasicSquare/Difficulties.json)
 
 This optional file defines the difficulty levels a player can choose when starting a new game.
 
-Base ruleset Mods can omit the file or supply an empty list, even though at least one difficulty is mandatory, in which case they inherit [the ones from the Vanilla ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/Difficulties.json).
+Base ruleset Mods can omit the file or supply an empty list, even though at least one difficulty is mandatory, in which case they inherit [the ones from the BasicSquare ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Difficulties.json).
 
 Each difficulty level has the following structure:
 
@@ -43,7 +43,7 @@ Each difficulty level has the following structure:
 
 ## Eras.json
 
-[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/Civ%20V%20-%20Gods%20&%20Kings/Eras.json)
+[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/BasicSquare/Eras.json)
 
 This file should contain all the era's you want to use in your mod.
 
@@ -75,11 +75,11 @@ Each era can have the following attributes:
 
 ## Speeds.json
 
-[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/Civ%20V%20-%20Gods%20&%20Kings/Speeds.json)
+[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/BasicSquare/Speeds.json)
 
 This optional file should contain all the speeds you want to use in your mod.
 
-Base ruleset Mods can omit the file or supply an empty list, even though at least one game speed is mandatory, in which case they inherit [the ones from the Vanilla ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/Speeds.json).
+Base ruleset Mods can omit the file or supply an empty list, even though at least one game speed is mandatory, in which case they inherit [the ones from the BasicSquare ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Speeds.json).
 
 Each speed can have the following attributes:
 
@@ -157,11 +157,10 @@ Here, civilopediaText is shown outside the active Button, before the triggeredUn
 
 ## ModOptions.json
 
-<!-- [Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/Civ%20V%20-%20Gods%20&%20Kings/ModOptions.json) -->
+[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/BasicSquare/ModOptions.json)
 
 This file is a little different:
 
-- Does not exist in Vanilla ruleset
 - Is entirely optional but will be created after downloading a mod
 
 Note that this file controls _declarative mod compatibility_ (Work in progress) - e.g. there's [uniques](../uniques.md#modoptions-uniques) to say your Mod should only or never be used as 'Permanent audiovisual mod'.
@@ -172,6 +171,8 @@ The file can have the following attributes, not including the values Unciv sets 
 | Attribute              | Type    | default | Notes                                                                                                                                                                               |
 |------------------------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | isBaseRuleset          | Boolean | false   | Replaces vanilla ruleset if true                                                                                                                                                    |
+| useCiv4LocalHappiness  | Boolean | true    | Uses Civ IV per-city local happiness and angry citizens when true                                                                                                                   |
+| useCiv4CultureBorders  | Boolean | true    | Uses Civ IV whole-ring cultural border expansion and tile culture flipping when true                                                                                                |
 | uniques                | List    | empty   | Mod-wide specials, [see here](../uniques.md#modoptions-uniques)                                                                                                                     |
 | beliefsToRemove        | List    | empty   | List of [Beliefs](2-Civilization-related-JSON-files.md#beliefsjson) or beliefFilter (matches name, type, "All" or a filtering Unique) to remove (isBaseRuleset=false only)          |
 | buildingsToRemove      | List    | empty   | List of [Buildings or Wonders](2-Civilization-related-JSON-files.md#buildingsjson) or [buildingFilter](../Unique-parameters.md#buildingfilter) to remove (isBaseRuleset=false only) |
@@ -245,9 +246,10 @@ and city distance in another. In case of conflicts, there is no guarantee which 
 | cityStrengthFromTechsExponent            | Float  | 2.8                           | [^B]  |
 | cityStrengthFromTechsFullMultiplier      | Float  | 1.0                           | [^B]  |
 | cityStrengthFromGarrison                 | Float  | 0.2                           | [^B]  |
-| baseCityBombardRange                     | Int    | 2                             | [^X]  |
-| cityWorkRange                            | Int    | 3                             | [^Y]  |
-| cityExpandRange                          | Int    | 5                             | [^Z]  |
+| baseCityBombardRange                     | Int     | 2                             | [^X]  |
+| cityWorkRange                            | Int     | 2                             | [^Y]  |
+| cityWorkRangeExcludeCorners              | Boolean | true                          | [^Y]  |
+| cityExpandRange                          | Int     | 5                             | [^Z]  |
 | cityAirUnitCapacity                      | Int    | 6                             | [^W]  |
 | unitSupplyPerPopulation                  | Float  | 0.5                           | [^C]  |
 | minimalCityDistance                      | Int    | 3                             | [^D]  |
@@ -339,11 +341,11 @@ With `civModifier` being the multiplicative aggregate of ["\[relativeAmount\]% G
 
 ## GlobalUniques.json
 
-[link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/GlobalUniques.json)
+[link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/BasicSquare/GlobalUniques.json)
 
-GlobalUniques defines uniques that apply globally. e.g. Vanilla rulesets define the effects of Unhappiness here.
+GlobalUniques defines uniques that apply globally. e.g. BasicSquare defines base happiness and leader traits here.
 
-Base ruleset Mods can omit the file, in which case they inherit [the ones from the Vanilla ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/GlobalUniques.json).
+Base ruleset Mods can omit the file, in which case they inherit [the ones from the BasicSquare ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/GlobalUniques.json).
 Alternatively, they can supply a file with an empty object (`{}`), meaning that no global Uniques exist for that Mod.
 
 It has the following structure:
@@ -379,12 +381,12 @@ This is searched for, meaning the mod defining the Tutorial is irrelevant, mods 
 
 ## VictoryTypes.json
 
-[link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/Civ%20V%20-%20Gods%20&%20Kings/VictoryTypes.json)
+[link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/BasicSquare/VictoryTypes.json)
 
 These files contain which victories this mod provides, and what milestones must be reached for someone to win a victory.
 Most of the file contains of strings that are shown to the user in the victory screen, with the rest being the requirements for winning.
 
-Base ruleset Mods can omit the file or supply an empty list, even though at least one victory type is mandatory, in which case they inherit [the ones from the Vanilla ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/VictoryTypes.json).
+Base ruleset Mods can omit the file or supply an empty list, even though at least one victory type is mandatory, in which case they inherit [the ones from the BasicSquare ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/VictoryTypes.json).
 
 Each victory have the following structure:
 
@@ -446,6 +448,8 @@ Currently the following milestones are supported:
 | Have highest score after max turns | Basically time victory. Enables the 'max turn' slider and calculates score when that amount is reached       |
 | Have at least [amount] [countable] | Have at least [amount] of the given `countable`. Unlike the milestone below, this does not depend on the other players, so a ruleset can require several concrete things - a building, a policy, worked tiles - to be achieved in any order. |
 | Have more [countable] than each player's [countable] | Have your given `countable` be more than every other Civilization's `countable` to achieve this victory. This is useful to simulate a victory similar to the Cultural Victory in Brave New World. |
+| Have 3 cities with Legendary Culture | Have at least 3 cities reach culture level 6 (Legendary Culture). |
+| Control 64% of land and 50% of world population | Control at least 64% of all land tiles and at least 50% of total major-civilization population. |
 
 ## Civilopedia text
 

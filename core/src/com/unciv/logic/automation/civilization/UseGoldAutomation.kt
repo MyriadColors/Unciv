@@ -33,6 +33,8 @@ object UseGoldAutomation {
             // Low production cities are disallowed from building military and world wonders, and have low priority for xp buildings
             val construction = city.cityConstructions.getCurrentConstruction()
             if (construction !is INonPerpetualConstruction) continue
+            if (tryHurryWithGold(civ, city, construction)) continue
+
             val statBuyCost = construction.getStatBuyCost(city, Stat.Gold) ?: continue
             if (!city.cityConstructions.isConstructionPurchaseAllowed(construction, Stat.Gold, statBuyCost)) continue
             if (civ.gold < statBuyCost || construction.hurryCostModifier > acceptableHurryCostModifier) continue
@@ -41,6 +43,15 @@ object UseGoldAutomation {
         }
 
         maybeBuyCityTiles(civ)
+    }
+
+    private fun tryHurryWithGold(civ: Civilization, city: City, construction: INonPerpetualConstruction): Boolean {
+        if (!civ.hasUnique(UniqueType.CanHurryProductionWithGold)) return false
+        if (!city.cityConstructions.canHurryConstructionWithGold(construction)) return false
+        val hurryCost = city.cityConstructions.getGoldHurryCost(construction)
+        val reserveGold = if (civ.isAtWar()) 50 else 150
+        if (hurryCost <= 0 || civ.gold - hurryCost < reserveGold) return false
+        return city.cityConstructions.hurryConstructionWithGold(construction)
     }
 
     private fun useGoldForCityStates(civ: Civilization) {

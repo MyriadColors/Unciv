@@ -175,6 +175,25 @@ object HeadTowardsEnemyCityAutomation {
         ourUnitsAroundEnemyCity: Sequence<ForeignMapUnitView>,
         city: ForeignCityView
     ): Boolean {
+        val centerTile = city.getCenterTile()
+        if (centerTile.getRuleset().modOptions.hasUnique(UniqueType.Civ4StackCombat)) {
+            val defenders = centerTile.militaryUnits
+            if (defenders.isEmpty()) return false
+            val defenseMultiplier = 1f + city.getCityDefenseBonus() / 100f
+            val totalDefenderPower = defenders.sumOf {
+                (it.getBaseUnit().strength * (it.unitHealth / 100f) * defenseMultiplier).toDouble()
+            }.toFloat()
+            val ourAttackers = ourUnitsAroundEnemyCity.toList()
+            val hasSiege = ourAttackers.any { it.getBaseUnit().isProbablySiegeUnit() }
+            val ourTotalPower = ourAttackers.sumOf {
+                val basePower = it.getBaseUnit().strength * (it.unitHealth / 100f)
+                val siegeFactor = if (it.getBaseUnit().isProbablySiegeUnit() && defenders.size >= 2) 1.5f else 1.0f
+                (basePower * siegeFactor).toDouble()
+            }.toFloat()
+            val requiredRatio = if (hasSiege) 0.9f else 1.15f
+            return ourTotalPower < totalDefenderPower * requiredRatio
+        }
+
         val cityCombatant = city.asCombatant()
         val expectedDamagePerTurn = ourUnitsAroundEnemyCity
             .sumOf { it.asCombatant().calculateDamageToDefender(cityCombatant) }
@@ -187,15 +206,29 @@ object HeadTowardsEnemyCityAutomation {
 
     private fun headToLandingGrounds(closestReachableEnemyCity: TileView, unitView: MapUnitView): Boolean {
         val unitTile = unitView.getTile()
+        val allowStacking = closestReachableEnemyCity.getRuleset().modOptions.hasUnique(UniqueType.AllowUnitStacking)
+        val civ = unitView.civ()
         // don't head straight to the city, try to head to landing grounds -
         // this is against tha AI's brilliant plan of having everyone embarked and attacking via sea when unnecessary.
-        val tileToHeadTo = (minDistanceFromCityToConsiderForLandingArea..maxDistanceFromCityToConsiderForLandingArea).asSequence()
+        val candidateTiles = (minDistanceFromCityToConsiderForLandingArea..maxDistanceFromCityToConsiderForLandingArea).asSequence()
             .flatMap { closestReachableEnemyCity.getExploredTilesAtDistance(it) }
             .filter { it.isLand && unitView.getDamageFromTerrain(it) <= 0 } // Don't head for hurty terrain
-            .sortedBy { it.aerialDistanceTo(unitTile) }
+
+        val sortedCandidates = if (allowStacking) {
+            // Rally units onto a shared stack staging tile (preferring tiles already holding friendly units)
+            candidateTiles.sortedWith(
+                compareByDescending<TileView> { tile -> tile.militaryUnits.count { it.civ() == civ } }
+                    .thenBy { it.aerialDistanceTo(closestReachableEnemyCity) }
+                    .thenBy { it.aerialDistanceTo(unitTile) }
+            )
+        } else {
+            candidateTiles.sortedBy { it.aerialDistanceTo(unitTile) }
+        }
+
+        val tileToHeadTo = sortedCandidates
             .firstOrNull { (unitView.canMoveTo(it) || it == unitTile) && unitView.canReach(it) }
 
-        if (tileToHeadTo != null) { // no need to worry, keep going as the movement alg. says
+        if (tileToHeadTo != null && tileToHeadTo != unitTile) { // no need to worry, keep going as the movement alg. says
             unitView.tryHeadTowards(tileToHeadTo)
         }
         return true

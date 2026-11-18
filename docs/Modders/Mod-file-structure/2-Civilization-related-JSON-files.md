@@ -2,7 +2,7 @@
 
 ## Beliefs.json
 
-[link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Beliefs.json)
+[link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Beliefs.json)
 
 This file contains the beliefs that can be chosen for religions in your mod.
 
@@ -17,7 +17,7 @@ Each belief has the following structure:
 
 ## Buildings.json
 
-[link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Buildings.json)
+[link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Buildings.json)
 
 This file contains all the buildings and wonders you want to use in your mod.
 
@@ -50,7 +50,7 @@ Each building has the following structure:
 
 ## Nations.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Nations.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Nations.json)
 
 This file contains all the nations and city states, including Barbarians and Spectator.
 
@@ -110,7 +110,7 @@ best).
 
 ## Personalities.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Personalities.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Personalities.json)
 
 This file contains all Personalities for computer players.
 
@@ -162,11 +162,10 @@ There are 7 defining behaviours that influence an AI Civilization's behaviour. A
 
 ## CityStateTypes.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/CityStateTypes.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/CityStateTypes.json)
 
 This optional file is used for defining the types of city states. These types determine the benefits major civilizations get when they befriend or ally the city state with influence.
-For base ruleset Mods, if the file is ommitted or contains an empty list, [all types from the Vanilla ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Vanilla/CityStateTypes.json) are automatically added:
-Cultured, Maritime, Mercantile, Militaristic, Religious.
+For base ruleset Mods, if the file is omitted or contains an empty list, [all types from the BasicSquare ruleset](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/CityStateTypes.json) are automatically added.
 
 Each city state type has the following structure:
 
@@ -178,9 +177,36 @@ Each city state type has the following structure:
 | uniques            | List of Strings                                                     | empty           | Type-wide [uniques](../uniques.md) for every city-state of this type (e.g. `Start bias [Coast]`)            |
 | color              | [List of 3× Integer](5-Miscellaneous-JSON-files.md#rgb-colors-list) | [255, 255, 255] | RGB color of text in civilopedia                                                                           |
 
+## Civics.json
+
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Civics.json)
+
+This file defines Civilization IV-style Civic Categories (such as `Government`, `Legal`, `Labor`, `Economy`, `Religion`) and their member Civics when `Uses Civ IV Civics` is enabled in `ModOptions.json`.
+
+### Civic Category structure
+
+| Attribute       | Type            | Default  | Notes                                                                         |
+|-----------------|-----------------|----------|-------------------------------------------------------------------------------|
+| name            | String          | Required | Name of the civic category                                                    |
+| defaultCivic    | String          | empty    | Starting civic in this category (defaults to the first civic in `civics`)     |
+| civics          | List            | Required | List of [Civic objects](#civic-structure) belonging to this category          |
+| uniques         | List of Strings | empty    | Optional category-level [unique abilities](../uniques.md)                     |
+| civilopediaText | List            | empty    | See [civilopediaText chapter](5-Miscellaneous-JSON-files.md#civilopedia-text) |
+
+### Civic structure
+
+| Attribute       | Type            | Default  | Notes                                                                         |
+|-----------------|-----------------|----------|-------------------------------------------------------------------------------|
+| name            | String          | Required | Name of the civic                                                             |
+| upkeep          | Enum            | Low      | One of `None`, `Low`, `Medium`, `High`                                        |
+| requiredTech    | String          | none     | Technology required to adopt this civic. Must be in [Techs.json](#techsjson)  |
+| priorities      | Object          | empty    | Optional victory-type priority weights                                        |
+| uniques         | List of Strings | empty    | List of [unique abilities](../uniques.md) active while this civic is adopted  |
+| civilopediaText | List            | empty    | See [civilopediaText chapter](5-Miscellaneous-JSON-files.md#civilopedia-text) |
+
 ## Policies.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Policies.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Policies.json)
 
 This file contains all the available social policies that can be "bought" with culture.
 
@@ -247,7 +273,7 @@ The code below is an example of a valid "priorities" definition.
 
 ## Quests.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Quests.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Quests.json)
 
 This file contains the quests that may be given to major civilizations by city states.
 
@@ -314,14 +340,14 @@ quest with weight 1.
 
 ## Religions.json
 
-[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/Civ%20V%20-%20Gods%20&%20Kings/Religions.json)
+[Link to original](https://github.com/yairm210/Unciv/tree/master/android/assets/jsons/BasicSquare/Religions.json)
 
 This is just a list of Strings specifying all predefined religion names. Corresponding icons must
 exist, that's all to it. After all, they're just containers for [beliefs](#beliefsjson).
 
 ## Specialists.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Specialists.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Specialists.json)
 
 This file should contain a list of all possible specialists that citizens can be assigned to.
 
@@ -336,7 +362,7 @@ Each specialist has the following structure:
 
 ## Techs.json
 
-[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/Civ%20V%20-%20Gods%20%26%20Kings/Techs.json)
+[Link to original](https://github.com/yairm210/Unciv/blob/master/android/assets/jsons/BasicSquare/Techs.json)
 
 This file contains all the technologies that can be researched with science. It is organized into an
 outer list of 'columns', which in turn contains one or more tech each.

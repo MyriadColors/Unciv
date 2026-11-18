@@ -203,22 +203,39 @@ class Civ4ReligionManager : IsPartOfGameInfoSerialization {
     }
 
     private fun processAiStateReligion() {
-        if (civInfo.isHuman() || stateReligion != null || civInfo.hasUnique(UniqueType.NoStateReligion)) return
-        val counts = HashMap<String, Int>()
+        if (civInfo.isHuman() || civInfo.isInAnarchy() || civInfo.hasUnique(UniqueType.NoStateReligion)) return
+        val scores = HashMap<String, Int>()
         for (city in civInfo.cities) {
             for (religion in city.presentReligions) {
-                counts[religion] = (counts[religion] ?: 0) + 1
+                scores[religion] = (scores[religion] ?: 0) + 1
+            }
+            for (holyReligion in city.holyCityOfReligions) {
+                if (holyReligion in city.presentReligions) {
+                    scores[holyReligion] = (scores[holyReligion] ?: 0) + 2
+                }
             }
         }
         var bestReligion: String? = null
-        var bestCount = 0
-        for ((religion, count) in counts) {
-            if (count > bestCount) {
-                bestCount = count
+        var bestScore = 0
+        for ((religion, score) in scores) {
+            if (score > bestScore) {
+                bestScore = score
                 bestReligion = religion
             }
         }
-        if (bestReligion != null) {
+        if (bestReligion == null) return
+
+        val currentReligion = stateReligion
+        if (currentReligion == null) {
+            setStateReligion(bestReligion, applyAnarchy = true)
+            return
+        }
+        if (bestReligion == currentReligion) return
+
+        val currentScore = scores[currentReligion] ?: 0
+        val noAnarchy = civInfo.hasUnique(UniqueType.NoAnarchy) || civInfo.goldenAges.isGoldenAge()
+        val requiredMargin = if (noAnarchy) 1 else 2
+        if (bestScore >= currentScore + requiredMargin) {
             setStateReligion(bestReligion, applyAnarchy = true)
         }
     }

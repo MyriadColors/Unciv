@@ -120,6 +120,7 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
             addSpaceshipPartChoice()
             addWorkerChoice()
             addWorkBoatChoice()
+            addMissionaryChoice()
             addMilitaryUnitChoice()
         }
 
@@ -231,6 +232,45 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
         if (!findTileWorthImproving()) return
 
         addChoice(relativeCostEffectiveness, buildableWorkboatUnits.minBy { it.cost }, 6f) // Improving coastal luxuries etc. is quite important
+    }
+
+    private fun addMissionaryChoice() {
+        if (!civInfo.isCiv4ReligionEnabled()) return
+        val stateReligion = civInfo.civ4Religion.stateReligion ?: return
+        val buildableMissionaries = units
+            .filter {
+                it.hasUnique(UniqueType.CanSpreadCiv4Religion)
+                    && Automation.allowAutomatedConstruction(GameView(civInfo.gameInfo, civInfo).civView, city, it)
+            }
+            .filterBuildable()
+            .toList()
+        if (buildableMissionaries.isEmpty()) return
+
+        val existingMissionaries = civInfo.units.getCivUnits().count { it.hasUnique(UniqueType.CanSpreadCiv4Religion) } +
+            civInfo.cities.count { it != city && it.cityConstructions.getCurrentConstruction() in buildableMissionaries }
+        if (existingMissionaries >= 2) return
+
+        val domesticTargets = civInfo.cities.count {
+            stateReligion !in it.presentReligions && civInfo.civ4Religion.canSpreadReligionToCity(stateReligion, it)
+        }
+        val foreignTargets = if (domesticTargets > 0) 0 else civInfo.getKnownCivs()
+            .filter { otherCiv ->
+                val diplo = civInfo.getDiplomacyManager(otherCiv)
+                diplo != null && !civInfo.isAtWarWith(otherCiv) && (diplo.hasOpenBorders || otherCiv.isCityState)
+            }
+            .flatMap { it.cities }
+            .count { foreignCity ->
+                stateReligion !in foreignCity.presentReligions &&
+                    civInfo.civ4Religion.canSpreadReligionToCity(stateReligion, foreignCity)
+            }
+
+        val totalTargets = domesticTargets + foreignTargets
+        if (totalTargets <= existingMissionaries) return
+
+        val baseModifier = if (domesticTargets > 0) 3.5f else 1.8f
+        val holyCityBonus = if (civInfo.cities.any { stateReligion in it.holyCityOfReligions }) 1.5f else 1.0f
+        val modifier = baseModifier * holyCityBonus * personality.modifierFocus(PersonalityValue.Faith, 0.3f)
+        addChoice(relativeCostEffectiveness, buildableMissionaries.minBy { it.cost }, modifier)
     }
 
     private fun addWorkerChoice() {
@@ -352,8 +392,15 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
 
         buildingStats.gold *= 2 // Everything's weighed by rankStatsValue, which ranks gold at 0.3, let's make that 0.6 (vs Science being 1)
 
-        if (civInfo.getHappiness() < 10 || civInfo.getHappiness() < civInfo.cities.size)
+        val useLocalHappiness = civInfo.gameInfo.ruleset.modOptions.useCiv4LocalHappiness
+        val localNetHappiness = city.cityStats.happinessList.values.sum()
+        if (useLocalHappiness) {
+            if (city.getAngryCitizens() > 0 || localNetHappiness <= 1f) {
+                buildingStats.happiness *= 4f
+            }
+        } else if (civInfo.getHappiness() < 10 || civInfo.getHappiness() < civInfo.cities.size) {
             buildingStats.happiness *= 3
+        }
 
         if (city.cityStats.currentCityStats.culture < 2) {
             buildingStats.culture *= 2 // We need to start growing borders
@@ -390,7 +437,7 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
 
     @Readonly
     private fun getBuildingStatsFromUniques(building: Building, buildingStats: Stats) : Stats {
-        val stats = Stats()
+        @yairm210.purity.annotations.LocalState val stats = Stats()
         building.forEachMatchingUnique(UniqueType.StatPercentBonusCities, cityState) { unique ->
             val statType = Stat.valueOf(unique.params[1])
             val relativeAmount = unique.params[0].toFloat() / 100f
@@ -404,6 +451,69 @@ class ConstructionAutomation(val cityConstructions: CityConstructions) {
                 val relativeAmount = unique.params[0].toFloat() / 100f
                 stats[Stat.Food] += foodGain * relativeAmount // Essentialy gives us the food per turn this unique saves us
             }
+        }
+
+        stats.add(getCiv4HealthStatsFromUniques(building, buildingStats))
+        stats.add(getCiv4ReligionStatsFromUniques(building))
+
+        return stats
+    }
+
+    @Readonly
+    private fun getCiv4HealthStatsFromUniques(building: Building, buildingStats: Stats): Stats {
+        @yairm210.purity.annotations.LocalState val stats = Stats()
+        if (!civInfo.gameInfo.ruleset.modOptions.hasUnique(UniqueType.CityHealthMode)) return stats
+        val netHealth = city.getHealthBreakdown().netHealth
+        if (netHealth > 2) return stats
+
+        val healthWeight = if (netHealth <= 0) 2.0f else 1.0f
+        var buildingHealthBonus = 0f
+        building.forEachMatchingUnique(UniqueType.CityHealth, cityState) { unique ->
+            val amount = unique.params[0].toFloatOrNull() ?: 0f
+            if (amount > 0f) buildingHealthBonus += amount
+        }
+        if (building.hasUnique(UniqueType.NoBuildingUnhealthiness, cityState)) {
+            val existingBuildingUnhealthiness = city.cityConstructions.getBuiltBuildings().sumOf { built ->
+                built.getMatchingUniques(UniqueType.CityHealth, cityState)
+                    .map { it.params[0].toIntOrNull() ?: 0 }
+                    .filter { it < 0 }
+                    .sumOf { -it }
+            }
+            buildingHealthBonus += existingBuildingUnhealthiness.coerceAtLeast(2)
+        }
+        if (buildingHealthBonus > 0f && buildingStats.food <= 0f) {
+            stats[Stat.Food] += buildingHealthBonus * healthWeight * 0.5f
+        }
+        return stats
+    }
+
+    @Readonly
+    private fun getCiv4ReligionStatsFromUniques(building: Building): Stats {
+        @yairm210.purity.annotations.LocalState val stats = Stats()
+        if (!civInfo.isCiv4ReligionEnabled()) return stats
+        val stateReligion = civInfo.civ4Religion.stateReligion
+        if (stateReligion != null && stateReligion in city.presentReligions) {
+            building.forEachMatchingUnique(UniqueType.StateReligionHappiness, cityState) { unique ->
+                stats[Stat.Happiness] += unique.params[0].toFloatOrNull() ?: 0f
+            }
+        }
+        if (city.presentReligions.isNotEmpty()) {
+            building.forEachMatchingUnique(UniqueType.HappinessPerPresentReligion, cityState) { unique ->
+                stats[Stat.Happiness] += (unique.params[0].toFloatOrNull() ?: 0f) * city.presentReligions.size
+            }
+            building.forEachMatchingUnique(UniqueType.ReligionSpreadModifier, cityState) { unique ->
+                val spreadBonus = unique.params[0].toFloatOrNull() ?: 0f
+                if (spreadBonus > 0f) stats[Stat.Culture] += spreadBonus * 0.03f
+            }
+        }
+        building.forEachMatchingUnique(UniqueType.ShrineGoldForReligion, cityState) { unique ->
+            val amount = unique.params[0].toFloatOrNull() ?: 0f
+            val targetReligion = unique.params[1]
+            val matchingReligions = if (targetReligion == "any") city.holyCityOfReligions else setOf(targetReligion)
+            val globalFollowers = civInfo.gameInfo.civilizations.sumOf { civ ->
+                civ.cities.count { c -> c.presentReligions.any { it in matchingReligions } }
+            }
+            stats[Stat.Gold] += amount * globalFollowers.coerceAtLeast(1)
         }
         return stats
     }

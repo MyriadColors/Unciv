@@ -2,11 +2,13 @@
 
 The codebase supports the ability to run automated simulations and compare the results for AI development.
 
+For a complete technical breakdown of the AI decision pipeline (`NextTurnAutomation`, `CivicManager`, `Civ4ReligionManager`, `ConstructionAutomation`, `UnitAutomation`, `BattleHelper`, `HeadTowardsEnemyCityAutomation`, `WorkerAutomation`, and the `com.unciv.view` purity layer), see [AI & Automation Architecture](./AI-Architecture.md).
+
 ## Enabling
 
 Set up a custom build configuration.
 
-Set the working directory to android/assets, just like when running desktop. And use the `unciv.desktop.main` module.
+Set the working directory to `android/assets`, just like when running desktop. And use the `unciv.desktop.main` module (`desktop/src/com/unciv/app/desktop/ConsoleLauncher.kt`).
 ![image](../assets/ConsoleLauncher_Config.png)
 
 ## Running Simulations
@@ -15,9 +17,9 @@ Execute the ConsoleLauncher Build Configuration set up above. Results should app
 
 ## Configuring Simulations
 
-Within the `desktop\src\ConsoleLauncher.kt` file, you can adjust the number of simulations to run, which nations to use, etc.
+Within the `desktop/src/com/unciv/app/desktop/ConsoleLauncher.kt` file, you can adjust the number of simulations to run, which nations to use, etc. By default, `ConsoleLauncher` uses `BaseRuleset.BasicSquare.fullName` with `MirroringType.aroundCenterTile`.
 
-Recommend using generic civs with no Uniques. You can see the code add a generic `Nation` to the `ruleset` object.
+Recommend using generic civs with no Uniques (`Constants.simulationCiv1` / `Constants.simulationCiv2`). You can see the code add generic `Nation` entries to the `ruleset` object.
 
 To A/B test an AI change, pass the civs that should use the new behavior as the `civIdsInExperimentGroup` parameter of `Simulation`, e.g. `Simulation(newGame, 50, 8, civIdsInExperimentGroup = setOf("Nation1", "Nation2"))`, and gate the changed code with `if (civInfo.civID in DebugUtils.CIV_IDS_IN_EXPERIMENT_GROUP)`. You can also run more complicated experiments (e.g. three different AI behaviors) by using the Nation Name constant as the control switch.
 
@@ -25,7 +27,7 @@ You can also adjust the game parameters and map parameters. To get more consiste
 
 By default the order of players is randomized to make it more fair.
 
-The `statTurns` list parameter allows the system to save certain stats at particular turns so you can track it over the course of the games.
+The `statTurns` list parameter allows the system to save certain stats at particular turns so you can track it over the course of the games (`printProd`, `printCityCnt`, `printAvgCityPop`).
 
 ## Understanding Results
 

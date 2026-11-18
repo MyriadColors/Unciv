@@ -248,7 +248,16 @@ class MapUnitView internal constructor(
         return true
     }
     /** `true` if this unit's civ may spread its religion with this unit at all */
-    @Readonly fun maySpreadReligion(): Boolean = unit.civ.religionManager.maySpreadReligionAtAll(unit)
+    @Readonly fun maySpreadReligion(): Boolean {
+        if (unit.civ.isCiv4ReligionEnabled()) {
+            return unit.getMatchingUniques(UniqueType.CanSpreadCiv4Religion).any { unique ->
+                val religionParam = unique.params[0]
+                val religionName = if (religionParam == "any") unit.civ.civ4Religion.stateReligion else religionParam
+                religionName != null && religionName in unit.civ.gameInfo.ruleset.religions
+            }
+        }
+        return unit.civ.religionManager.maySpreadReligionAtAll(unit)
+    }
     /** `true` if the unit action [unique] has usages left, see [UnitActionModifiers.canUse] */
     @Readonly fun canUseUnitActionUnique(unique: Unique): Boolean = UnitActionModifiers.canUse(unit, unique)
     /** Triggers [unique] on this unit's tile, and applies its action side effects (movement cost, consuming the unit, etc.) */

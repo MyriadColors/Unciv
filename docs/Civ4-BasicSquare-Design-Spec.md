@@ -1,10 +1,30 @@
-# Civilization IV Alignment Specification for `BasicSquare`
+# Civilization IV Alignment Specification & Implementation Status for `BasicSquare`
 
-## 1. Executive Summary
+## 1. Executive Summary & Current Status
 
-This document defines the full technical and ruleset design specification for aligning Unciv's built-in square-grid ruleset ([`BasicSquare`](../android/assets/jsons/BasicSquare)) and core Kotlin engine with **Civilization IV** (Base Civ IV + **Warlords** + **Beyond the Sword**), while preserving **City-States** as an optional Civ V hybrid feature.
+This document defines the technical and ruleset design specification for Unciv's built-in square-grid ruleset ([`BasicSquare`](../android/assets/jsons/BasicSquare)) and core Kotlin engine aligned with **Civilization IV**.
+
+> [!NOTE]
+> **Implementation Status (November 2026)**:
+>
+> - **Implemented in Core Engine & `BasicSquare` Ruleset**:
+>   - 8-direction Square Grid (`GridMath`, `GridCoord`) and 21-tile "Fat Cross" (`cityWorkRange = 2`, `cityWorkRangeExcludeCorners = true`)
+>   - Unit Stacking (`UniqueType.AllowUnitStacking`, `Tile.militaryUnits`, `UnitStackContextMenu`) and Civ IV Stack Combat (`UniqueType.Civ4StackCombat`, `Battle.getBestDefender`, undefended city instant capture)
+>   - Siege City Defense Bombardment (`UnitActionsSiege` / `UniqueType.CanBombardCityDefenses`), Collateral Damage (`UniqueType.CollateralDamage`, `UniqueType.CollateralDamageBonus`, `UniqueType.ImmuneToCollateralDamage`), and Primary Defender Damage Cap (`UniqueType.MaxAttackDamage`)
+>   - Native Civics & Anarchy (`CivicManager`, `Civics.json`, `UniqueType.CivicsMode`, `UniqueType.NoAnarchy`, `UniqueType.CivicUpkeepDiscount`, `CivicPickerScreen`)
+>   - Native City Health (`UniqueType.CityHealthMode`, `City.getHealthBreakdown()`, `UniqueType.CityHealth`, `UniqueType.NoBuildingUnhealthiness`)
+>   - Civ IV Local Happiness (`ModOptions.useCiv4LocalHappiness`, `City.getAngryCitizens()`, `whipAngerTurns`), Cultural Ring Borders & Tile Culture Flipping (`ModOptions.useCiv4CultureBorders`, `Tile.tileCulture`), City Maintenance (`CityStats.getCiv4CityMaintenance()`), Per-City Trade Routes (`CityStats.getStatsFromTradeRoute()`), Per-City Great Person Pool (`City.cityGreatPersonPoints`), Slavery Whip (`UniqueType.CanWhipProduction`, `CityConstructions.whipConstruction`), and Gold Hurry (`UniqueType.CanHurryProductionWithGold`, `CityConstructions.hurryConstructionWithGold`)
+>   - Civ IV Religion (`Civ4ReligionManager`, `UniqueType.Civ4ReligionMode`, `UniqueType.FoundReligionOnTech`, `UniqueType.CanSpreadCiv4Religion`, passive trade-network spread, State Religion happiness/diplomacy, `UniqueType.ShrineGoldForReligion`, `UniqueType.NoStateReligion`, `UniqueType.HappinessPerPresentReligion`)
+>   - Auto-Upgrading Improvements (`UniqueType.ImprovementUpgradesAfterTurns`: `Cottage -> Hamlet -> Village -> Town`, `UniqueType.ImprovementGrowthRate`)
+>   - Civ IV Victory Milestones (`MilestoneType.ThreeLegendaryCities`, `MilestoneType.Civ4Domination`)
+>   - Orthogonal Tech Tree Line Router (`TechLineRouter`)
+>   - Full Civ IV AI & Automation Adaptation (see [AI & Automation Architecture](./Developers/AI-Architecture.md))
+> - **Intentional Adjustments from Initial Spec**:
+>   - **City-States Removed from `BasicSquare`**: `CityStateTypes.json` and `Quests.json` in `BasicSquare` are empty (`[]`) and City-State nations were removed from `BasicSquare/Nations.json` for a pure Civ IV major-civilization setup.
+>   - **Asset-Only Mod Restriction & Offline Single-Player**: External mods are restricted to asset-only (`ModCompatibility.isAssetOnlyMod`) and online multiplayer is disabled (`PlatformSpecific.supportsOnlineMultiplayer = false`).
 
 ### Design Pillars
+
 1. **True Civ IV Core Mechanics in Kotlin:** Replace Unciv's JSON-only workarounds with first-class engine support for unit stacking, best-defender stack combat, siege city-defense bombardment and collateral damage, native Civics switching with Anarchy, native City Health/Unhealthiness, passive trade-route/missionary Religion spread with State Religion, and auto-upgrading `Cottage → Hamlet → Village → Town` improvements.
 2. **Complete Civ IV + Expansions Content:** Incorporate technologies, units, buildings, wonders, promotions, civics, and all 11 leader traits from Base Civ IV, Warlords, and Beyond the Sword.
 3. **Ruleset-Gated Engine Behavior:** Gate all Civ IV engine mechanics behind explicit `ModOptions` / `UniqueType` flags so core Unciv architecture remains clean, testable, and extensible.
@@ -29,6 +49,7 @@ Three community repositories were analyzed to determine which patterns to adopt 
 ### 3.1 Unit Stacking & True Civ IV Stack Combat
 
 **Affected Files:**
+
 - `core/src/com/unciv/models/ruleset/unique/UniqueType.kt`
 - `core/src/com/unciv/logic/map/tile/Tile.kt`
 - `core/src/com/unciv/logic/battle/Battle.kt`
@@ -37,6 +58,7 @@ Three community repositories were analyzed to determine which patterns to adopt 
 - `core/src/com/unciv/logic/battle/CityCombatant.kt`
 
 #### Data Model & Ruleset Gating
+
 - Add a new `UniqueType` on `ModOptions`:
   - `AllowUnitStacking("Allows unlimited military units per tile", UniqueTarget.ModOptions)`
   - `Civ4StackCombat("Uses Civ IV stack combat (no 2-tile ranged land attacks, best defender auto-selected)", UniqueTarget.ModOptions)`
@@ -45,12 +67,14 @@ Three community repositories were analyzed to determine which patterns to adopt 
   - Update `Tile.getUnits()`, `Tile.clone()`, and `Tile.removeUnit()` to operate on `militaryUnits`.
 
 #### Movement & Pathfinding
+
 - When `AllowUnitStacking` is active:
   - Friendly military units can enter and end their turn on tiles already occupied by friendly military units without swapping or blocking.
   - Enemy tiles with `militaryUnits` remain impassable unless attacking.
   - Add UI support on `WorldScreen` (unit stack panel / cycling) to select individual units in a stack or issue group-move orders.
 
 #### Best-Defender Selection & City Capture
+
 - When an attacker targets a tile containing one or more enemy `militaryUnits`:
   1. Evaluate every unit in `targetTile.militaryUnits` as a `MapUnitCombatant` against the attacker using `BattleDamage` modifiers (base strength, terrain/river/city defense, fortification, unit-type bonuses such as `Spearman` +100% vs `Mounted`, `Axeman` +50% vs `Sword`).
   2. Select the unit with the **highest effective defensive strength** (tie-breaking by highest HP, then lowest XP/value).
@@ -65,12 +89,14 @@ Three community repositories were analyzed to determine which patterns to adopt 
 ### 3.2 Siege Bombardment & Collateral Damage
 
 **Affected Files:**
+
 - `core/src/com/unciv/models/ruleset/unique/UniqueType.kt`
 - `core/src/com/unciv/logic/battle/Battle.kt`
 - `core/src/com/unciv/logic/city/City.kt`
 - `core/src/com/unciv/ui/screens/worldscreen/unit/actions/UnitActions.kt` (unit action registration)
 
 #### City Defense % & Bombard Action
+
 - Add `var cityDefenseBonus: Int = 0` (or `damageTakenToDefense: Int = 0` subtracted from max cultural + building defense) to `City`.
   - Cultural defense tiers: `0%` (0 culture), `20%`, `40%`, `60%`, `80%`, `100%` (Legendary), or `Walls` (+50% vs pre-Gunpowder), `Castle` (+50% additional, +100% total vs pre-Gunpowder).
 - Add `UniqueType`:
@@ -80,6 +106,7 @@ Three community repositories were analyzed to determine which patterns to adopt 
   - Reduces the city's effective defense bonus by the unit's bombard rate (halved if the city has `Walls`/`Castle` against non-Gunpowder siege, matching Civ IV).
 
 #### Collateral Damage & Attack Damage Cap
+
 - Add `UniqueType`s:
   - `CollateralDamage("Deals collateral damage to up to [amount] other units in stacked tiles", UniqueTarget.Unit)`
   - `MaxAttackDamage("Maximum [amount]% damage dealt to primary defender", UniqueTarget.Unit)` (e.g., `75%` for `Catapult`, `80%` for `Trebuchet`, `85%` for `Cannon`, `90%` for `Artillery`).
@@ -92,6 +119,7 @@ Three community repositories were analyzed to determine which patterns to adopt 
 ### 3.3 Native Civics Switching & Anarchy (`CivicManager` & `Civics.json`)
 
 **Affected Files:**
+
 - `core/src/com/unciv/models/ruleset/Civic.kt` (new ruleset model + `Civics.json` loader in `Ruleset.kt`)
 - `core/src/com/unciv/logic/civilization/managers/CivicManager.kt` (new dedicated manager on `Civilization`)
 - `core/src/com/unciv/logic/civilization/Civilization.kt`
@@ -99,6 +127,7 @@ Three community repositories were analyzed to determine which patterns to adopt 
 - `core/src/com/unciv/ui/screens/pickerscreens/` (dedicated Civics picker screen)
 
 #### Dedicated `CivicManager` & `Civics.json`
+
 - Add `ModOptions` unique: `CivicsMode("Uses Civ IV Civics instead of Social Policies", UniqueTarget.ModOptions)`.
 - Introduce a dedicated `CivicCategory` / `Civic` ruleset model loaded from `Civics.json` (cleanly separated from `PolicyManager` and `Policies.json`), with its own `UniqueMap` (`civicUniques`) and `RulesetValidator` checks.
 - In `CivicManager`:
@@ -108,6 +137,7 @@ Three community repositories were analyzed to determine which patterns to adopt 
   - **Civic Upkeep:** Sum the upkeep of all 5 active Civics (Low / Medium / High, scaled by city count and population, halved by the `Organized` trait) and deduct it as empire maintenance each turn.
 
 #### Anarchy Turns
+
 - Add `var anarchyTurns: Int = 0` on `Civilization`.
 - When a player confirms Civic changes in the Civics/Policies screen:
   - Calculate `anarchyTurns` based on the number of Civics changed and game speed (e.g., 1 turn for 1–2 civics on Standard, +1 for additional civics).
@@ -120,12 +150,14 @@ Three community repositories were analyzed to determine which patterns to adopt 
 ### 3.4 Native City Health & Unhealthiness
 
 **Affected Files:**
+
 - `core/src/com/unciv/models/ruleset/unique/UniqueType.kt`
 - `core/src/com/unciv/logic/city/City.kt`
 - `core/src/com/unciv/logic/city/CityStats.kt`
 - `core/src/com/unciv/ui/screens/cityscreen/`
 
 #### Health Calculation
+
 - Add `UniqueType`s:
   - `CityHealth("[amount] Health", UniqueTarget.Building, UniqueTarget.Global, UniqueTarget.Resource)` (supports positive Health and negative Unhealthiness, plus conditionals like `<with [Corn]>` or `<in [River] cities>`).
 - On `City`:
@@ -140,12 +172,14 @@ Three community repositories were analyzed to determine which patterns to adopt 
 ### 3.5 Passive Religion Spread & State Religion (`Civ4ReligionManager`)
 
 **Affected Files:**
+
 - `core/src/com/unciv/logic/civilization/managers/Civ4ReligionManager.kt` (new dedicated manager on `Civilization`)
 - `core/src/com/unciv/logic/civilization/managers/TurnManager.kt`
 - `core/src/com/unciv/logic/city/City.kt` (`presentReligions: HashSet<String>`)
 - `core/src/com/unciv/logic/civilization/diplomacy/DiplomacyManager.kt`
 
 #### Dedicated `Civ4ReligionManager` & City `presentReligions`
+
 - Add `ModOptions` unique: `Civ4ReligionMode("Uses Civ IV tech-founded religions and State Religion", UniqueTarget.ModOptions)`.
 - Keep Civ V's `ReligionManager` untouched; when `Civ4ReligionMode` is enabled, `Civ4ReligionManager` handles religion state cleanly without Faith currency or Pantheon phases:
   - Cities can contain **multiple** religions simultaneously (tracking presence `Set<String>` rather than Civ V's single-majority follower count).
@@ -157,6 +191,7 @@ Three community repositories were analyzed to determine which patterns to adopt 
 ### 3.6 Auto-Upgrading Tile Improvements (`Cottage` → `Town`)
 
 **Affected Files:**
+
 - `core/src/com/unciv/models/ruleset/unique/UniqueType.kt`
 - `core/src/com/unciv/logic/map/tile/Tile.kt`
 - `core/src/com/unciv/logic/city/City.kt`
@@ -178,6 +213,7 @@ Three community repositories were analyzed to determine which patterns to adopt 
 All files reside in `android/assets/jsons/BasicSquare/` and `android/Images.*`.
 
 ### 4.1 Visual Assets (`android/Images.*`)
+
 - Import CC Noun Project icons from `yairm210/Civ-IV` (`Images.Constructions`, `Images.TechPolicyIcons`, `Images.Tilesets`, `Images.UnitIcons` / `NationIcons`) for all new Civ IV entries:
   - **Improvements:** `Cottage`, `Hamlet`, `Village`, `Town`, `Forest Preserve`, `Watermill`, `Windmill`, `Workshop`
   - **Buildings & Wonders:** `Grocer`, `Supermarket`, `Courthouse`, `Drydock`, `Levee`, `Coal Plant`, `Jail`, `Security Bureau`, `Bunker`, `Public Transportation`, `Industrial Park`, `Spiral Minaret`, `University of Sankore`, `Versailles`, `Hollywood`, `Broadway`, `Rock 'n' Roll`, `Three Gorges Dam`, `Space Elevator`, `Mt. Rushmore`, `West Point`, `Wall Street`, `Globe Theatre`, `National Park`, `Apollo Program`, `SS` parts, plus Unique Buildings (`Hammam`, `Ziggurat`, `Madrassa`, `Ger`, `Ikhanda`, `Rathaus`, `Dike`, `Feitoria`, `Baray`, `Sacrificial Altar`, `Seowon`, `Dun`, `Terrace`, `Totem Pole`, etc.)
@@ -205,6 +241,7 @@ All files reside in `android/assets/jsons/BasicSquare/` and `android/Images.*`.
 ## 5. Phase 3: Granular Execution Roadmap & Verification Plan
 
 ### Granular Phase Breakdown
+
 To keep engine changes manageable, compilable, and independently testable, implementation is split into 8 phases (with sub-phases `1A–1D`, `2A–2B`, `4A–4B`, `7A–7C`):
 
 1. **Phase 1A — `Tile.militaryUnits` & Movement Core:** Add `AllowUnitStacking` / `Civ4StackCombat` in `UniqueType.kt`; replace `Tile.militaryUnit` with `militaryUnits = ArrayList<MapUnit>(0)` in `Tile.kt`; update `MapUnit.kt`, `UnitMovement.kt`, `MovementCost.kt`, `UnitTurnManager.kt`, `GameInfo.kt`, `GameStarter.kt`.
@@ -224,10 +261,13 @@ To keep engine changes manageable, compilable, and independently testable, imple
 ### Verification Plan
 
 #### Automated Tests
+
 1. **Existing Ruleset & Translation Gates:**
+
    ```pwsh
    ./gradlew test --tests "com.unciv.testing.BasicTests" --tests "com.unciv.uniques.RulesetValidatorTests" --tests "com.unciv.logic.TranslationTests"
    ```
+
 2. **New Engine Unit Tests (in `tests/src/com/unciv/`):**
    - `StackCombatTests`: Multi-unit stacking on `Tile`, best-defender selection, immediate capture of undefended cities, disabled 2-tile land ranged attacks.
    - `SiegeCollateralTests`: City defense % reduction via `Bombard`, collateral damage across stacked units, and `MaxAttackDamage` cap.
@@ -237,6 +277,7 @@ To keep engine changes manageable, compilable, and independently testable, imple
    - `CottageUpgradeTests`: `Cottage → Hamlet → Village → Town` automatic progression after `N` turns worked.
 
 #### Manual Verification
+
 1. Launch the Desktop client (`./gradlew desktop:run`).
 2. Start a New Game using `BasicSquare`.
 3. Verify stack movement & best-defender combat, Siege `Bombard` & collateral damage, Civics switching & Anarchy, City Health UI breakdown, Gold/Science/Culture sliders, `Cottage` auto-growth, and Religion founding/spread alongside City-States.

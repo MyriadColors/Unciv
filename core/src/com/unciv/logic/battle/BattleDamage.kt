@@ -325,7 +325,16 @@ object BattleDamage {
         if (defender.isCivilian()) return BattleConstants.DAMAGE_TO_CIVILIAN_UNIT
         val ratio = getAttackingStrength(attacker, defender, tileToAttackFrom) /
                 getDefendingStrength(attacker, defender, tileToAttackFrom)
-        return (damageModifier(ratio, false, randomnessFactor) * getHealthDependantDamageRatio(attacker)).roundToInt()
+        val rawDamage = (damageModifier(ratio, false, randomnessFactor) * getHealthDependantDamageRatio(attacker)).roundToInt()
+        if (attacker is MapUnitCombatant && defender is MapUnitCombatant) {
+            val maxDamageUnique = attacker.unit.getMatchingUniques(UniqueType.MaxAttackDamage).firstOrNull()
+            if (maxDamageUnique != null) {
+                val maxAttackDamagePercent = maxDamageUnique.params[0].toInt()
+                val minDefenderHealth = (100 - maxAttackDamagePercent).coerceAtLeast(1)
+                return (defender.getHealth() - minDefenderHealth).coerceAtLeast(0).coerceAtMost(rawDamage)
+            }
+        }
+        return rawDamage
     }
 
     /** (max, min) bonus damage dealt to [defender] from an additional [UniqueType.ExtraRangedAttack] - `(0, 0)` if not applicable. */

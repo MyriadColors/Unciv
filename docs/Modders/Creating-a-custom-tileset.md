@@ -51,7 +51,7 @@ This is an example of such a config file that will be explain below:
 
 A boolean value ("true" or "false"). Default value: "false"
 
-If true, an additional "Hexagon" image is placed below each tile and colored in the corresponding BaseTerrain color. This removes the necessity to add individual BaseTerrain images. This is how the "Minimal" tileset works.
+If true, an additional "Square" (or fallback "Hexagon") image is placed below each tile and colored in the corresponding BaseTerrain color. This removes the necessity to add individual BaseTerrain images.
 
 ### useSummaryImages
 
@@ -71,9 +71,9 @@ Defines the color of the fog of war. The color gets approximated by 60% to allow
 
 ### fallbackTileSet
 
-A string value. Default value: "FantasyHex"
+A string value. Default value: "SquareBasic"
 
-The name of another tileset whose images should be used if this tileset is missing images. Can be set to null to disable the the fallback tileset
+The name of another tileset whose images should be used if this tileset is missing images. Can be set to null to disable the fallback tileset.
 
 ### tileScale
 
@@ -100,11 +100,11 @@ An example is given in the code above. For the tile "Grassland+Jungle+Dyes+Tradi
 Unciv distinguishes between "unexplored" tiles, which are tiles the Civ has never seen,
 and "not visible" tiles, which are those that were seen once but now are not.
 
-Not visible tiles are grayed out by design, and on top of that have the `CrosshatchHexagon.png` image applied to them.
+Not visible tiles are grayed out by design, and on top of that have the `CrosshatchSquare.png` (or fallback `CrosshatchHexagon.png`) image applied to them.
 
-Unexplored tiles display the `UnexploredTile.png` image, on top of which `CrosshatchHexagon.png` is applied.
+Unexplored tiles display the `UnexploredTile.png` image, on top of which `CrosshatchSquare.png` is applied.
 
-You can set the CrosshatchHexagon to be functionally invisible by replacing it with a 1px by 1px invisible image.
+You can set the crosshatch overlay to be functionally invisible by replacing it with a 1px by 1px invisible image.
 
 ## Unit images
 
@@ -146,11 +146,13 @@ You can add additional images that will be drawn only when a tile is adjacent to
 
 The images should be placed in the `Images/Tilesets/<tileset name>/Edges` folder, rather than in `/Tiles`.
 
-The name of the tile should be `<tile name>-<origin tile filter>-<destination tile filter>-<neighbor direction>.png`, where direction of one of:
+The name of the tile should be `<tile name>-<origin tile filter>-<destination tile filter>-<neighbor direction>.png`, where direction is one of the 8 square grid neighbor directions:
 
 - Bottom
 - BottomLeft
 - BottomRight
+- Left
+- Right
 - Top
 - TopLeft
 - TopRight

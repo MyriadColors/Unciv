@@ -68,7 +68,9 @@
             "Become the world religion",
             "Have highest score after max turns",
             "Have at least [amount] [countable]",
-            "Have more [countable] than each player's [countable]"
+            "Have more [countable] than each player's [countable]",
+            "Have 3 cities with Legendary Culture",
+            "Control 64% of land and 50% of world population"
           ]
         },
         "description": "List of milestones that must be accomplished to win. See https://yairm210.github.io/Unciv/Modders/Mod-file-structure/5-Miscellaneous-JSON-files/#milestones"
