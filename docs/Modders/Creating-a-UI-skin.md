@@ -64,6 +64,7 @@ These shapes are used all over Unciv and can be replaced to make a lot of UI ele
 | General/ | ExpanderTab | null | |
 | General/ | HealthBar | null | |
 | General/ | KeyCapturingButton | roundedEdgeRectangleSmall | |
+| General/ | RoundedEdgeRectangle | null | |
 | General/ | TabbedPager | null | |
 | General/ | Tooltip | roundedEdgeRectangle | |
 | General/Popup/ | Background | null | |

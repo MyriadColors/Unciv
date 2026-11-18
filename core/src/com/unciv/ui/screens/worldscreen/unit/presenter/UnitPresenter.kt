@@ -9,6 +9,7 @@ import com.unciv.models.ruleset.unique.UniqueType
 import com.unciv.models.translations.tr
 import com.unciv.ui.components.extensions.surroundWithCircle
 import com.unciv.ui.components.extensions.toLabel
+import com.unciv.ui.components.extensions.toTextButton
 import com.unciv.ui.components.fonts.Fonts
 import com.unciv.ui.components.input.onClick
 import com.unciv.ui.components.widgets.UnitIconGroup
@@ -130,7 +131,26 @@ class UnitPresenter(private val unitTable: UnitTable, private val worldScreen: W
         // single selected unit
         if (selectedUnits.size == 1) with(unitTable) {
 
-            unitIconHolder.add(UnitIconGroup(unit, 30f)).pad(5f)
+            val iconGroup = UnitIconGroup(unit, 30f)
+            iconGroup.onClick {
+                worldScreen.openCivilopedia(unit.getBaseUnit().makeLink())
+            }
+            unitIconHolder.add(iconGroup).pad(5f)
+
+            val friendlyTileUnits = unit.getTile().militaryUnits.filter { it.civ() == unit.civ() }
+            if (friendlyTileUnits.size > 1) {
+                val stackBtn = "Stack (${friendlyTileUnits.size})".toTextButton(hideIcons = true)
+                stackBtn.onClick {
+                    unitTable.selectUnit(unit)
+                    for (other in friendlyTileUnits) {
+                        if (other != unit && other is MapUnitView) {
+                            unitTable.selectUnit(other, append = true)
+                        }
+                    }
+                    worldScreen.shouldUpdate = true
+                }
+                unitIconHolder.add(stackBtn).pad(2f)
+            }
 
             for (promotion in unit.getPromotions())
                 if (!promotion.hasUnique(UniqueType.NotShownOnWorldScreen))
@@ -158,8 +178,25 @@ class UnitPresenter(private val unitTable: UnitTable, private val worldScreen: W
                 worldScreen.openCivilopedia(unit.getBaseUnit().makeLink())
             }
         } else { // multiple selected units
-            for (selectedUnitView in selectedUnits)
-                unitTable.unitIconHolder.add(UnitIconGroup(selectedUnitView, 30f)).pad(5f)
+            for (selectedUnitView in selectedUnits) {
+                val iconGroup = UnitIconGroup(selectedUnitView, 30f)
+                iconGroup.onClick {
+                    val ctrlHeld = com.badlogic.gdx.Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.CONTROL_LEFT) ||
+                        com.badlogic.gdx.Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.CONTROL_RIGHT)
+                    if (ctrlHeld && unitTable.selectedUnits.size > 1) {
+                        val remaining = unitTable.selectedUnits.filter { it != selectedUnitView }
+                        unitTable.selectUnit(remaining.first())
+                        for (other in remaining.drop(1)) {
+                            unitTable.selectUnit(other, append = true)
+                        }
+                        unitTable.worldScreen.shouldUpdate = true
+                    } else {
+                        unitTable.selectUnit(selectedUnitView)
+                        unitTable.worldScreen.shouldUpdate = true
+                    }
+                }
+                unitTable.unitIconHolder.add(iconGroup).pad(5f)
+            }
         }
     }
 

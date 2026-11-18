@@ -2,6 +2,7 @@ package com.unciv.ui.components.tilegroups.layers
 
 import com.unciv.view.hasMovement
 import com.unciv.view.isAirUnit
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.utils.Align
 import com.unciv.UncivGame
@@ -53,11 +54,10 @@ class TileLayerUnitFlag(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup
             // Display stack count badge when multiple military units share the tile
             val militaryUnitsCount = if (slot == 1) unit.getTile().militaryUnits.size else 0
             if (militaryUnitsCount > 1) {
-                val stackTable = getStackCountTable(unit, militaryUnitsCount)
+                val stackTable = getStackCountTable(militaryUnitsCount)
                 newIcon.addActor(stackTable)
-                stackTable.toBack()
-                stackTable.y = newIcon.height / 2 - stackTable.height / 2
-                stackTable.x = -stackTable.width * 0.55f
+                stackTable.toFront()
+                stackTable.setPosition(-2f, newIcon.height - stackTable.height + 2f)
             }
 
             // Fade out action indicator for own non-idle units
@@ -98,19 +98,15 @@ class TileLayerUnitFlag(tileGroup: TileGroup, size: Float) : TileLayer(tileGroup
         return airUnitTable
     }
 
-    private fun getStackCountTable(unit: ForeignMapUnitView, stackCount: Int): Table {
-        val iconColor = unit.civ().getOuterColor()
-        val bgColor = unit.civ().getInnerColor()
-
+    private fun getStackCountTable(stackCount: Int): Table {
         val stackTable = Table()
         stackTable.background = BaseScreen.skinStrings.getUiBackground(
-            path = "WorldScreen/AirUnitTable",
-            "", bgColor
+            path = "General/RoundedEdgeRectangle",
+            tintColor = ImageGetter.CHARCOAL.cpy().apply { a = 0.9f }
         )
-        stackTable.pad(0f).defaults().pad(0f)
-        stackTable.setSize(22f, 12f)
-        stackTable.add("x$stackCount".toLabel(iconColor, 10, alignment = Align.center)).expand().center()
-
+        stackTable.pad(1f, 4f, 1f, 4f)
+        stackTable.add("×$stackCount".toLabel(Color.WHITE, 10, alignment = Align.center))
+        stackTable.pack()
         return stackTable
     }
 

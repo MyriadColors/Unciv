@@ -131,10 +131,20 @@ class WorldMapHolder(
                     Concurrency.runOnGLThread("Sound") { SoundPlayer.play(UncivSound.Click) }
 
                     if (button == 0) onTileClicked(child.tileView) // Regular click
-                    else if (button == 1) { // Right button click = move unit to tile
-                        if (!UncivGame.Current.settings.longTapMove) return
+                    else if (button == 1) { // Right button click = stack menu or move unit to tile
                         val unit = worldScreen.bottomUnitTable.selectedUnit
-                            ?: return
+                        val friendlyCount = child.tileView.militaryUnits.count { it.civ() == worldScreen.selectedCiv }
+                        if (friendlyCount > 1 && (unit == null || unit.getTile() == child.tileView || !UncivGame.Current.settings.longTapMove)) {
+                            com.unciv.ui.screens.worldscreen.unit.UnitStackContextMenu(
+                                worldScreen,
+                                child.tileView,
+                                com.badlogic.gdx.Gdx.input.x.toFloat(),
+                                worldScreen.stage.height - com.badlogic.gdx.Gdx.input.y.toFloat()
+                            )
+                            return
+                        }
+                        if (!UncivGame.Current.settings.longTapMove) return
+                        if (unit == null) return
                         onTileRightClicked(unit, child.tileView)
                     }
                 }
