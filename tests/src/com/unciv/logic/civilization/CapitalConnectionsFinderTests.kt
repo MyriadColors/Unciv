@@ -3,6 +3,7 @@
 package com.unciv.logic.civilization
 
 import com.unciv.logic.map.tile.RoadStatus
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert
@@ -25,7 +26,7 @@ import org.junit.runner.RunWith
 @RunWith(BaseTestRunner::class)
 class CapitalConnectionsFinderTests {
 
-    private var testGame = TestGame()
+    private var testGame = TestGame(civVMode = true)
     private lateinit var ourCiv: Civilization
 
     @Before

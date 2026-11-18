@@ -1124,7 +1124,7 @@ enum class UniqueType(
     CanWhipProduction("Can sacrifice population to finish production", UniqueTarget.Global),
     CanHurryProductionWithGold("Can spend Gold to finish production", UniqueTarget.Global),
     FirstStrikes("[amount] First Strikes", UniqueTarget.Unit, UniqueTarget.Promotion),
-    FlankAttack("Flank attack against [unitFilter]", UniqueTarget.Unit, UniqueTarget.Promotion),
+    FlankAttack("Flank attack against [mapUnitFilter]", UniqueTarget.Unit, UniqueTarget.Promotion),
     CivicUpkeepDiscount("[relativeAmount]% Civic upkeep", UniqueTarget.Global),
     CityHealth("[amount] Health", UniqueTarget.Building, UniqueTarget.Global, UniqueTarget.Resource),
     NoBuildingUnhealthiness("Removes unhealthiness from buildings", UniqueTarget.Building, UniqueTarget.Global),

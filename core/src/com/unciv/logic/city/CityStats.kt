@@ -410,17 +410,33 @@ class CityStats(val city: City) {
                             statsFromUniquesBySource: StatTreeNode = getStatsFromUniquesBySource()) {
         val civInfo = city.civ
         val newHappinessList = LinkedHashMap<String, Float>()
-        // Civ IV local happiness: 1 unhappy per citizen, base happy cap from difficulty,
-        // +1 per connected luxury resource, plus buildings/religions/uniques.
-        newHappinessList["Base"] = 4f
-        newHappinessList["Population"] = -city.population.population.toFloat()
-        if (city.whipAngerTurns > 0)
-            newHappinessList["Whip anger"] = -1f
+        if (civInfo.gameInfo.ruleset.modOptions.useCiv4LocalHappiness) {
+            // Civ IV local happiness: 1 unhappy per citizen, base happy cap from difficulty,
+            // +1 per connected luxury resource, plus buildings/religions/uniques.
+            newHappinessList["Base"] = 4f
+            newHappinessList["Population"] = -city.population.population.toFloat()
+            if (city.whipAngerTurns > 0)
+                newHappinessList["Whip anger"] = -1f
 
-        val luxuryCount = civInfo.detailedCivResources
-            .count { it.resource.resourceType == com.unciv.models.ruleset.tile.ResourceType.Luxury && it.amount > 0 }
-        if (luxuryCount > 0)
-            newHappinessList["Luxury resources"] = luxuryCount.toFloat()
+            val luxuryCount = civInfo.detailedCivResources
+                .count { it.resource.resourceType == com.unciv.models.ruleset.tile.ResourceType.Luxury && it.amount > 0 }
+            if (luxuryCount > 0)
+                newHappinessList["Luxury resources"] = luxuryCount.toFloat()
+        } else {
+            val cityUnhappinessPercent = city.getMatchingUniques(UniqueType.UnhappinessFromCitiesPercentage)
+                .sumOf { it.params[0].toInt() } / 100f
+            newHappinessList["Cities"] = -3f * 0.25f * (1f + cityUnhappinessPercent)
+
+            val specialists = city.population.getNewSpecialists().values.sum()
+            val normalPop = (city.population.population - specialists).coerceAtLeast(0)
+            val popUnhappinessPercent = city.getMatchingUniques(UniqueType.UnhappinessFromPopulationTypePercentageChange)
+                .filter { it.params[1] == "Population" || it.params[1] == "All" }
+                .sumOf { it.params[0].toInt() } / 100f
+            val specialistUnhappinessPercent = city.getMatchingUniques(UniqueType.UnhappinessFromPopulationTypePercentageChange)
+                .filter { it.params[1] == "Specialists" || it.params[1] == "Population" || it.params[1] == "All" }
+                .sumOf { it.params[0].toInt() } / 100f
+            newHappinessList["Population"] = -(normalPop * (1f + popUnhappinessPercent) + specialists * (1f + specialistUnhappinessPercent)) * 0.25f
+        }
 
         val happinessFromSpecialists = statsFromSpecialists.happiness.toInt().toFloat()
         if (happinessFromSpecialists > 0) newHappinessList["Specialists"] = happinessFromSpecialists

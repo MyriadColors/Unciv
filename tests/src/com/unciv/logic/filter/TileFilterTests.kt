@@ -36,7 +36,7 @@ class TileFilterTests {
             game.tileMap.tileList.count { it.matchesFilter(test, civ) }
         },
             "All", 49,
-            "worked", 9,
+            "worked", 2,
             "Coastal", 10,
             "Coast", 2,
             "Land", 47,

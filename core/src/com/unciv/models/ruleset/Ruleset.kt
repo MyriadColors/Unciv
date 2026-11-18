@@ -701,7 +701,7 @@ class Ruleset {
             tutorials += createHashmap(json().fromJsonFile(Array<Tutorial>::class.java, tutorialsFile))
 
         // Add objects that might not be present in base ruleset mods, but are required
-        if (modOptions.isBaseRuleset) {
+        if (modOptions.isBaseRuleset && name != BaseRuleset.BasicSquare.fullName) {
             val fallbackRuleset by lazy { RulesetCache.getVanillaRuleset() } // clone at most once
             // This one should be temporary
             if (unitTypes.isEmpty()) {
@@ -745,9 +745,8 @@ class Ruleset {
                             ).isEmpty()
                         })
                     }
-
-            updateResourceTransients()
         }
+        updateResourceTransients()
     }
 
     /** Building costs are unique in that they are dependant on info in the technology part.

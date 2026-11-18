@@ -3,6 +3,7 @@ package com.unciv.logic.filter
 import com.unciv.Constants
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert
@@ -23,7 +24,7 @@ class UnitFilterTests {
         setupModdedGame()
     }
     private fun setupModdedGame(vararg addGlobalUniques: String, withCiv: Boolean = true) {
-        game = TestGame(*addGlobalUniques)
+        game = TestGame(*addGlobalUniques, civVMode = true)
         game.makeHexagonalMap(3)
         if (!withCiv) return
         civ = game.addCiv()
@@ -33,7 +34,7 @@ class UnitFilterTests {
     @Test
     fun testFilteredUnits() {
         val wetTile = game.tileMap[3,1]
-        val deSela = game.addCiv(game.ruleset.nations["Lhasa"]!!)
+        val deSela = game.addCiv(cityStateType = "Religious")
         val city2 = game.addCity(deSela, game.tileMap[-2,1])
         wetTile.setBaseTerrain(ruleset.terrains[Constants.coast]!!)
         val carrier = game.addUnit("Carrier", civ, wetTile)

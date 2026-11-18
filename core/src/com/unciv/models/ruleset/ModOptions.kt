@@ -9,6 +9,8 @@ import com.unciv.models.ruleset.unique.UniqueTarget
 class ModOptions : IHasUniques {
     //region Modder choices
     var isBaseRuleset = false
+    var useCiv4LocalHappiness = true
+    var useCiv4CultureBorders = true
 
     var beliefsToRemove = HashSet<String>()
     var buildingsToRemove = HashSet<String>()

@@ -5,6 +5,7 @@ import com.unciv.logic.city.City
 import com.unciv.logic.city.CityFocus
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.map.GridCoord
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.*
@@ -18,7 +19,7 @@ class CityPopulationManagerTest {
     private lateinit var civ: Civilization
     private lateinit var city: City
 
-    private val testGame = TestGame()
+    private val testGame = TestGame(civVMode = true)
 
     @Before
     fun setUp() {

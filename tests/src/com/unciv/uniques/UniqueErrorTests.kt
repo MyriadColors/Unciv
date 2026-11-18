@@ -10,6 +10,7 @@ import com.unciv.models.ruleset.unique.UniqueType
 import com.unciv.models.ruleset.validation.RulesetErrorSeverity
 import com.unciv.models.ruleset.validation.UniqueValidator
 import com.unciv.models.translations.getPlaceholderParameters
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert
@@ -52,7 +53,7 @@ class UniqueErrorTests {
 
     @Test
     fun testPromotionCircularReferenceWithAcyclicAlternativeIsAllowed() {
-        val game = TestGame()
+        val game = TestGame(civVMode = true)
         val root = game.createUnitPromotion()
         val firstBranch = game.createUnitPromotion()
         val secondBranch = game.createUnitPromotion()
@@ -68,7 +69,7 @@ class UniqueErrorTests {
 
     @Test
     fun testPromotionCircularReferenceWithoutAcyclicAlternativeIsWarned() {
-        val game = TestGame()
+        val game = TestGame(civVMode = true)
         val firstBranch = game.createUnitPromotion()
         val secondBranch = game.createUnitPromotion()
         listOf(firstBranch, secondBranch).forEach { it.unitTypes = listOf("Scout") }
@@ -158,7 +159,7 @@ class UniqueErrorTests {
             println(msg)
         }
         val flagName = CivFlags.CityStateGreatPersonGift.name
-        val game = TestGame()
+        val game = TestGame(civVMode = true)
         game.makeHexagonalMap(2)
         // prevent files access from completing tutorial tasks
         UncivGame.Current.settings.tutorialTasksCompleted.addAll(

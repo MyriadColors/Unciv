@@ -26,7 +26,7 @@ class CityStateTypeStartBiasTests {
 
     @Test
     fun `G&K Maritime city-state type has Coast start bias unique`() {
-        val ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!
+        val ruleset = TestGame(civVMode = true).ruleset
         val maritime = ruleset.cityStateTypes["Maritime"]!!
         Assert.assertTrue(
             maritime.uniqueMap.getMatchingUniques(UniqueType.StartBias, GameContext.IgnoreConditionals)
@@ -36,7 +36,7 @@ class CityStateTypeStartBiasTests {
 
     @Test
     fun `Nation getStartBias merges type unique and nation field`() {
-        val ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!
+        val ruleset = TestGame(civVMode = true).ruleset
         val type = CityStateType().apply {
             name = "TestType"
             uniques = arrayListOf("Start bias [Coast]")
@@ -55,7 +55,7 @@ class CityStateTypeStartBiasTests {
 
     @Test
     fun `Nation StartBias unique merges with field`() {
-        val ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!
+        val ruleset = TestGame(civVMode = true).ruleset
         val nation = Nation().apply {
             name = "BiasNation"
             startBias = arrayListOf("Hills")

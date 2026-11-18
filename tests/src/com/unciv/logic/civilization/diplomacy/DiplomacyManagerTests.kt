@@ -5,6 +5,7 @@ import com.unciv.logic.civilization.diplomacy.DiplomacyTurnManager.nextTurn
 import com.unciv.logic.map.GridCoord
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.ruleset.BeliefType
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -17,7 +18,7 @@ import org.junit.runner.RunWith
 @RunWith(BaseTestRunner::class)
 class DiplomacyManagerTests {
 
-    private val testGame = TestGame()
+    private val testGame = TestGame(civVMode = true)
 
     fun addCiv(cityStateType: String? = null, defaultUnitTile: Tile? = null) = testGame.addCiv(cityStateType = cityStateType).apply { testGame.addUnit("Warrior", this@apply, defaultUnitTile) }
     // We need to add units so they are not considered defeated, since defeated civs are filtered out of knowncivs

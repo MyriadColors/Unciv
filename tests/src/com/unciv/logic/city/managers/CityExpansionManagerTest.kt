@@ -3,6 +3,7 @@ package com.unciv.logic.city.managers
 import com.unciv.logic.city.City
 import com.unciv.logic.civilization.Civilization
 import com.unciv.logic.map.GridCoord
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -20,7 +21,7 @@ class CityExpansionManagerTest {
     private lateinit var city: City
     private val cityExpansionManager = CityExpansionManager()
 
-    private val testGame = TestGame()
+    private val testGame = TestGame(civVMode = true)
 
     @Before
     fun setUp() {

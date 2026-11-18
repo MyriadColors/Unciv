@@ -12,6 +12,7 @@ import com.unciv.models.ruleset.BeliefType
 import com.unciv.models.ruleset.unique.Unique
 import com.unciv.models.ruleset.unique.UniqueTriggerActivation
 import com.unciv.models.stats.Stats
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert
@@ -28,7 +29,7 @@ class GlobalUniquesTests {
 
     @Before
     fun initTheWorld() {
-        game = TestGame()
+        game = TestGame(civVMode = true)
     }
 
     // region base stat bonus providing uniques

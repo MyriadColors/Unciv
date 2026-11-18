@@ -289,6 +289,24 @@ class CityExpansionManager : IsPartOfGameInfoSerialization {
     }
 
     fun nextTurn(culture: Float) {
+        if (!city.civ.gameInfo.ruleset.modOptions.useCiv4CultureBorders) {
+            cultureStored += culture.toInt()
+            if (cultureStored >= getCultureToNextTile()) {
+                chooseNewTileToOwn()?.let {
+                    cultureStored -= getCultureToNextTile()
+                    takeOwnership(it)
+                    if (city.civ.isHuman())
+                        city.civ.addNotification(
+                            "[${city.name}] has expanded its borders!",
+                            LocationAction(it.position),
+                            NotificationCategory.Cities,
+                            NotificationIcons.Culture
+                        )
+                }
+            }
+            return
+        }
+
         val previousLevel = getCultureLevel()
         cultureStored += culture.toInt()
         val newLevel = getCultureLevel()

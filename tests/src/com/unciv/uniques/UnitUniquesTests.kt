@@ -9,6 +9,7 @@ import com.unciv.models.ruleset.tile.TileImprovement
 import com.unciv.models.ruleset.unique.UniqueTriggerActivation
 import com.unciv.models.ruleset.unique.UniqueType
 import com.unciv.models.translations.fillPlaceholders
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import com.unciv.ui.components.UnitMovementMemoryType
@@ -27,7 +28,7 @@ class UnitUniquesTests {
 
     @Before
     fun initTheWorld() {
-        game = TestGame()
+        game = TestGame(civVMode = true)
     }
 
     @Test

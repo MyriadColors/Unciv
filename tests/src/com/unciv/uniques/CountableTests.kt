@@ -30,8 +30,8 @@ class CountableTests {
     private lateinit var civ: Civilization
     private lateinit var city: City
 
-    private fun setupModdedGame(vararg addGlobalUniques: String, withCiv: Boolean = true): Ruleset {
-        game = TestGame(*addGlobalUniques)
+    private fun setupModdedGame(vararg addGlobalUniques: String, withCiv: Boolean = true, civVMode: Boolean = false): Ruleset {
+        game = TestGame(*addGlobalUniques, civVMode = civVMode)
         game.makeHexagonalMap(3)
         if (!withCiv) return game.ruleset
         civ = game.addCiv()
@@ -212,6 +212,7 @@ class CountableTests {
             "[+42 Faith] <when number of [turns] is less than [42]>",
             "[+1 Happiness] <for every [City-States]>",
             "[+1 Happiness] <for every [[42] Monkeys]>",
+            civVMode = true,
         )
 
         val cityState = game.addCiv(cityStateType = game.ruleset.cityStateTypes.keys.first())
@@ -284,7 +285,7 @@ class CountableTests {
     @Test
     fun testKnownCivsCountable() {
         // A big map with distant cities: civilizations must not meet by seeing each other
-        game = TestGame()
+        game = TestGame(civVMode = true)
         game.makeHexagonalMap(12)
         val ourCiv = game.addCiv()
         val otherMajorCiv = game.addCiv()
@@ -318,7 +319,7 @@ class CountableTests {
             Countables.getCountableAmount(test, context)
         },
             "Owned [All] Tiles", 18,
-            "Owned [worked] Tiles", 9,
+            "Owned [worked] Tiles", 2,
             "Owned [Coastal] Tiles", 10,
             "Owned [Coast] Tiles", 2,
             "Owned [Land] Tiles", 16,

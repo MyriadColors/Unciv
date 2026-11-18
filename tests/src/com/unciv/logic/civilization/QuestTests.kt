@@ -6,6 +6,7 @@ import com.unciv.logic.city.City
 import com.unciv.logic.civilization.managers.quests.QuestManager
 import com.unciv.logic.map.tile.Tile
 import com.unciv.models.ruleset.QuestName
+import com.unciv.models.metadata.BaseRuleset
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -25,7 +26,7 @@ class QuestTests {
 
     @Before
     fun setUp() {
-        testGame = TestGame()
+        testGame = TestGame(civVMode = true)
         civ = testGame.addCiv()
         cityState = testGame.addCiv(cityStateType = "Maritime")
         civ.diplomacyFunctions.makeCivilizationsMeet(cityState)

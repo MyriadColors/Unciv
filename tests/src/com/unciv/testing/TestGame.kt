@@ -16,6 +16,7 @@ import com.unciv.models.Religion
 import com.unciv.models.metadata.BaseRuleset
 import com.unciv.models.metadata.GameSettings
 import com.unciv.models.ruleset.*
+import com.unciv.models.ruleset.nation.CityStateType
 import com.unciv.models.ruleset.nation.Nation
 import com.unciv.models.ruleset.tile.TileImprovement
 import com.unciv.models.ruleset.tile.TileResource
@@ -38,7 +39,7 @@ import kotlin.random.Random
  *  @param addGlobalUniques optional global uniques to add to the ruleset
  *  @param forUITesting default initializes UncivGame.Current and its settings, `true` initializes ImageGetter ruleset instead. Needed for FasterUIDevelopment.
  */
-class TestGame(vararg addGlobalUniques: String, forUITesting: Boolean = false) {
+class TestGame(vararg addGlobalUniques: String, forUITesting: Boolean = false, civVMode: Boolean = false) {
 
     private var objectsCreated = 0
     val ruleset: Ruleset
@@ -64,6 +65,42 @@ class TestGame(vararg addGlobalUniques: String, forUITesting: Boolean = false) {
         if (RulesetCache.isEmpty())
             RulesetCache.loadRulesets(noMods = true)
         ruleset = RulesetCache[BaseRuleset.BasicSquare.fullName]!!.clone()
+        if (civVMode) {
+            ruleset.modOptions.useCiv4LocalHappiness = false
+            ruleset.modOptions.useCiv4CultureBorders = false
+            for (typeName in listOf("Cultured", "Maritime", "Mercantile", "Militaristic", "Religious")) {
+                if (!ruleset.cityStateTypes.containsKey(typeName)) {
+                    ruleset.cityStateTypes[typeName] = CityStateType().apply {
+                        name = typeName
+                        if (typeName == "Maritime") {
+                            friendBonusUniques.add("[+2 Food] [in capital]")
+                            allyBonusUniques.add("[+1 Food] [in all cities]")
+                            allyBonusUniques.add("[+2 Food] [in capital]")
+                            uniques.add("Start bias [Coast]")
+                        }
+                        if (typeName == "Cultured") {
+                            friendBonusUniques.add("Provides [3] [Culture] in your Capital")
+                            allyBonusUniques.add("Provides [6] [Culture] in your Capital")
+                        }
+                    }
+                }
+            }
+            for (questName in listOf("Route", "Build Road", "Clear Barbarian Camp", "Connect Resource", "Construct Wonder", "Acquire Great Person", "Great Person", "Conquer City State", "Find Player", "Find Natural Wonder", "Give Gold", "Pledge to Protect", "Contest Culture", "Contest Faith", "Contest Tech", "Bully City State", "Denounce Civilization")) {
+                if (!ruleset.quests.containsKey(questName)) {
+                    ruleset.quests[questName] = Quest().apply {
+                        name = questName
+                        description = questName
+                        duration = 20
+                        minimumCivs = if (questName == "Route" || questName == "Contest Culture" || questName == "Contest Faith" || questName == "Contest Tech") 2 else 1
+                        weightForCityStateType["Militaristic"] = 1f
+                        weightForCityStateType["Maritime"] = 1f
+                        weightForCityStateType["Cultured"] = 1f
+                        weightForCityStateType["Mercantile"] = 1f
+                        weightForCityStateType["Religious"] = 1f
+                    }
+                }
+            }
+        }
         ruleset.addGlobalUniques(*addGlobalUniques)
         if (forUITesting)
             ImageGetter.ruleset = ruleset
