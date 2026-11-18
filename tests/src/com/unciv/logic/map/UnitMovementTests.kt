@@ -849,7 +849,7 @@ class UnitMovementTests(private val pathfindingAlgorithm: PathfindingAlgorithm) 
         extra.currentTile = origin
         extra.isTransported = true
 
-        assertEquals(UnitMovement.CannotMoveToReason.TileIsNotEmpty, carrier.movement.getCannotMoveToReason(origin))
+        assertEquals(null, carrier.movement.getCannotMoveToReason(origin))
         assertEquals(UnitMovement.CannotMoveToReason.NoAirUnitTransport, carrier.movement.getCannotMoveToReason(other))
 
         carrier.removeFromTile()

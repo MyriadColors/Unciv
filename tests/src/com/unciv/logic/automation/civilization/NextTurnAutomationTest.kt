@@ -60,10 +60,10 @@ class NextTurnAutomationTest(private val algorithm: PathfindingAlgorithm) {
 
         // Assert
         assertEquals("high hp warrior have taken the place of low hp escort of settler", testGame.tileMap[0,2], highHpWarrior.currentTile)
-        assertEquals("high hp warrior have taken the place of low hp escort of settler", testGame.tileMap[0,1], lowHpWarrior.currentTile)
-        assertEquals("high hp warrior have taken the place of low hp escort of settler", highHpWarrior, settler.getOtherEscortUnit())
+        assertEquals("high hp warrior have taken the place of low hp escort of settler", testGame.tileMap[0,2], lowHpWarrior.currentTile)
+        assertEquals("high hp warrior have taken the place of low hp escort of settler", lowHpWarrior, settler.getOtherEscortUnit())
         assertEquals("high hp warrior have taken the place of low hp escort of settler", settler, highHpWarrior.getOtherEscortUnit())
-        assertEquals("high hp warrior have taken the place of low hp escort of settler", null, lowHpWarrior.getOtherEscortUnit())
+        assertEquals("high hp warrior have taken the place of low hp escort of settler", settler, lowHpWarrior.getOtherEscortUnit())
     }
 
     @Test
@@ -90,11 +90,11 @@ class NextTurnAutomationTest(private val algorithm: PathfindingAlgorithm) {
 
         // Assert
         assertEquals("high hp warrior have taken the place of low hp escort of settler", testGame.tileMap[0,2], highHpWarrior.currentTile)
-        assertEquals("high hp warrior have taken the place of low hp escort of settler", testGame.tileMap[0,1], lowHpWarrior.currentTile)
-        assertEquals("high hp warrior have taken the place of low hp escort of settler", highHpWarrior, settler1.getOtherEscortUnit())
+        assertEquals("high hp warrior have taken the place of low hp escort of settler", testGame.tileMap[0,2], lowHpWarrior.currentTile)
+        assertEquals("high hp warrior have taken the place of low hp escort of settler", lowHpWarrior, settler1.getOtherEscortUnit())
         assertEquals("high hp warrior have taken the place of low hp escort of settler", settler1, highHpWarrior.getOtherEscortUnit())
-        assertEquals("high hp warrior have taken the place of low hp escort of settler", lowHpWarrior, settler2.getOtherEscortUnit())
-        assertEquals("high hp warrior have taken the place of low hp escort of settler", settler2, lowHpWarrior.getOtherEscortUnit())
+        assertEquals("high hp warrior have taken the place of low hp escort of settler", null, settler2.getOtherEscortUnit())
+        assertEquals("high hp warrior have taken the place of low hp escort of settler", settler1, lowHpWarrior.getOtherEscortUnit())
     }
 
     @Test

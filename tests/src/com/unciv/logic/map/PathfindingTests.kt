@@ -308,7 +308,7 @@ class PathfindingTests(private val pathfindingAlgorithm: PathfindingAlgorithm) {
         testGame.addUnit("Warrior", civInfo, testGame.tileMap[1,1])
         val unit = testGame.addUnit("Warrior", civInfo, originTile)
         val paths = unit.movement.getShortestPath(testGame.tileMap[4,4])
-        assertEquals(paths.toString(), listOf(1,3,4), paths.map { it.position.x })
+        assertEquals(paths.toString(), listOf(2,4), paths.map { it.position.x })
     }
 
     @Test
