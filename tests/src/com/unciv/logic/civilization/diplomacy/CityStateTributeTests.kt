@@ -2,6 +2,7 @@ package com.unciv.logic.civilization.diplomacy
 
 import com.unciv.logic.civilization.CivFlags
 import com.unciv.logic.civilization.diplomacy.DiplomacyTurnManager.nextTurn
+import com.unciv.models.ruleset.nation.CityStateType
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -137,7 +138,11 @@ class CityStateTributeTests {
         ranked: Boolean = true,
         uniques: List<String> = emptyList()
     ) {
-        private val game = TestGame()
+        private val game = TestGame().apply {
+            if ("Cultured" !in ruleset.cityStateTypes) {
+                ruleset.cityStateTypes["Cultured"] = CityStateType().apply { name = "Cultured" }
+            }
+        }
         val demander = game.addCiv(*uniques.toTypedArray(), isPlayer = true)
         val cityState = game.addCiv(cityStateType = "Cultured")
 
@@ -148,15 +153,16 @@ class CityStateTributeTests {
             cityState.cityStatePersonality = CityStatePersonality.Neutral
             game.addCity(cityState, game.getTile(0, 0), initialPopulation = population)
 
+            val unitName = game.ruleset.units.values.filter { it.isLandUnit && it.isMilitary }.maxByOrNull { it.strength }?.name ?: "Warrior"
             if (ranked) {
                 val unitTile = game.getTile(if (withNearbyUnit) 2 else 6, 0)
-                game.addUnit("Giant Death Robot", demander, unitTile)
+                game.addUnit(unitName, demander, unitTile)
             }
             if (withProtector || !ranked) {
                 val rival = game.addCiv()
-                game.addUnit("Giant Death Robot", rival, game.getTile(-6, 0))
+                game.addUnit(unitName, rival, game.getTile(-6, 0))
                 if (withProtector) {
-                    game.addUnit("Giant Death Robot", rival, game.getTile(-7, 0))
+                    game.addUnit(unitName, rival, game.getTile(-7, 0))
                     cityState.diplomacyFunctions.makeCivilizationsMeet(rival)
                     cityState.getDiplomacyManager(rival)!!.diplomaticStatus = DiplomaticStatus.Protector
                 }
