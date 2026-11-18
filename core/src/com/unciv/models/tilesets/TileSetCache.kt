@@ -64,18 +64,7 @@ object TileSetCache : HashMap<String, TileSet>() {
 
         loadConfigFiles(internalFiles, TileSet.DEFAULT)
 
-        // Load mod TileSets
-        val modsHandles =
-            if (consoleMode) FileHandle("mods").list().toList()
-            else RulesetCache.values.mapNotNull { it.folderLocation }
-
-        for (modFolder in modsHandles) {
-            val modName = modFolder.name()
-            if (!modFolder.isDirectory || modName.startsWith('.'))
-                continue
-            val modFiles = modFolder.child("jsons/TileSets").list().toList()
-            loadConfigFiles(modFiles, modName)
-        }
+        // Mod TileSets are currently disabled (only built-in TileSets are loaded)
 
         values.forEach { it.fallback = get(it.config.fallbackTileSet) }
 

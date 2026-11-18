@@ -113,7 +113,7 @@ object RulesetCache : HashMap<String, Ruleset>() {
 
     fun getSortedBaseRulesets(): List<String> {
         val baseRulesets = values
-            .filter { it.modOptions.isBaseRuleset }
+            .filter { it.modOptions.isBaseRuleset && BaseRuleset.entries.any { br -> br.fullName == it.name } }
             .map { it.name }
             .distinct()
         if (baseRulesets.size < 2) return baseRulesets

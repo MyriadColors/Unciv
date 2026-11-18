@@ -10,6 +10,7 @@ import com.unciv.ui.components.widgets.ExpanderTab
 import com.unciv.ui.components.widgets.UncivTextField
 import com.unciv.ui.components.UncivTooltip.Companion.addTooltip
 import com.unciv.ui.components.extensions.surroundWithCircle
+import com.unciv.ui.components.extensions.toCheckBox
 import com.unciv.ui.components.extensions.toLabel
 import com.unciv.ui.components.fonts.Fonts
 import com.unciv.ui.components.input.KeyCharAndCode
@@ -71,14 +72,16 @@ internal class ModManagementOptions(private val modManagementScreen: ModManageme
 
     class Filter(
         val text: String,
-        val topic: String
+        val topic: String,
+        val compatibleOnly: Boolean
     )
 
     fun getFilter(): Filter {
-        return Filter(textField.text, category.topic)
+        return Filter(textField.text, category.topic, compatibleOnlyCheckBox.isChecked)
     }
 
     private val textField = UncivTextField("Enter search text")
+    private val compatibleOnlyCheckBox = "Show compatible mods only".toCheckBox(true)
 
     var category = ModCategories.default()
 
@@ -148,7 +151,13 @@ internal class ModManagementOptions(private val modManagementScreen: ModManageme
             it.add("Sort Current:".toLabel()).left()
             it.add(sortInstalledSelect).right().padBottom(7.5f).row()
             it.add("Sort Downloadable:".toLabel()).left()
-            it.add(sortOnlineSelect).right().row()
+            it.add(sortOnlineSelect).right().padBottom(7.5f).row()
+            it.add(compatibleOnlyCheckBox).colspan(2).left().row()
+        }
+
+        compatibleOnlyCheckBox.onChange {
+            modManagementScreen.refreshInstalledModTable()
+            modManagementScreen.refreshOnlineModTable()
         }
 
         searchIcon.touchable = Touchable.enabled

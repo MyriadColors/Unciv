@@ -474,7 +474,13 @@ class ModManagementScreen private constructor(
         }
 
         rightSideButton.isVisible = true
-        rightSideButton.enable()
+        val issue = onlineModInfo[repo.name]?.compatibilityIssue()
+        if (issue != null) {
+            modActionTable.add(issue.toLabel(Color.SALMON).apply { wrap = true }).growX().row()
+            rightSideButton.disable()
+        } else {
+            rightSideButton.enable()
+        }
         val label = if (installedModInfo[repo.name]?.hasUpdate == true) "Update [${cleanModName(repo.name)}]"
             else "Download [${cleanModName(repo.name)}]"
         rightSideButton.setText(label.tr())
@@ -520,7 +526,7 @@ class ModManagementScreen private constructor(
                         ToastPopup(msg, this@ModManagementScreen, 4000L)
                     }
 
-                    if (RulesetCache[repoName]?.modOptions?.hasUnique(UniqueType.ModIsAudioVisualOnly) == true)
+                    if (RulesetCache[repoName]?.let { com.unciv.models.ruleset.validation.ModCompatibility.isAssetOnlyMod(it) && it.modOptions.hasUnique(UniqueType.ModIsAudioVisualOnly) } == true)
                         game.settings.visualMods.add(repoName)
                     updateInstalledModUIData(repoName)
                     refreshInstalledModTable()

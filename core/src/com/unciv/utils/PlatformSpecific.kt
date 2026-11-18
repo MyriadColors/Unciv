@@ -5,7 +5,7 @@ import java.util.Locale
 interface PlatformSpecific {
 
     /** Whether online multiplayer transport features are available on this platform. */
-    val supportsOnlineMultiplayer: Boolean get() = true
+    val supportsOnlineMultiplayer: Boolean get() = false
 
     /** Notifies player that his multiplayer turn started */
     fun notifyTurnStarted() {}

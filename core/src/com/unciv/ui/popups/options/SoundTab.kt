@@ -48,7 +48,8 @@ internal class SoundTab(
                 try {
                     game.musicController.downloadDefaultFile()
                     launchOnGLThread {
-                        replacePage { optionsPopup -> SoundTab(optionsPopup) }
+                        if (stage != null)
+                            replacePage { optionsPopup -> SoundTab(optionsPopup) }
                         game.musicController.chooseTrack(flags = MusicTrackChooserFlags.setPlayDefault)
                     }
                 } catch (_: Exception) {

@@ -56,11 +56,30 @@ object ModCompatibility {
         return folder.list("atlas").isNotEmpty()
     }
 
+    fun isAssetOnlyMod(mod: Ruleset): Boolean {
+        if (mod.modOptions.isBaseRuleset) return false
+        val folder = mod.folderLocation ?: return false
+
+        // Disallow any gameplay JSONs (only ModOptions.json and Skins/ are allowed)
+        val jsonFolder = folder.child("jsons")
+        if (jsonFolder.exists() && jsonFolder.isDirectory) {
+            val jsonEntries = jsonFolder.list()
+            if (jsonEntries.any {
+                if (it.isDirectory) it.name() != "Skins"
+                else it.name() != "ModOptions.json"
+            }) return false
+        }
+
+        // Disallow tileset assets in atlases
+        if (folder.list("atlas").any { atlasFile ->
+            atlasFile.readString().lineSequence().any { it.startsWith("TileSets/") }
+        }) return false
+
+        return isAudioVisualGuessed(mod) || folder.child("Skins").let { it.exists() && it.isDirectory && it.list().isNotEmpty() }
+    }
+
     @Readonly
-    fun isExtensionMod(mod: Ruleset) =
-        !mod.modOptions.isBaseRuleset
-            && mod.name.isNotBlank()
-            && !mod.modOptions.hasUnique(UniqueType.ModIsAudioVisualOnly)
+    fun isExtensionMod(mod: Ruleset) = false
 
     @Readonly
     fun isConstantsOnly(mod: Ruleset): Boolean {

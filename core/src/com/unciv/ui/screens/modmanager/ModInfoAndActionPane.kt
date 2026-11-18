@@ -62,7 +62,7 @@ internal class ModInfoAndActionPane : Table() {
         val modName = mod.name
         val modOptions = mod.modOptions  // The ModOptions as enriched by us with GitHub metadata when originally downloaded
         isBuiltin = modOptions.modUrl.isEmpty() && BaseRuleset.entries.any { it.fullName == modName }
-        enableVisualCheckBox = ModCompatibility.isAudioVisualMod(mod)
+        enableVisualCheckBox = ModCompatibility.isAssetOnlyMod(mod)
         update(
             isLocal = true,
             modName, modOptions.modUrl, modOptions.defaultBranch,
@@ -131,6 +131,8 @@ internal class ModInfoAndActionPane : Table() {
     fun addVisualCheckBox(startsOutChecked: Boolean = false, changeAction: ((Boolean)->Unit)? = null) {
         if (enableVisualCheckBox)
             add("Permanent audiovisual mod".toCheckBox(startsOutChecked, changeAction)).row()
+        else if (!isBuiltin)
+            add("Only asset-only mods (excluding tilesets) are currently supported.".toLabel(com.badlogic.gdx.graphics.Color.SALMON).apply { wrap = true }).growX().row()
     }
 
     fun addUpdateModButton(modInfo: ModUIData): TextButton? {

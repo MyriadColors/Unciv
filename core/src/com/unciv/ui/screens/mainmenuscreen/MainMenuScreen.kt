@@ -173,7 +173,7 @@ class MainMenuScreen: BaseScreen(), RecreateOnResize {
 
         val multiplayerTable = getMenuButton("Multiplayer", "OtherIcons/Multiplayer", KeyboardBinding.Multiplayer) {
             if (game.supportsOnlineMultiplayer) game.pushScreen { MultiplayerScreen() }
-            else ToastPopup("Online multiplayer is unavailable in the browser preview.", this)
+            else ToastPopup("Multiplayer is currently disabled until further notice.", this)
         }
         column2.add(multiplayerTable).row()
 

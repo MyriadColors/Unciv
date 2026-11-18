@@ -49,7 +49,45 @@ class ModUIData private constructor(
         else -> ""
     }
 
+    internal fun compatibilityIssue(): String? {
+        if (ruleset != null) {
+            if (ruleset.folderLocation == null) return null // Built-in rulesets (e.g. BasicSquare)
+            if (ruleset.modOptions.isBaseRuleset)
+                return "Ruleset mods are currently disabled due to engine differences (square grid & Civ IV mechanics)."
+            val folder = ruleset.folderLocation!!
+            val jsonFolder = folder.child("jsons")
+            if (jsonFolder.exists() && jsonFolder.isDirectory &&
+                jsonFolder.list().any {
+                    if (it.isDirectory) it.name() != "Skins"
+                    else it.name() != "ModOptions.json"
+                }
+            ) {
+                return "Ruleset/gameplay mods are currently disabled due to engine differences (square grid & Civ IV mechanics)."
+            }
+            if (folder.list("atlas").any { atlasFile ->
+                    atlasFile.readString().lineSequence().any { it.startsWith("TileSets/") }
+                }) {
+                return "Tileset mods are currently disabled because external hex tilesets are incompatible with the square grid."
+            }
+            if (com.unciv.models.ruleset.validation.ModCompatibility.isAssetOnlyMod(ruleset))
+                return null
+            return "Only asset-only mods (graphics, audio, skins — excluding tilesets) are currently supported."
+        }
+        if (repo != null) {
+            if ("unciv-mod-rulesets" in repo.topics)
+                return "Ruleset mods are currently disabled due to engine differences (square grid & Civ IV mechanics)."
+            val textToCheck = (repo.name + " " + (repo.description ?: "")).lowercase()
+            if (listOf("tileset", "tile set", "hex", "tiles").any { it in textToCheck })
+                return "Tileset mods are currently disabled because external hex tilesets are incompatible with the square grid."
+            if ("unciv-mod-graphics" in repo.topics || "unciv-mod-audio" in repo.topics)
+                return null
+            return "Only asset-only mods (graphics, audio, skins — excluding tilesets) are currently supported."
+        }
+        return null
+    }
+
     internal fun matchesFilter(filter: ModManagementOptions.Filter): Boolean = when {
+        filter.compatibleOnly && compatibilityIssue() != null -> false
         !matchesCategory(filter) -> false
         filter.text.isEmpty() -> true
         name.contains(filter.text, true) -> true
