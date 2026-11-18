@@ -52,6 +52,10 @@ class TechPickerScreen(
     private var lines = NonTransformGroup().apply { touchable = Touchable.disabled }
     private var orderIndicators = NonTransformGroup().apply { touchable = Touchable.disabled }
     private var eraLabels = ArrayList<Label>()
+    private var hoveredTechName: String? = null
+    private val edgeToActors = HashMap<Pair<String, String>, MutableList<com.badlogic.gdx.scenes.scene2d.Actor>>()
+    private val techGridCoords = HashMap<String, Pair<Int, Int>>()
+    private var cellTables: Array<Array<Table>> = emptyArray()
 
     /** We need this to be a separate table, and NOT the topTable, because *inhales*
      * When call setConnectingLines we need to pack() the table so that the lines will align correctly, BUT
@@ -92,9 +96,9 @@ class TechPickerScreen(
         tempTechsToResearch = ArrayList(civTech.techsToResearch)
 
         createTechTable()
-        setButtonsInfo()
         techTable.addActor(lines)
         techTable.addActor(orderIndicators)
+        setButtonsInfo()
         topTable.add(techTable)
         techTable.background = skinStrings.getUiBackground("TechPickerScreen/Background", tintColor = skinStrings.skinConfig.clearColor)
         pickerPane.bottomTable.background = skinStrings.getUiBackground("TechPickerScreen/BottomTable", tintColor = skinStrings.skinConfig.clearColor)
@@ -191,6 +195,8 @@ class TechPickerScreen(
             techTable.add(table1).fill().colspan(columnSpan)
         }
 
+        cellTables = Array(techMatrix.size) { Array(rows) { Table() } }
+
         for (rowIndex in 0 until rows) {
 
             techTable.row()
@@ -198,9 +204,10 @@ class TechPickerScreen(
             for (columnIndex in techMatrix.indices) {
                 val tech = techMatrix[columnIndex][rowIndex]
 
-                val table = Table().pad(2f).padRight(60f).padLeft(20f)
+                val table = Table().pad(2f).padTop(14f).padBottom(14f).padRight(60f).padLeft(20f)
+                cellTables[columnIndex][rowIndex] = table
                 if (rowIndex == 0)
-                    table.padTop(7f)
+                    table.padTop(14f)
 
                 if (erasNamesToColumns[civTech.era.name]?.contains(columnIndex) == true)
                     table.background = skinStrings.getUiBackground("TechPickerScreen/Background", tintColor = queuedTechColor.darken(0.5f))
@@ -211,9 +218,24 @@ class TechPickerScreen(
                     val techButton = TechButton(tech.name, civTech, false, techIconsIndex)
                     table.add(techButton)
                     techNameToButton[tech.name] = techButton
+                    techGridCoords[tech.name] = columnIndex to rowIndex
                     techButton.onClick { selectTechnology(tech, queue = false, center = false) }
                     techButton.onRightClick { selectTechnology(tech, queue = true, center = false) }
                     techButton.onDoubleClick(UncivSound.Paper) { tryExit() }
+                    techButton.addListener(object : com.badlogic.gdx.scenes.scene2d.InputListener() {
+                        override fun enter(event: com.badlogic.gdx.scenes.scene2d.InputEvent?, x: Float, y: Float, pointer: Int, fromActor: com.badlogic.gdx.scenes.scene2d.Actor?) {
+                            if (pointer == -1) {
+                                hoveredTechName = tech.name
+                                updateLineFocusHighlighting()
+                            }
+                        }
+                        override fun exit(event: com.badlogic.gdx.scenes.scene2d.InputEvent?, x: Float, y: Float, pointer: Int, toActor: com.badlogic.gdx.scenes.scene2d.Actor?) {
+                            if (pointer == -1 && hoveredTechName == tech.name) {
+                                hoveredTechName = null
+                                updateLineFocusHighlighting()
+                            }
+                        }
+                    })
                     techTable.add(table).fillX()
                 }
             }
@@ -254,6 +276,7 @@ class TechPickerScreen(
         scrollPane.updateVisualScroll()
 
         lines.clear()
+        edgeToActors.clear()
 
         for (eraLabel in eraLabels) {
             val coords = Vector2(0f, 0f)
@@ -265,61 +288,274 @@ class TechPickerScreen(
             lines.addActor(line)
         }
 
+        val cols = cellTables.size
+        val numRows = if (cols > 0) cellTables[0].size else 0
+        val router = TechLineRouter(cols, numRows) { col, row ->
+            cellTables[col][row].children.any { it is TechButton }
+        }
+
+        data class EdgeSpec(val prereq: String, val tech: Technology, val isOr: Boolean)
+        val edgeSpecs = ArrayList<EdgeSpec>()
+        val routedInputs = ArrayList<TechLineRouter.RoutedEdge>()
+
         for (tech in ruleset.technologies.values) {
             val techButton = techNameToButton[tech.name]
             if (techButton == null) {
                 ToastPopup("Tech ${tech.name} appears to be missing - perhaps two techs have the same row & column", this)
                 continue
             }
-            addTechPrerequisiteLines(tech, techButton)
+            for (prerequisite in tech.prerequisites) {
+                if (techNameToButton[prerequisite] == null) {
+                    ToastPopup("Tech $prerequisite. prerequisite of ${tech.name}, appears to be missing - perhaps two techs have the same row & column", this)
+                    continue
+                }
+                val from = techGridCoords[prerequisite] ?: continue
+                val to = techGridCoords[tech.name] ?: continue
+                edgeSpecs.add(EdgeSpec(prerequisite, tech, isOr = false))
+                routedInputs.add(router.route("${prerequisite}->${tech.name}", prerequisite, from.first, from.second, to.first, to.second))
+            }
+            val orPrerequisites = tech.uniqueObjects
+                .filter { it.type == com.unciv.models.ruleset.unique.UniqueType.Unavailable }
+                .flatMap { it.modifiers }
+                .filter { it.type == com.unciv.models.ruleset.unique.UniqueType.ConditionalNoTech }
+                .map { it.params[0] }
+                .distinct()
+                .filter { it !in tech.prerequisites }
+            for (prerequisite in orPrerequisites) {
+                if (techNameToButton[prerequisite] == null) continue
+                val from = techGridCoords[prerequisite] ?: continue
+                val to = techGridCoords[tech.name] ?: continue
+                edgeSpecs.add(EdgeSpec(prerequisite, tech, isOr = true))
+                routedInputs.add(router.route("${prerequisite}->${tech.name}", prerequisite, from.first, from.second, to.first, to.second))
+            }
         }
 
-        lines.children.filter { it.color == currentTechColor && it.color != Color.WHITE.cpy() }
-            .forEach { it.toFront() }
+        val lanedRoutes = router.assignLanes(routedInputs)
+        for (i in edgeSpecs.indices) {
+            drawRoutedEdge(edgeSpecs[i].tech, edgeSpecs[i].prereq, edgeSpecs[i].isOr, lanedRoutes[i])
+        }
 
         lines.setSize(techTable.width, techTable.height)
+        updateLineFocusHighlighting()
+    }
+
+    private fun gutterX(gx: Int): Float {
+        if (cellTables.isEmpty()) return 0f
+        return when {
+            gx <= 0 -> {
+                val cell = cellTables[0][0]
+                val v = Vector2(0f, 0f)
+                cell.localToStageCoordinates(v)
+                techTable.stageToLocalCoordinates(v)
+                v.x + 8f
+            }
+            gx >= cellTables.size -> {
+                val cell = cellTables.last()[0]
+                val v = Vector2(cell.width, 0f)
+                cell.localToStageCoordinates(v)
+                techTable.stageToLocalCoordinates(v)
+                v.x - 8f
+            }
+            else -> {
+                val leftCell = cellTables[gx - 1][0]
+                val rightCell = cellTables[gx][0]
+                val vL = Vector2(leftCell.width - 60f, 0f)
+                val vR = Vector2(20f, 0f)
+                leftCell.localToStageCoordinates(vL)
+                rightCell.localToStageCoordinates(vR)
+                techTable.stageToLocalCoordinates(vL)
+                techTable.stageToLocalCoordinates(vR)
+                (vL.x + vR.x) / 2f
+            }
+        }
+    }
+
+    private fun latticeY(gy: Int): Float {
+        val numRows = cellTables[0].size
+        return if (gy % 2 == 1) {
+            val row = ((gy - 1) / 2).coerceIn(0, numRows - 1)
+            val cell = cellTables[0][row]
+            val v = Vector2(0f, cell.height / 2f)
+            cell.localToStageCoordinates(v)
+            techTable.stageToLocalCoordinates(v)
+            v.y
+        } else {
+            val upperRow = (gy / 2 - 1).coerceIn(0, numRows - 1)
+            val lowerRow = (gy / 2).coerceIn(0, numRows - 1)
+            val vU = Vector2(0f, 0f)
+            cellTables[0][upperRow].localToStageCoordinates(vU)
+            techTable.stageToLocalCoordinates(vU)
+            if (gy == 0) return vU.y + cellTables[0][0].height - 6f
+            if (gy >= numRows * 2) return vU.y + 6f
+            val vL = Vector2(0f, cellTables[0][lowerRow].height)
+            cellTables[0][lowerRow].localToStageCoordinates(vL)
+            techTable.stageToLocalCoordinates(vL)
+            (vU.y + vL.y) / 2f
+        }
+    }
+
+    private fun drawRoutedEdge(
+        tech: Technology,
+        prerequisite: String,
+        isOrPrerequisite: Boolean,
+        routed: TechLineRouter.RoutedEdge
+    ) {
+        val techButton = techNameToButton[tech.name] ?: return
+        val prereqButton = techNameToButton[prerequisite] ?: return
+
+        val startPt = Vector2(prereqButton.width, prereqButton.height / 2f)
+        prereqButton.localToStageCoordinates(startPt)
+        techTable.stageToLocalCoordinates(startPt)
+
+        val endPt = Vector2(0f, techButton.height / 2f)
+        techButton.localToStageCoordinates(endPt)
+        techTable.stageToLocalCoordinates(endPt)
+
+        val defaultColor = if (isOrPrerequisite) Color(1f, 0.75f, 0.2f, 0.85f) else Color.WHITE.cpy()
+        val lineColor = when {
+            civTech.isResearched(tech.name) && !tech.isContinuallyResearchable() -> defaultColor
+            civTech.isResearched(prerequisite) -> researchableTechColor
+            tempTechsToResearch.contains(tech.name) -> currentTechColor
+            else -> defaultColor
+        }
+        val lineSize = if (tempTechsToResearch.contains(tech.name) && !civTech.isResearched(prerequisite)) 4f else 2f
+
+        val laneSpacing = 4f
+        val waypoints = ArrayList<Vector2>()
+        waypoints.add(startPt)
+
+        if (routed.segments.isEmpty()) {
+            waypoints.add(endPt)
+        } else {
+            for (segIdx in routed.segments.indices) {
+                val seg = routed.segments[segIdx]
+                val offset = seg.lane * laneSpacing
+                val x1 = gutterX(seg.start.gx) + if (seg.isVertical) offset else 0f
+                val y1 = latticeY(seg.start.gy) + if (seg.isHorizontal) offset else 0f
+                val x2 = gutterX(seg.end.gx) + if (seg.isVertical) offset else 0f
+                val y2 = latticeY(seg.end.gy) + if (seg.isHorizontal) offset else 0f
+                if (segIdx == 0) waypoints.add(Vector2(x1, startPt.y))
+                waypoints.add(Vector2(x1, y1))
+                waypoints.add(Vector2(x2, y2))
+                if (segIdx == routed.segments.lastIndex) waypoints.add(Vector2(x2, endPt.y))
+            }
+            waypoints.add(endPt)
+        }
+
+        val actors = edgeToActors.getOrPut(prerequisite to tech.name) { ArrayList() }
+        for (i in 0 until waypoints.size - 1) {
+            val a = waypoints[i]
+            val b = waypoints[i + 1]
+            if (a.dst2(b) < 0.25f) continue
+            val segLine = ImageGetter.getLine(a.x, a.y, b.x, b.y, lineSize)
+            segLine.color = lineColor.cpy()
+            lines.addActor(segLine)
+            actors.add(segLine)
+        }
+    }
+
+    private fun updateLineFocusHighlighting() {
+        val focus = hoveredTechName ?: selectedTech?.name
+        for ((edge, actors) in edgeToActors) {
+            val isFocused = focus == null || edge.first == focus || edge.second == focus
+            for (actor in actors) {
+                actor.color.a = if (isFocused) 1f else 0.25f
+                if (focus != null && isFocused) actor.toFront()
+            }
+        }
     }
 
     private fun addTechPrerequisiteLines(tech: Technology, techButton: Table) {
         for (prerequisite in tech.prerequisites) {
-            val prerequisiteButton = techNameToButton[prerequisite]
-            if (prerequisiteButton == null) {
-                ToastPopup("Tech $prerequisite. prerequisite of ${tech.name}, appears to be missing - perhaps two techs have the same row & column", this)
-                continue
+            addPrerequisiteLine(tech, techButton, prerequisite, isOrPrerequisite = false)
+        }
+
+        val orPrerequisites = tech.uniqueObjects
+            .filter { it.type == com.unciv.models.ruleset.unique.UniqueType.Unavailable }
+            .flatMap { it.modifiers }
+            .filter { it.type == com.unciv.models.ruleset.unique.UniqueType.ConditionalNoTech }
+            .map { it.params[0] }
+            .distinct()
+            .filter { it !in tech.prerequisites }
+
+        for (prerequisite in orPrerequisites) {
+            addPrerequisiteLine(tech, techButton, prerequisite, isOrPrerequisite = true)
+        }
+    }
+
+    private fun addPrerequisiteLine(
+        tech: Technology,
+        techButton: Table,
+        prerequisite: String,
+        isOrPrerequisite: Boolean
+    ) {
+        val prerequisiteButton = techNameToButton[prerequisite]
+        if (prerequisiteButton == null) {
+            ToastPopup("Tech $prerequisite. prerequisite of ${tech.name}, appears to be missing - perhaps two techs have the same row & column", this)
+            return
+        }
+        val techButtonCoords = Vector2(0f, techButton.height / 2)
+        techButton.localToStageCoordinates(techButtonCoords)
+        techTable.stageToLocalCoordinates(techButtonCoords)
+
+        val prerequisiteCoords = Vector2(prerequisiteButton.width, prerequisiteButton.height / 2)
+        prerequisiteButton.localToStageCoordinates(prerequisiteCoords)
+        techTable.stageToLocalCoordinates(prerequisiteCoords)
+
+        val defaultColor = if (isOrPrerequisite) Color(1f, 0.75f, 0.2f, 0.85f) else Color.WHITE.cpy()
+        val lineColor = when {
+            civTech.isResearched(tech.name) && !tech.isContinuallyResearchable() -> defaultColor
+            civTech.isResearched(prerequisite) -> researchableTechColor
+            tempTechsToResearch.contains(tech.name) -> currentTechColor
+            else -> defaultColor
+        }
+
+        val lineSize = when {
+            tempTechsToResearch.contains(tech.name) && !civTech.isResearched(prerequisite) -> 4f
+            else -> 2f
+        }
+
+        if (techButtonCoords.y != prerequisiteCoords.y) {
+            addSteppedConnectingLine(techButtonCoords, prerequisiteCoords, lineColor, lineSize)
+        } else if (hasHorizontalObstacle(prerequisiteCoords.x, techButtonCoords.x, prerequisiteCoords.y, techButton, prerequisiteButton)) {
+            val detourY = prerequisiteCoords.y + techButton.height / 2 + 8f
+            val midX = (prerequisiteCoords.x + techButtonCoords.x) / 2f
+            addSteppedConnectingLine(Vector2(midX, detourY), prerequisiteCoords, lineColor, lineSize)
+            addSteppedConnectingLine(techButtonCoords, Vector2(midX, detourY), lineColor, lineSize)
+        } else {
+            val line = ImageGetter.getWhiteDot().apply {
+                width = techButtonCoords.x - prerequisiteCoords.x
+                height = lineSize
+                x = prerequisiteCoords.x
+                y = prerequisiteCoords.y - lineSize / 2
             }
-            val techButtonCoords = Vector2(0f, techButton.height / 2)
-            techButton.localToStageCoordinates(techButtonCoords)
-            techTable.stageToLocalCoordinates(techButtonCoords)
+            line.color = lineColor
+            lines.addActor(line)
+        }
+    }
 
-            val prerequisiteCoords = Vector2(prerequisiteButton.width, prerequisiteButton.height / 2)
-            prerequisiteButton.localToStageCoordinates(prerequisiteCoords)
-            techTable.stageToLocalCoordinates(prerequisiteCoords)
-
-            val lineColor = when {
-                civTech.isResearched(tech.name) && !tech.isContinuallyResearchable() -> Color.WHITE.cpy()
-                civTech.isResearched(prerequisite) -> researchableTechColor
-                tempTechsToResearch.contains(tech.name) -> currentTechColor
-                else -> Color.WHITE.cpy()
-            }
-
-            val lineSize = when {
-                tempTechsToResearch.contains(tech.name) && !civTech.isResearched(prerequisite) -> 4f
-                else -> 2f
-            }
-
-            if (techButtonCoords.y != prerequisiteCoords.y) {
-                addSteppedConnectingLine(techButtonCoords, prerequisiteCoords, lineColor, lineSize)
-            } else {
-                val line = ImageGetter.getWhiteDot().apply {
-                    width = techButtonCoords.x - prerequisiteCoords.x
-                    height = lineSize
-                    x = prerequisiteCoords.x
-                    y = prerequisiteCoords.y - lineSize / 2
-                }
-                line.color = lineColor
-                lines.addActor(line)
+    private fun hasHorizontalObstacle(
+        startX: Float,
+        endX: Float,
+        y: Float,
+        techButton: Table,
+        prerequisiteButton: Table
+    ): Boolean {
+        val minX = minOf(startX, endX)
+        val maxX = maxOf(startX, endX)
+        for (btn in techNameToButton.values) {
+            if (btn === techButton || btn === prerequisiteButton) continue
+            val topLeft = Vector2(0f, btn.height)
+            val bottomRight = Vector2(btn.width, 0f)
+            btn.localToStageCoordinates(topLeft)
+            btn.localToStageCoordinates(bottomRight)
+            techTable.stageToLocalCoordinates(topLeft)
+            techTable.stageToLocalCoordinates(bottomRight)
+            if (bottomRight.x > minX && topLeft.x < maxX && y in bottomRight.y..topLeft.y) {
+                return true
             }
         }
+        return false
     }
 
     private fun addSteppedConnectingLine(
