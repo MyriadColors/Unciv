@@ -53,6 +53,16 @@ class Tile : IsPartOfGameInfoSerialization, TileInterface<Tile> {
     /** Should be immutable - never be altered in-place, instead replaced */
     private var exploredBy = HashSet<String>(0)
 
+    /** Per-civilization accumulated culture on this tile (civName -> culture). */
+    var tileCulture: HashMap<String, Float> = HashMap(0)
+
+    @Readonly
+    fun getCulturePercentage(civName: String): Int {
+        val total = tileCulture.values.sum()
+        if (total <= 0f) return 0
+        return (((tileCulture[civName] ?: 0f) / total) * 100f).toInt()
+    }
+
     var naturalWonder: String? = null
     var resource: String? = null
         private set

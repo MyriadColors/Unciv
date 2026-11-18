@@ -39,7 +39,8 @@
                 "requiredTech": "Democracy",
                 "upkeep": "Medium",
                 "uniques": [
-                    "[+1 Production] from every [Town]"
+                    "[+1 Production] from every [Town]",
+                    "Can spend Gold to finish production"
                 ]
             }
         ]
@@ -103,7 +104,8 @@
                 "requiredTech": "Bronze Working",
                 "upkeep": "Low",
                 "uniques": [
-                    "[+10]% [Production] [in all cities]"
+                    "[+10]% [Production] [in all cities]",
+                    "Can sacrifice population to finish production"
                 ]
             },
             {

@@ -299,7 +299,6 @@
 				"row": 12,
 				"prerequisites": ["Sailing", "Iron Working"],
                 "uniques": [
-					"Enables embarkation for land units"
 				],
 				"quote": "\"The wisest men follow their own direction.\" - Euripides"
 			}
@@ -423,8 +422,7 @@
 				"row": 11,
 				"prerequisites": ["Compass", "Machinery"],
 				"uniques": [
-					"[+1] Sight <for [Water] units>",
-					"Enables [Embarked] units to enter ocean tiles" // TODO: Civ IV doesn't have Embark. Optimally, we would use Carry [Land] units instead.
+					"[+1] Sight <for [Water] units>"
 				],
 				"quote": "\"One doesn't discover new lands without losing sight of the shore.\" - Andre Gide"
 			}

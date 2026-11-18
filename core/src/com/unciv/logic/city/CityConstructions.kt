@@ -768,6 +768,55 @@ class CityConstructions : IsPartOfGameInfoSerialization {
      *                          Ignored when the [constructionName] does not have that unique. If null and the building has the unique, a tile is chosen automatically.
      *  @return                 Success (false e.g. unit cannot be placed)
      */
+    /** Returns the population cost to whip [construction] under Slavery (30 base hammers per citizen). */
+    @Readonly
+    fun getWhipPopulationCost(construction: INonPerpetualConstruction): Int {
+        val remaining = getRemainingWork(construction.name)
+        if (remaining <= 0) return 0
+        val hammersPerPop = (30f * city.civ.gameInfo.speed.productionCostModifier).coerceAtLeast(1f)
+        return kotlin.math.ceil(remaining / hammersPerPop).toInt().coerceAtLeast(1)
+    }
+
+    @Readonly
+    fun canWhipConstruction(construction: INonPerpetualConstruction): Boolean {
+        if (!city.civ.hasUnique(UniqueType.CanWhipProduction)) return false
+        val popCost = getWhipPopulationCost(construction)
+        return popCost > 0 && city.population.population > popCost
+    }
+
+    fun whipConstruction(construction: INonPerpetualConstruction): Boolean {
+        if (!canWhipConstruction(construction)) return false
+        val popCost = getWhipPopulationCost(construction)
+        city.population.setPopulation(city.population.population - popCost)
+        city.whipAngerTurns += 10
+        completeConstruction(construction)
+        city.cityStats.update()
+        return true
+    }
+
+    /** Returns the Gold cost to hurry [construction] under Universal Suffrage (3 Gold per remaining hammer). */
+    @Readonly
+    fun getGoldHurryCost(construction: INonPerpetualConstruction): Int {
+        val remaining = getRemainingWork(construction.name)
+        return (remaining * 3).coerceAtLeast(0)
+    }
+
+    @Readonly
+    fun canHurryConstructionWithGold(construction: INonPerpetualConstruction): Boolean {
+        if (!city.civ.hasUnique(UniqueType.CanHurryProductionWithGold)) return false
+        val goldCost = getGoldHurryCost(construction)
+        return goldCost > 0 && city.civ.gold >= goldCost
+    }
+
+    fun hurryConstructionWithGold(construction: INonPerpetualConstruction): Boolean {
+        if (!canHurryConstructionWithGold(construction)) return false
+        val goldCost = getGoldHurryCost(construction)
+        city.civ.addGold(-goldCost)
+        completeConstruction(construction)
+        city.cityStats.update()
+        return true
+    }
+
     fun purchaseConstruction(
         constructionName: String,
         queuePosition: Int,

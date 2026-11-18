@@ -267,15 +267,58 @@ class CityExpansionManager : IsPartOfGameInfoSerialization {
         tile.history.recordTakeOwnership(tile)
     }
 
+    /** Civ IV culture ring thresholds (base Normal speed): 10, 100, 500, 5000, 50000. */
+    @Readonly
+    fun getCultureLevel(): Int {
+        val mod = city.civ.gameInfo.speed.cultureCostModifier
+        return when {
+            cultureStored >= (50000 * mod).toInt() -> 6
+            cultureStored >= (5000 * mod).toInt() -> 5
+            cultureStored >= (500 * mod).toInt() -> 4
+            cultureStored >= (100 * mod).toInt() -> 3
+            cultureStored >= (10 * mod).toInt() -> 2
+            else -> 1
+        }
+    }
+
+    @Readonly
+    fun getCultureToNextLevel(): Int {
+        val mod = city.civ.gameInfo.speed.cultureCostModifier
+        val thresholds = listOf(10, 100, 500, 5000, 50000).map { (it * mod).toInt() }
+        return thresholds.firstOrNull { cultureStored < it } ?: thresholds.last()
+    }
+
     fun nextTurn(culture: Float) {
+        val previousLevel = getCultureLevel()
         cultureStored += culture.toInt()
-        if (cultureStored >= getCultureToNextTile()) {
-            val location = addNewTileWithCulture()
-            if (location != null) {
-                val locations = LocationAction(location, city.location)
-                city.civ.addNotification("[${city.name}] has expanded its borders!", locations,
-                    NotificationCategory.Cities, NotificationIcons.Culture)
+        val newLevel = getCultureLevel()
+
+        // Spread per-tile culture within the city's current culture ring and claim/flip tiles
+        val center = city.getCenterTile()
+        for (tile in center.getTilesInDistance(newLevel)) {
+            val dist = center.aerialDistanceTo(tile)
+            if (newLevel == 2 && dist == 2 && kotlin.math.abs(tile.position.x - center.position.x) == 2 && kotlin.math.abs(tile.position.y - center.position.y) == 2)
+                continue // Fat Cross excludes outer corners at level 2
+            val weight = (newLevel - dist + 1).coerceAtLeast(1)
+            val civName = city.civ.civName
+            tile.tileCulture[civName] = (tile.tileCulture[civName] ?: 0f) + culture.coerceAtLeast(1f) * weight
+
+            val currentOwner = tile.getOwner()
+            if (currentOwner == null) {
+                takeOwnership(tile)
+            } else if (currentOwner != city.civ && !tile.isCityCenter()) {
+                val topCiv = tile.tileCulture.maxByOrNull { it.value }?.key
+                if (topCiv == civName) takeOwnership(tile)
             }
+        }
+
+        if (newLevel > previousLevel) {
+            city.civ.addNotification(
+                "[${city.name}] has expanded its borders!",
+                LocationAction(city.location),
+                NotificationCategory.Cities,
+                NotificationIcons.Culture
+            )
         }
     }
 

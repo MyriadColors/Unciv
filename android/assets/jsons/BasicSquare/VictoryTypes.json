@@ -18,19 +18,17 @@
     },
     {
         "name": "Cultural",
-        "victoryScreenHeader": "Build all three\nUtopia Projects.",
+        "victoryScreenHeader": "Have 3 cities with\nLegendary Culture.",
         "milestones": [
-            "Build [Utopia Project 1]",
-            "Build [Utopia Project 2]",
-            "Build [Utopia Project 3]"
+            "Have 3 cities with Legendary Culture"
         ],
         "victoryString": "You have achieved victory through the awesome power of your Culture!",
         "defeatString": "You have been defeated. Your civilization has been overwhelmed by its many foes. But your people do not despair, for they know that one day you shall return - and lead them forward to victory!"
     },
     {
         "name": "Domination",
-        "victoryScreenHeader": "Eliminate all other\ncivilizations.",
-        "milestones": ["Destroy all players"],
+        "victoryScreenHeader": "Control 64% of land and\n50% of world population.",
+        "milestones": ["Control 64% of land and 50% of world population"],
         "victoryString": "The world has been convulsed by war. Many great and powerful civilizations have fallen, but you have survived - and emerged victorious!",
         "defeatString": "You have been defeated. Your civilization has been overwhelmed by its many foes. But your people do not despair, for they know that one day you shall return - and lead them forward to victory!"
     },

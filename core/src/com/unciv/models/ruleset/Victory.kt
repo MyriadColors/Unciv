@@ -33,6 +33,8 @@ enum class MilestoneType(val text: String) {
     MoreCountableThanEachPlayer("Have more [countable] than each player's [countable]"),
     /** Reach an absolute amount of a countable - unlike [MoreCountableThanEachPlayer] this does not depend on the other players */
     HaveCountable("Have at least [amount] [countable]"),
+    ThreeLegendaryCities("Have 3 cities with Legendary Culture"),
+    Civ4Domination("Control 64% of land and 50% of world population"),
 }
 
 class Victory : RulesetObject() {
@@ -165,6 +167,15 @@ class Milestone(val uniqueDescription: String, private val parentVictory: Victor
                 originalMajorCapitalsOwned(civInfo) == civsWithPotentialCapitalsToOwn(civInfo.gameInfo).size
             MilestoneType.CompletePolicyBranches ->
                 civInfo.policies.completedBranches.size >= params[0].toInt()
+            MilestoneType.ThreeLegendaryCities ->
+                civInfo.cities.count { it.expansion.getCultureLevel() >= 6 } >= 3
+            MilestoneType.Civ4Domination -> {
+                val totalLand = civInfo.gameInfo.tileMap.tileList.count { it.isLand }.coerceAtLeast(1)
+                val ownedLand = civInfo.cities.sumOf { it.getTiles().count { t -> t.isLand } }
+                val totalPop = civInfo.gameInfo.getAliveMajorCivs().sumOf { c -> c.cities.sumOf { it.population.population } }.coerceAtLeast(1)
+                val ownedPop = civInfo.cities.sumOf { it.population.population }
+                (ownedLand * 100 / totalLand) >= 64 && (ownedPop * 100 / totalPop) >= 50
+            }
             MilestoneType.HaveCountable -> getCountableDone(civInfo) >= getCountableToDo()
             MilestoneType.MoreCountableThanEachPlayer -> {
                 val relevantCivs = civInfo.gameInfo.civilizations.filter { getMoreCountableThanOtherCivRelevant(civInfo, it) }
@@ -202,7 +213,8 @@ class Milestone(val uniqueDescription: String, private val parentVictory: Victor
     fun getVictoryScreenButtonHeaderText(completed: Boolean, civInfo: Civilization): String {
         return when (type!!) {
             MilestoneType.BuildingBuiltGlobally, MilestoneType.WinDiplomaticVote,
-            MilestoneType.ScoreAfterTimeOut, MilestoneType.BuiltBuilding ->
+            MilestoneType.ScoreAfterTimeOut, MilestoneType.BuiltBuilding,
+            MilestoneType.ThreeLegendaryCities, MilestoneType.Civ4Domination ->
                 uniqueDescription
             MilestoneType.CompletePolicyBranches -> {
                 val amountToDo = params[0].tr()
@@ -352,6 +364,9 @@ class Milestone(val uniqueDescription: String, private val parentVictory: Victor
                     buttons.add(getMilestoneButton(finisher, civInfo.policies.isAdopted(finisher)))
                 }
             }
+            MilestoneType.ThreeLegendaryCities, MilestoneType.Civ4Domination -> {
+                buttons.add(getMilestoneButton(uniqueDescription, hasBeenCompletedBy(civInfo)))
+            }
 
             MilestoneType.MoreCountableThanEachPlayer -> {
                 val hideCivCount = civInfo.shouldHideCivCount()
@@ -435,6 +450,8 @@ class Milestone(val uniqueDescription: String, private val parentVictory: Victor
             }
             MilestoneType.DestroyAllPlayers, MilestoneType.CaptureAllCapitals -> Victory.Focus.Military
             MilestoneType.CompletePolicyBranches -> Victory.Focus.Culture
+            MilestoneType.ThreeLegendaryCities -> Victory.Focus.Culture
+            MilestoneType.Civ4Domination -> Victory.Focus.Military
             MilestoneType.MoreCountableThanEachPlayer -> getFocusFromCountable(params[0], ruleset)
             MilestoneType.HaveCountable -> getFocusFromCountable(params[1], ruleset)
             MilestoneType.WinDiplomaticVote -> Victory.Focus.CityStates

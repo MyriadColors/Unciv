@@ -72,6 +72,8 @@ class TechManager : IsPartOfGameInfoSerialization {
 
     /** In civ IV, you can auto-convert a certain percentage of gold in cities to science */
     var goldPercentConvertedToScience = 0.6f
+    /** In civ IV, you can also convert a percentage of commerce/gold in cities to culture */
+    var goldPercentConvertedToCulture = 0f
 
     //region state-changing functions
     fun clone(): TechManager {
@@ -85,6 +87,7 @@ class TechManager : IsPartOfGameInfoSerialization {
         toReturn.scienceFromResearchAgreements = scienceFromResearchAgreements
         toReturn.overflowScience = overflowScience
         toReturn.goldPercentConvertedToScience = goldPercentConvertedToScience
+        toReturn.goldPercentConvertedToCulture = goldPercentConvertedToCulture
         return toReturn
     }
 

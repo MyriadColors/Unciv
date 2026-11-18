@@ -99,19 +99,32 @@ class CityStats(val city: City) {
     @Readonly
     private fun getStatsFromTradeRoute(): Stats {
         val stats = Stats()
-        val capitalForTradeRoutePurposes = city.civ.getCapital()!!
-        if (city != capitalForTradeRoutePurposes && city.isConnectedToCapital()) {
-            stats.gold = capitalForTradeRoutePurposes.population.population * 0.15f + city.population.population * 1.1f - 1 // Calculated by http://civilization.wikia.com/wiki/Trade_route_(Civ5)
-            city.forEachMatchingUnique(UniqueType.StatsFromTradeRoute) { unique ->
-                stats.add(unique.stats)
+        // Civ IV per-city trade routes: base 1 slot, filled by connected domestic or Open Borders foreign cities
+        val tradeSlots = 1
+        val partnerCities = city.civ.gameInfo.civilizations
+            .filter { otherCiv ->
+                otherCiv.isAlive() && (otherCiv == city.civ ||
+                    (city.civ.knows(otherCiv) && city.civ.getDiplomacyManager(otherCiv)?.hasOpenBorders == true))
             }
-            val percentageStats = Stats()
-            city.forEachMatchingUnique(UniqueType.StatPercentFromTradeRoutes) { unique ->
-                percentageStats[Stat.valueOf(unique.params[1])] += unique.params[0].toFloat()
-            }
-            for ((stat) in stats) {
-                stats[stat] *= percentageStats[stat].toPercent()
-            }
+            .flatMap { it.cities }
+            .filter { it != city }
+            .sortedByDescending { it.population.population + if (it.civ != city.civ) 5 else 0 }
+            .take(tradeSlots)
+
+        for (partner in partnerCities) {
+            val baseYield = 1f + partner.population.population * 0.1f
+            stats.gold += if (partner.civ != city.civ) baseYield * 2f else baseYield
+        }
+
+        city.forEachMatchingUnique(UniqueType.StatsFromTradeRoute) { unique ->
+            stats.add(unique.stats)
+        }
+        val percentageStats = Stats()
+        city.forEachMatchingUnique(UniqueType.StatPercentFromTradeRoutes) { unique ->
+            percentageStats[Stat.valueOf(unique.params[1])] += unique.params[0].toFloat()
+        }
+        for ((stat) in stats) {
+            stats[stat] *= percentageStats[stat].toPercent()
         }
         return stats
     }
@@ -350,6 +363,20 @@ class CityStats(val city: City) {
         return buildingsMaintenance
     }
 
+    /** Civ IV-style city maintenance: distance from capital + number of cities, scaled by population. */
+    @Readonly
+    fun getCiv4CityMaintenance(): Float {
+        val capital = city.civ.getCapital()
+        val distanceToCapital = if (capital == null || capital == city) 0
+        else city.getCenterTile().aerialDistanceTo(capital.getCenterTile())
+
+        val pop = city.population.population
+        val distanceMaintenance = kotlin.math.floor(distanceToCapital * (pop + 7) / 10f * 0.25f)
+        val numCities = (city.civ.cities.size - 1).coerceAtLeast(0)
+        val numCitiesMaintenance = kotlin.math.floor(numCities * (pop + 17) / 18f * 0.3f)
+        return distanceMaintenance + numCitiesMaintenance
+    }
+
     //endregion
     //region State-Changing Methods
 
@@ -383,44 +410,17 @@ class CityStats(val city: City) {
                             statsFromUniquesBySource: StatTreeNode = getStatsFromUniquesBySource()) {
         val civInfo = city.civ
         val newHappinessList = LinkedHashMap<String, Float>()
-        // This calculation seems weird to me.
-        // Suppose we calculate the modifier for an AI (non-human) player when the game settings has difficulty level 'prince'.
-        // We first get the difficulty modifier for this civilization, which results in the 'chieftain' modifier (0.6) being used,
-        // as this is a non-human player. Then we multiply that by the ai modifier in general, which is 1.0 for prince.
-        // The end result happens to be 0.6, which seems correct. However, if we were playing on chieftain difficulty,
-        // we would get back 0.6 twice and the modifier would be 0.36. Thus, in general there seems to be something wrong here
-        // I don't know enough about the original whether they do something similar or not and can't be bothered to find where
-        // in the source code this calculation takes place, but it would surprise me if they also did this double multiplication thing. ~xlenstra
-        var unhappinessModifier = civInfo.getDifficulty().unhappinessModifier
-        if (!civInfo.isHuman())
-            unhappinessModifier *= civInfo.gameInfo.getDifficulty().aiUnhappinessModifier
+        // Civ IV local happiness: 1 unhappy per citizen, base happy cap from difficulty,
+        // +1 per connected luxury resource, plus buildings/religions/uniques.
+        newHappinessList["Base"] = 4f
+        newHappinessList["Population"] = -city.population.population.toFloat()
+        if (city.whipAngerTurns > 0)
+            newHappinessList["Whip anger"] = -1f
 
-        var unhappinessFromCity = -3f // -3 happiness per city
-        if (hasExtraAnnexUnhappiness())
-            unhappinessFromCity -= 2f
-
-        var uniqueUnhappinessModifier = 0f
-        civInfo.forEachMatchingUnique(UniqueType.UnhappinessFromCitiesPercentage) { unique ->
-            uniqueUnhappinessModifier += unique.params[0].toFloat()
-        }
-
-        newHappinessList["Cities"] = unhappinessFromCity * unhappinessModifier * uniqueUnhappinessModifier.toPercent()
-
-        var unhappinessFromCitizens = city.population.population.toFloat()
-
-        city.forEachMatchingUnique(UniqueType.UnhappinessFromPopulationTypePercentageChange) { unique ->
-            if (city.matchesFilter(unique.params[2]))
-                unhappinessFromCitizens += (unique.params[0].toFloat() / 100f) * city.population.getPopulationFilterAmount(unique.params[1])
-        }
-
-        if (hasExtraAnnexUnhappiness())
-            unhappinessFromCitizens *= 2f
-
-        if (unhappinessFromCitizens < 0) unhappinessFromCitizens = 0f
-
-        newHappinessList["Population"] = -unhappinessFromCitizens * unhappinessModifier
-
-        if (hasExtraAnnexUnhappiness()) newHappinessList["Occupied City"] = -2f //annexed city
+        val luxuryCount = civInfo.detailedCivResources
+            .count { it.resource.resourceType == com.unciv.models.ruleset.tile.ResourceType.Luxury && it.amount > 0 }
+        if (luxuryCount > 0)
+            newHappinessList["Luxury resources"] = luxuryCount.toFloat()
 
         val happinessFromSpecialists = statsFromSpecialists.happiness.toInt().toFloat()
         if (happinessFromSpecialists > 0) newHappinessList["Specialists"] = happinessFromSpecialists
@@ -594,10 +594,14 @@ class CityStats(val city: City) {
 
         // AFTER we've gotten all the gold stats figured out, only THEN do we plonk that gold into Science
         if (city.getRuleset().modOptions.hasUnique(UniqueType.ConvertGoldToScience)) {
-            val amountConverted = (newFinalStatList.values.sumOf { it.gold.toDouble() }
-                    * city.civ.tech.goldPercentConvertedToScience).toInt().toFloat()
-            if (amountConverted > 0) // Don't want you converting negative gold to negative science yaknow
-                newFinalStatList["Gold -> Science"] = Stats(science = amountConverted, gold = -amountConverted)
+            val totalGold = newFinalStatList.values.sumOf { it.gold.toDouble() }
+            val scienceConverted = (totalGold * city.civ.tech.goldPercentConvertedToScience).toInt().toFloat()
+            if (scienceConverted > 0) // Don't want you converting negative gold to negative science yaknow
+                newFinalStatList["Gold -> Science"] = Stats(science = scienceConverted, gold = -scienceConverted)
+
+            val cultureConverted = (totalGold * city.civ.tech.goldPercentConvertedToCulture).toInt().toFloat()
+            if (cultureConverted > 0)
+                newFinalStatList["Gold -> Culture"] = Stats(culture = cultureConverted, gold = -cultureConverted)
         }
         for (entry in newFinalStatList.values) {
             entry.science *= statPercentBonusesSum.science.toPercent()
@@ -654,6 +658,10 @@ class CityStats(val city: City) {
 
         val buildingsMaintenance = getBuildingMaintenanceCosts() // this is AFTER the bonus calculation!
         newFinalStatList["Maintenance"] = Stats(gold = -buildingsMaintenance.toInt().toFloat())
+
+        val civ4Maintenance = getCiv4CityMaintenance()
+        if (civ4Maintenance > 0f)
+            newFinalStatList["City Maintenance"] = Stats(gold = -civ4Maintenance)
 
         if (canConvertFoodToProduction(totalFood, currentConstruction)) {
             newFinalStatList["Excess food to production"] =

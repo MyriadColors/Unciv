@@ -385,6 +385,18 @@ class City : IsPartOfGameInfoSerialization, INamed {
     @Readonly
     fun getCityDefenseBonus(): Int = (getMaxCityDefenseBonus() - defenseDamageTaken).coerceAtLeast(0)
 
+    /** Per-city Great Person Points pool (Civ IV-style: each city has its own independent GPP pool). */
+    var cityGreatPersonPoints: com.unciv.models.Counter<String> = com.unciv.models.Counter()
+
+    /** Returns the number of angry citizens in this city (when local unhappiness exceeds local happiness). */
+    var whipAngerTurns: Int = 0
+
+    @Readonly
+    fun getAngryCitizens(): Int {
+        val netHappiness = cityStats.happinessList.values.sum().toInt()
+        return (-netHappiness).coerceAtLeast(0)
+    }
+
     data class CityHealthBreakdown(
         val health: Int,
         val unhealthiness: Int,

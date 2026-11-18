@@ -44,7 +44,7 @@ class CityPopulationManager : IsPartOfGameInfoSerialization {
     @Readonly
     fun getFreePopulation(): Int {
         val workingPopulation = city.getWorkedTiles().count()
-        return population - workingPopulation - getNumberOfSpecialists()
+        return population - city.getAngryCitizens() - workingPopulation - getNumberOfSpecialists()
     }
     
     @Readonly

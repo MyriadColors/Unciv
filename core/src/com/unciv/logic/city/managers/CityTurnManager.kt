@@ -199,6 +199,9 @@ class CityTurnManager(val city: City) {
             city.health = (city.health + 20).coerceAtMost(city.getMaxHealth())
             if (city.defenseDamageTaken > 0)
                 city.defenseDamageTaken = (city.defenseDamageTaken - 5).coerceAtLeast(0)
+            if (city.whipAngerTurns > 0)
+                city.whipAngerTurns--
+            processCiv4GreatPeople()
             processWorkedImprovementUpgrades()
             city.population.unassignExtraPopulation()
         }
@@ -227,6 +230,20 @@ class CityTurnManager(val city: City) {
             if (tile.improvementWorkedTurns >= threshold && targetImprovementName in tile.ruleset.tileImprovements) {
                 tile.setImprovement(targetImprovementName, city.civ)
             }
+        }
+    }
+
+    private fun processCiv4GreatPeople() {
+        val gppThisTurn = city.getGreatPersonPoints()
+        if (gppThisTurn.isEmpty()) return
+        city.cityGreatPersonPoints.add(gppThisTurn)
+        val totalGpp = city.cityGreatPersonPoints.values.sum()
+        val threshold = 100
+        if (totalGpp >= threshold) {
+            val topGp = city.cityGreatPersonPoints.maxByOrNull { it.value }?.key ?: return
+            city.cityGreatPersonPoints.clear()
+            val gpUnit = city.getRuleset().units[topGp] ?: return
+            city.civ.units.placeUnitNearTile(city.location, gpUnit)
         }
     }
 
