@@ -650,7 +650,7 @@ class GlobalUniquesTests {
     @Test
     fun statPercentBonusAppliesToCityHappiness() {
         val civInfo = game.addCiv()
-        val city = game.addCity(civInfo, game.getTile(HexCoord.Zero), true)
+        val city = game.addCity(civInfo, game.getTile(0, 0), true)
         city.cityConstructions.addBuilding(game.createBuilding("[+2 Happiness]"))
         city.cityStats.update()
         val citiesUnhappiness = city.cityStats.happinessList["Cities"]!!

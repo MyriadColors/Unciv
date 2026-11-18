@@ -2,7 +2,6 @@ package com.unciv.logic.civilization.diplomacy
 
 import com.unciv.logic.civilization.CivFlags
 import com.unciv.logic.civilization.diplomacy.DiplomacyTurnManager.nextTurn
-import com.unciv.logic.map.HexCoord
 import com.unciv.testing.BaseTestRunner
 import com.unciv.testing.TestGame
 import org.junit.Assert.assertEquals
@@ -147,7 +146,7 @@ class CityStateTributeTests {
             game.ruleset.modOptions.constants.tributeGlobalModifier = global
             game.ruleset.modOptions.constants.tributeLocalModifier = local
             cityState.cityStatePersonality = CityStatePersonality.Neutral
-            game.addCity(cityState, game.getTile(HexCoord.Zero), initialPopulation = population)
+            game.addCity(cityState, game.getTile(0, 0), initialPopulation = population)
 
             if (ranked) {
                 val unitTile = game.getTile(if (withNearbyUnit) 2 else 6, 0)
