@@ -81,7 +81,11 @@ private fun JavaExec.configureCommon() {
     classpath = sourceSets.main.get().runtimeClasspath
     standardInput = System.`in`
     workingDir = assetsDir
-    jvmArgs(*Platform.current().vmArgs.map { "-$it" }.toTypedArray())
+    jvmArgs(
+        "--enable-native-access=ALL-UNNAMED",
+        "--sun-misc-unsafe-memory-access=allow",
+        *Platform.current().vmArgs.map { "-$it" }.toTypedArray()
+    )
     isIgnoreExitValue = true
 }
 
@@ -118,7 +122,13 @@ tasks.register<Jar>("dist") {
     archiveFileName.set("${BuildConfig.appName}.jar")
 
     manifest {
-        attributes(mapOf("Main-Class" to mainClassName, "Specification-Version" to BuildConfig.appVersion))
+        attributes(
+            mapOf(
+                "Main-Class" to mainClassName,
+                "Specification-Version" to BuildConfig.appVersion,
+                "Enable-Native-Access" to "ALL-UNNAMED"
+            )
+        )
     }
 }
 

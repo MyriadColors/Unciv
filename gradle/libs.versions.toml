@@ -7,11 +7,13 @@ kotlin = "2.4.21"
 coroutines = "1.10.2" # 1.11.0 causes IDEA profiler to break :( 
 
 gdx = "1.14.2"
+lwjgl = "3.3.6"
 discord = "v2.0.1"
 
 ktor = "3.5.2"
 jna = "5.19.1"
 logback = "1.5.21"
+slf4j = "2.0.18"
 clikt = "5.0.3"
 
 purity = "1.10.4"
@@ -52,6 +54,7 @@ gdx-tools = { group = "com.badlogicgames.gdx", name = "gdx-tools", version.ref =
 gdx-backend-desktop = { group = "com.badlogicgames.gdx", name = "gdx-backend-lwjgl3", version.ref = "gdx" }
 gdx-backend-android = { group = "com.badlogicgames.gdx", name = "gdx-backend-android", version.ref = "gdx" }
 gdx-backend-headless = { group = "com.badlogicgames.gdx", name = "gdx-backend-headless", version.ref = "gdx" }
+lwjgl-bom = { group = "org.lwjgl", name = "lwjgl-bom", version.ref = "lwjgl" }
 
 discord = { group = "com.github.MinnDevelopment", name = "java-discord-rpc", version.ref = "discord" }
 
@@ -70,6 +73,7 @@ ktor-server-contentnegotiation = { group = "io.ktor", name = "ktor-server-conten
 ktor-server-websockets = { group = "io.ktor", name = "ktor-server-websockets", version.ref = "ktor" }
 
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4j" }
 clikt = { group = "com.github.ajalt.clikt", name = "clikt", version.ref = "clikt" }
 
 jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }

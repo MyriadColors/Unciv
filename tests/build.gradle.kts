@@ -24,6 +24,10 @@ dependencies {
 tasks {
     test {
         workingDir = file("../android/assets")
+        jvmArgs(
+            "--enable-native-access=ALL-UNNAMED",
+            "--sun-misc-unsafe-memory-access=allow"
+        )
         testLogging.lifecycle {
             events(
                     TestLogEvent.FAILED,
@@ -52,6 +56,10 @@ tasks {
         classpath = sourceSets["test"].runtimeClasspath
         workingDir = file("../android/assets")
         args = ((project.findProperty("ojh.args") as String?) ?: "").split(" ").filter { it.isNotEmpty() }
+        jvmArgs(
+            "--enable-native-access=ALL-UNNAMED",
+            "--sun-misc-unsafe-memory-access=allow"
+        )
         // The fps mode opens a real window, and GLFW on macOS insists on being
         // on the first thread of the process; headless AWT keeps AWT from
         // taking that same thread over (see OjhBenchmark.fps). Both are

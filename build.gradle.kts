@@ -159,8 +159,10 @@ project(":desktop") {
     dependencies {
         "implementation"(project(":core"))
         "implementation"(rootProject.libs.coroutines.core)
+        "implementation"(platform(rootProject.libs.lwjgl.bom))
         "implementation"(rootProject.libs.gdx.backend.desktop)
         "implementation"(gdxNatives("desktop"))
+        "runtimeOnly"(rootProject.libs.slf4j.simple)
 
         "implementation"(rootProject.libs.gdx.tools) {
             exclude("com.badlogicgames.gdx", "gdx-backend-lwjgl")
@@ -255,8 +257,10 @@ project(":core") {
 
             "implementation"(rootProject.libs.gdx)
             "implementation"(rootProject.libs.gdx.backend.headless)
+            "implementation"(platform(rootProject.libs.lwjgl.bom))
             "implementation"(rootProject.libs.gdx.backend.desktop)
             "implementation"(gdxNatives("desktop"))
+            "runtimeOnly"(rootProject.libs.slf4j.simple)
         }
     }
 }
