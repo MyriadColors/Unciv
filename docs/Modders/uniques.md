@@ -2658,6 +2658,9 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 
 	Applicable to: Unit
 
+??? example  "Cannot upgrade"
+	Applicable to: Unit
+
 ??? example  "Destroys tile improvements when attacking"
 	Applicable to: Unit
 
