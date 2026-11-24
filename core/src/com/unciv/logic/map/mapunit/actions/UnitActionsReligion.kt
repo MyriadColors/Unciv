@@ -1,7 +1,7 @@
 package com.unciv.logic.map.mapunit.actions
 
 import com.unciv.logic.civilization.NotificationCategory
-import com.unciv.logic.civilization.NotificationIcon
+import com.unciv.logic.civilization.NotificationIcons
 import com.unciv.logic.civilization.diplomacy.DiplomacyFlags
 import com.unciv.logic.civilization.managers.ReligionState
 import com.unciv.logic.map.mapunit.MapUnit
@@ -135,7 +135,7 @@ object UnitActionsReligion {
                 if (previousReligion != newReligion && newReligion != null && city.civ != unit.civ) {
                     city.civ.addNotification(
                         "[${unit.civ.civName}]'s [${unit.name}] has converted [${city.name}] to [${newReligion.getReligionDisplayName()}]!",
-                        city.location, NotificationCategory.Religion, NotificationIcon.Faith
+                        city.location, NotificationCategory.Religion, NotificationIcons.Faith
                     )
                 }
 

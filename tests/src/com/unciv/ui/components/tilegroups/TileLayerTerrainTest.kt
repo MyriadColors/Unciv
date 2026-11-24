@@ -2,7 +2,6 @@ package com.unciv.ui.components.tilegroups
 
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.unciv.dev.FontDesktop
-import com.unciv.logic.map.HexCoord
 import com.unciv.models.tilesets.TileSetCache
 import com.unciv.testing.GdxTestRunner
 import com.unciv.testing.TestGame
@@ -40,8 +39,8 @@ class TileLayerTerrainTest {
     fun buyingATileShowsTheOwnersTileStyle() {
         testGame.makeHexagonalMap(3)
         val civ = testGame.addCiv()
-        val city = testGame.addCity(civ, testGame.getTile(HexCoord.Zero))
-        val tile = testGame.getTile(HexCoord(2, 0))
+        val city = testGame.addCity(civ, testGame.getTile(0, 0))
+        val tile = testGame.getTile(2, 0)
         Assert.assertNull(tile.getOwner())
 
         val gameView = GameView(testGame.gameInfo, civ)
