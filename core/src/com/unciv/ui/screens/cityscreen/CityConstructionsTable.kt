@@ -194,6 +194,27 @@ class CityConstructionsTable(private val cityScreen: CityScreen) {
             if (cityScreen.canCityBeChanged() && !queueExpander.isOpen && selectedQueueEntry in 1..4)
                 buttonsTable.add(getRemoveFromQueueButton(selectedQueueEntry)).padLeft(10f)
         }
+
+        val constructions = cityView.constructions
+        if (cityScreen.canCityBeChanged() && constructions.canDraftUnit()) {
+            val draftUnit = constructions.getDraftableUnit()
+            if (draftUnit != null) {
+                val popCost = constructions.getDraftPopulationCost(draftUnit)
+                val draftButton = "Draft [${draftUnit.name}] (-$popCost Pop)".toTextButton()
+                draftButton.onClick {
+                    Concurrency.run {
+                        val drafted = constructions.draftUnit()
+                        if (drafted) {
+                            launchOnGLThread {
+                                SoundPlayer.play(UncivSound.Chimes)
+                                cityScreen.updateAsync()
+                            }
+                        }
+                    }
+                }
+                buttonsTable.add(draftButton).padLeft(5f)
+            }
+        }
     }
 
     private fun updateConstructionQueue() {

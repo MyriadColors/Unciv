@@ -158,6 +158,29 @@ class Civilization : IsPartOfGameInfoSerialization {
     var totalTurnTimeSeconds = 0
     /** To calculate average turn time, we only count turns when controlled by a human. Additionally, offers backward compatibility. */
     var turnsPlayedAsHuman = 0
+
+    /** Civ IV per-enemy war weariness accumulator (keyed by enemy civName). */
+    var warWeariness = HashMap<String, Float>()
+
+    /** Number of units drafted via Nationhood this turn. */
+    var draftsThisTurn = 0
+
+    fun addWarWeariness(enemyCivName: String, amount: Float) {
+        if (amount <= 0f || enemyCivName == civName) return
+        warWeariness[enemyCivName] = (warWeariness[enemyCivName] ?: 0f) + amount
+    }
+
+    fun decayWarWeariness() {
+        val iterator = warWeariness.entries.iterator()
+        while (iterator.hasNext()) {
+            val entry = iterator.next()
+            val enemy = gameInfo.getCivilizationOrNull(entry.key)
+            val atWar = enemy != null && isAtWarWith(enemy)
+            val decayFactor = if (atWar) 0.99f else 0.95f
+            val updated = entry.value * decayFactor
+            if (updated < 0.5f) iterator.remove() else entry.setValue(updated)
+        }
+    }
     var lastTurnProcessedWithVersion: Version? = null
     
     /** The Civ's gold reserves. Public get, private set - please use [addGold] method to modify. */

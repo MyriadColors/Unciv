@@ -201,6 +201,8 @@ class CityTurnManager(val city: City) {
                 city.defenseDamageTaken = (city.defenseDamageTaken - 5).coerceAtLeast(0)
             if (city.whipAngerTurns > 0)
                 city.whipAngerTurns--
+            if (city.draftAngerTurns > 0)
+                city.draftAngerTurns--
             processCiv4GreatPeople()
             processWorkedImprovementUpgrades()
             city.population.unassignExtraPopulation()

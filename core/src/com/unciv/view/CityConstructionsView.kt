@@ -7,6 +7,7 @@ import com.unciv.models.ruleset.IConstruction
 import com.unciv.models.ruleset.INonPerpetualConstruction
 import com.unciv.models.ruleset.RejectionReason
 import com.unciv.models.ruleset.tile.TileImprovement
+import com.unciv.models.ruleset.unit.BaseUnit
 import com.unciv.models.stats.Stat
 import yairm210.purity.annotations.Readonly
 
@@ -56,6 +57,11 @@ class CityConstructionsView(private val cityConstructions: CityConstructions, ga
     // Actions
     fun purchaseConstruction(construction: INonPerpetualConstruction, queuePosition: Int, stat: Stat, tileView: TileView?): Boolean =
         cityConstructions.purchaseConstruction(construction, queuePosition, automatic = false, stat, tileView?.unwrap())
+
+    @Readonly fun canDraftUnit(): Boolean = cityConstructions.canDraftUnit()
+    @Readonly fun getDraftableUnit(): BaseUnit? = cityConstructions.getDraftableUnit()
+    @Readonly fun getDraftPopulationCost(unit: BaseUnit): Int = cityConstructions.getDraftPopulationCost(unit)
+    fun draftUnit(): Boolean = cityConstructions.draftUnit() != null
 }
 
 // Helpers built on top of the view API, rather than being part of it

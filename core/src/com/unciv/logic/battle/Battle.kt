@@ -144,6 +144,7 @@ object Battle {
         val damageDealt = takeDamage(attacker, defender) + extraRangedAttackDamage
 
         applyCollateralDamage(attacker, defender, attackedTile)
+        applyFlankingDamage(attacker, defender, attackedTile)
 
         // check if unit is captured by the attacker (prize ships unique)
         // As ravignir clarified in issue #4374, this only works for aggressor
@@ -205,6 +206,7 @@ object Battle {
         if (defender.isDefeated() && defender is MapUnitCombatant && !defender.unit.isCivilian()) {
             tryEarnFromKilling(attacker, defender)
             tryHealAfterKilling(attacker)
+            defender.getCivInfo().addWarWeariness(attacker.getCivInfo().civName, 2f)
 
             if (attacker is MapUnitCombatant) triggerVictoryUniques(attacker, defender, attackedTile)
             triggerDefeatUniques(defender, attacker, attackedTile)
@@ -212,6 +214,7 @@ object Battle {
         } else if (attacker.isDefeated() && attacker is MapUnitCombatant && !attacker.unit.isCivilian()) {
             tryEarnFromKilling(defender, attacker)
             tryHealAfterKilling(defender)
+            attacker.getCivInfo().addWarWeariness(defender.getCivInfo().civName, 3f)
 
             if (defender is MapUnitCombatant) triggerVictoryUniques(defender, attacker, attackedTile)
             triggerDefeatUniques(attacker, defender, attackedTile)
@@ -417,7 +420,32 @@ object Battle {
                 }
             }
 
-            while (potentialDamageToDefender + potentialDamageToAttacker > 0) {
+            val attackerFirstStrikes = if (attacker is MapUnitCombatant)
+                attacker.unit.getMatchingUniques(UniqueType.FirstStrikes).sumOf { it.params[0].toInt() }
+            else 0
+            val defenderFirstStrikes = if (defender is MapUnitCombatant)
+                defender.unit.getMatchingUniques(UniqueType.FirstStrikes).sumOf { it.params[0].toInt() }
+            else 0
+            val netFirstStrikes = attackerFirstStrikes - defenderFirstStrikes
+            if (netFirstStrikes > 0) {
+                for (i in 0 until netFirstStrikes * 5) {
+                    if (potentialDamageToDefender <= 0) break
+                    if (minDefenderHealth > 0 && defender.getHealth() <= minDefenderHealth) break
+                    potentialDamageToDefender--
+                    defender.takeDamage(1)
+                    if (defender.isDefeated()) break
+                    if (minDefenderHealth > 0 && defender.getHealth() <= minDefenderHealth) break
+                }
+            } else if (netFirstStrikes < 0) {
+                for (i in 0 until (-netFirstStrikes) * 5) {
+                    if (potentialDamageToAttacker <= 0) break
+                    potentialDamageToAttacker--
+                    attacker.takeDamage(1)
+                    if (attacker.isDefeated()) break
+                }
+            }
+
+            while (!attacker.isDefeated() && !defender.isDefeated() && potentialDamageToDefender + potentialDamageToAttacker > 0) {
                 if (minDefenderHealth > 0 && defender.getHealth() <= minDefenderHealth) break
                 if (rng.nextInt(potentialDamageToDefender + potentialDamageToAttacker) < potentialDamageToDefender) {
                     potentialDamageToDefender--
@@ -476,6 +504,32 @@ object Battle {
                 targetCombatant.takeDamage(actualDamage)
             }
             targetsHit++
+        }
+    }
+
+    private fun applyFlankingDamage(attacker: ICombatant, defender: ICombatant, attackedTile: Tile) {
+        if (attacker !is MapUnitCombatant || attacker.isDefeated()) return
+        val flankFilters = attacker.unit.getMatchingUniques(UniqueType.FlankAttack)
+            .map { it.params[0] }
+            .toList()
+        if (flankFilters.isEmpty()) return
+
+        val primaryDefenderUnit = (defender as? MapUnitCombatant)?.unit
+        for (targetUnit in attackedTile.militaryUnits.toList()) {
+            if (targetUnit == primaryDefenderUnit) continue
+            if (targetUnit.isCivilian()) continue
+            if (!attacker.getCivInfo().isAtWarWith(targetUnit.civ)) continue
+            if (flankFilters.none { targetUnit.matchesFilter(it) }) continue
+
+            val targetCombatant = MapUnitCombatant(targetUnit)
+            val attackerStr = attacker.getAttackingStrength(targetCombatant).toFloat()
+            val defenderStr = targetCombatant.getDefendingStrength(attacker).coerceAtLeast(1).toFloat()
+            val rawDamage = (25f * (attackerStr / defenderStr)).roundToInt().coerceAtLeast(1)
+            val maxAllowedDamage = (targetUnit.health - 1).coerceAtLeast(0)
+            val actualDamage = rawDamage.coerceAtMost(maxAllowedDamage)
+            if (actualDamage > 0) {
+                targetCombatant.takeDamage(actualDamage)
+            }
         }
     }
 

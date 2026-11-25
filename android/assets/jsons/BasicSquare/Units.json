@@ -350,6 +350,7 @@
 			"No defensive terrain bonus",
 			"Withdraws before melee combat <with [20]% chance>",
 			"[+50]% Strength <vs [Siege] units> <when attacking>",
+			"Flank attack against [Siege]",
 			"[+20]% to Flank Attack bonuses <vs [Siege] units>", // Flank attack vs Catapults/Trebuchets
 
 			"Only available <with [Horses]>"
@@ -387,6 +388,7 @@
 			"Can upgrade to [Cuirassier]",
 			// Immune to first strikes
 			"No defensive terrain bonus",
+			"Flank attack against [Siege]",
 			"[+50]% to Flank Attack bonuses <vs [Siege] units>",
 			"Never appears as a Barbarian unit",
 
@@ -420,6 +422,7 @@
 			// Immune to first strikes
 			"Withdraws before melee combat <with [15]% chance>",
 			"No defensive terrain bonus",
+			"Flank attack against [Siege]",
 			"[+20]% to Flank Attack bonuses <vs [Siege] units>",
 			"Never appears as a Barbarian unit",
 
@@ -452,6 +455,7 @@
 			"No defensive terrain bonus",
 			"Withdraws before melee combat <with [30]% chance>",
 			"[+50]% Strength <vs [Cannon] units> <when attacking>",
+			"Flank attack against [Siege]",
 			"[+20]% to Flank Attack bonuses <vs [Siege] units>",
 			"Never appears as a Barbarian unit",
 

@@ -303,6 +303,23 @@ class CivicManager : IsPartOfGameInfoSerialization {
         }
     }
 
+    /** Evaluates Nationhood defensive unit drafting for AI cities when [UniqueType.CanDraftUnits] is active. */
+    fun automateNationhoodDraft() {
+        if (!::civInfo.isInitialized || !civInfo.hasUnique(UniqueType.CanDraftUnits)) return
+        if (!civInfo.isAtWar()) return
+        for (city in civInfo.cities) {
+            val constructions = city.cityConstructions
+            if (!constructions.canDraftUnit()) continue
+            if (city.getAngryCitizens() > 1) continue
+            val enemyNearby = city.getCenterTile().getTilesInDistance(3).any { tile ->
+                tile.militaryUnits.any { it.civ.isAtWarWith(civInfo) }
+            }
+            if (enemyNearby) {
+                constructions.draftUnit()
+            }
+        }
+    }
+
     @Readonly
     private fun shouldWhipCity(
         city: com.unciv.logic.city.City,

@@ -194,4 +194,29 @@ class Civ4AiTests {
         val cottageRank = Automation.rankStatsForCityWork(Stats(food = 2f, gold = 1f), city, false, fatCrossEdgeTile)
         assertTrue(cottageRank > baseRank)
     }
+
+    @Test
+    fun `ai drafts defensive unit when at war with enemy near city under Nationhood`() {
+        val civ = testGame.addCiv()
+        val enemy = testGame.addCiv()
+        civ.diplomacyFunctions.makeCivilizationsMeet(enemy)
+        civ.getDiplomacyManager(enemy)!!.declareWar()
+
+        civ.tech.addTechnology("Nationalism")
+        civ.civics.switchCivics(mapOf("Legal" to "Nationhood"))
+        civ.anarchyTurns = 0
+
+        val city = testGame.addCity(civ, testGame.getTile(0, 0))
+        city.population.setPopulation(6)
+        city.cityStats.update()
+
+        testGame.addUnit("Warrior", enemy, testGame.getTile(2, 0))
+
+        val unitsBefore = civ.units.getCivUnitsSize()
+        civ.civics.automateNationhoodDraft()
+
+        assertEquals(unitsBefore + 1, civ.units.getCivUnitsSize())
+        assertEquals(5, city.population.population)
+        assertEquals(1, civ.draftsThisTurn)
+    }
 }

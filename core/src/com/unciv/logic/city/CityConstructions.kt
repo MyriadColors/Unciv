@@ -794,6 +794,52 @@ class CityConstructions : IsPartOfGameInfoSerialization {
         return true
     }
 
+    /** Returns the strongest buildable foot/gunpowder/melee unit that can be drafted under Nationhood. */
+    @Readonly
+    fun getDraftableUnit(): BaseUnit? {
+        return city.getRuleset().units.values
+            .filter { unit ->
+                !unit.isCivilian() &&
+                unit.isMelee() &&
+                unit.unitType != "Mounted" &&
+                unit.unitType != "Armored" &&
+                unit.unitType != "Siege" &&
+                unit.isBuildable(this)
+            }
+            .maxByOrNull { it.strength }
+    }
+
+    @Readonly
+    fun getDraftPopulationCost(unit: BaseUnit): Int {
+        return if (unit.strength >= 20) 2 else 1
+    }
+
+    @Readonly
+    fun canDraftUnit(): Boolean {
+        if (city.isPuppet || city.isBeingRazed) return false
+        var maxDrafts = 0
+        for (unique in city.civ.getMatchingUniques(UniqueType.CanDraftUnits)) {
+            maxDrafts = maxOf(maxDrafts, unique.params[0].toInt())
+        }
+        if (maxDrafts <= 0 || city.civ.draftsThisTurn >= maxDrafts) return false
+        if (city.population.population < 6) return false
+        val unit = getDraftableUnit() ?: return false
+        val popCost = getDraftPopulationCost(unit)
+        return city.population.population - popCost >= 5
+    }
+
+    fun draftUnit(): MapUnit? {
+        if (!canDraftUnit()) return null
+        val baseUnit = getDraftableUnit() ?: return null
+        val popCost = getDraftPopulationCost(baseUnit)
+        val spawnedUnit = city.civ.units.placeUnitNearTile(city.location, baseUnit) ?: return null
+        city.population.setPopulation(city.population.population - popCost)
+        city.draftAngerTurns += 10
+        city.civ.draftsThisTurn++
+        city.cityStats.update()
+        return spawnedUnit
+    }
+
     /** Returns the Gold cost to hurry [construction] under Universal Suffrage (3 Gold per remaining hammer). */
     @Readonly
     fun getGoldHurryCost(construction: INonPerpetualConstruction): Int {

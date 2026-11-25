@@ -304,7 +304,7 @@
 		"specialistSlots": {"Spy": 2},
 		"uniques": [
 			"Only available <when espionage is enabled>",
-			"[+7]% [Happiness] [in this city] <when at war>" // -25% war weariness
+			"[-25]% War Weariness"
 			// +4 Espionage (BtS)
 			// +50% Espionage (BtS)
 		],

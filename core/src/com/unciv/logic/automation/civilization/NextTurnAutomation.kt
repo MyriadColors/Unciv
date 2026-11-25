@@ -109,6 +109,7 @@ object NextTurnAutomation {
         automateCities(civView)  // second most expensive
         if (tradeAndChangeState) {
             civInfo.civics.automateSlaveryWhip()
+            civInfo.civics.automateNationhoodDraft()
             trainSettler(civView)
         }
         // I'm not sure what will happen if we *don't* vote when we can, so automate vote even when forced automation

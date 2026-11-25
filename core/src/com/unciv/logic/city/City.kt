@@ -390,6 +390,7 @@ class City : IsPartOfGameInfoSerialization, INamed {
 
     /** Returns the number of angry citizens in this city (when local unhappiness exceeds local happiness). */
     var whipAngerTurns: Int = 0
+    var draftAngerTurns: Int = 0
 
     @Readonly
     fun getAngryCitizens(): Int {

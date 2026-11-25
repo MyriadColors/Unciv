@@ -417,6 +417,49 @@ class CityStats(val city: City) {
             newHappinessList["Population"] = -city.population.population.toFloat()
             if (city.whipAngerTurns > 0)
                 newHappinessList["Whip anger"] = -1f
+            if (city.draftAngerTurns > 0)
+                newHappinessList["Draft anger"] = -3f
+
+            val garrisonCount = city.getCenterTile().militaryUnits.size
+            if (garrisonCount > 0) {
+                var perGarrison = 0f
+                city.forEachMatchingUnique(UniqueType.HappinessPerGarrisonedUnit) { unique ->
+                    perGarrison += unique.params[0].toFloat()
+                }
+                if (perGarrison > 0f)
+                    newHappinessList["Military Police"] = garrisonCount * perGarrison
+            }
+
+            if (civInfo.warWeariness.isNotEmpty()) {
+                var activeWarWeariness = 0f
+                for ((enemyName, wwPoints) in civInfo.warWeariness) {
+                    val enemy = civInfo.gameInfo.getCivilizationOrNull(enemyName)
+                    if (enemy != null && civInfo.isAtWarWith(enemy))
+                        activeWarWeariness += wwPoints
+                }
+                if (activeWarWeariness > 0f) {
+                    var wwModifier = 1f
+                    city.forEachMatchingUnique(UniqueType.WarWearinessModifier) { unique ->
+                        wwModifier += unique.params[0].toFloat() / 100f
+                    }
+                    val clampedModifier = wwModifier.coerceAtLeast(0f)
+                    val wwUnhappiness = kotlin.math.floor(activeWarWeariness * city.population.population / 10f * clampedModifier)
+                    if (wwUnhappiness > 0f)
+                        newHappinessList["War Weariness"] = -wwUnhappiness
+                }
+            }
+
+            if (city.civ != city.foundingCivObject) {
+                val tileCulture = city.getCenterTile().tileCulture
+                val totalCulture = tileCulture.values.sum()
+                if (totalCulture > 0f) {
+                    val ownCulture = tileCulture[city.civ.civName] ?: 0f
+                    val foreignRatio = (totalCulture - ownCulture) / totalCulture
+                    val motherlandUnhappiness = kotlin.math.floor(foreignRatio * city.population.population * 0.5f)
+                    if (motherlandUnhappiness > 0f)
+                        newHappinessList["Yearn for Motherland"] = -motherlandUnhappiness
+                }
+            }
 
             val luxuryCount = civInfo.detailedCivResources
                 .count { it.resource.resourceType == com.unciv.models.ruleset.tile.ResourceType.Luxury && it.amount > 0 }
