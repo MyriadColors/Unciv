@@ -62,6 +62,15 @@ class CityConstructionsView(private val cityConstructions: CityConstructions, ga
     @Readonly fun getDraftableUnit(): BaseUnit? = cityConstructions.getDraftableUnit()
     @Readonly fun getDraftPopulationCost(unit: BaseUnit): Int = cityConstructions.getDraftPopulationCost(unit)
     fun draftUnit(): Boolean = cityConstructions.draftUnit() != null
+
+    @Readonly fun canWhipConstruction(construction: INonPerpetualConstruction): Boolean = cityConstructions.canWhipConstruction(construction)
+    @Readonly fun getWhipPopulationCost(construction: INonPerpetualConstruction): Int = cityConstructions.getWhipPopulationCost(construction)
+    fun whipConstruction(construction: INonPerpetualConstruction): Boolean = cityConstructions.whipConstruction(construction)
+
+    @Readonly fun hasGoldHurryUnique(): Boolean = cityConstructions.city.civ.hasUnique(com.unciv.models.ruleset.unique.UniqueType.CanHurryProductionWithGold)
+    @Readonly fun canHurryConstructionWithGold(construction: INonPerpetualConstruction): Boolean = cityConstructions.canHurryConstructionWithGold(construction)
+    @Readonly fun getGoldHurryCost(construction: INonPerpetualConstruction): Int = cityConstructions.getGoldHurryCost(construction)
+    fun hurryConstructionWithGold(construction: INonPerpetualConstruction): Boolean = cityConstructions.hurryConstructionWithGold(construction)
 }
 
 // Helpers built on top of the view API, rather than being part of it

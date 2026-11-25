@@ -16,6 +16,8 @@ import com.unciv.ui.screens.cityscreen.CityScreen
 import com.unciv.ui.screens.espionage.EspionageScreen
 import com.unciv.ui.screens.pickerscreens.DiplomaticVotePickerScreen
 import com.unciv.ui.screens.pickerscreens.PantheonPickerScreen
+import com.unciv.models.ruleset.unique.UniqueType
+import com.unciv.ui.screens.pickerscreens.CivicPickerScreen
 import com.unciv.ui.screens.pickerscreens.PolicyPickerScreen
 import com.unciv.ui.screens.pickerscreens.ReligiousBeliefsPickerScreen
 import com.unciv.ui.screens.pickerscreens.TechPickerScreen
@@ -78,9 +80,14 @@ enum class NextTurnAction(protected val text: String, val color: Color) {
     },
     PickPolicy("Pick a policy", Color.VIOLET) {
         override fun isChoice(worldScreen: WorldScreen) =
-            worldScreen.selectedGameView.civView.shouldShowPolicyPicker()
+            !worldScreen.gameInfo.ruleset.modOptions.hasUnique(UniqueType.CivicsMode) &&
+                worldScreen.selectedGameView.civView.shouldShowPolicyPicker()
         override fun action(worldScreen: WorldScreen) {
-            worldScreen.game.pushScreen { PolicyPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState) }
+            val ruleset = worldScreen.gameInfo.ruleset
+            if (ruleset.modOptions.hasUnique(UniqueType.CivicsMode) && ruleset.civicCategories.isNotEmpty())
+                worldScreen.game.pushScreen { CivicPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState) }
+            else
+                worldScreen.game.pushScreen { PolicyPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState) }
             worldScreen.selectedGameView.civView.tryDismissPolicyPicker()
         }
     },

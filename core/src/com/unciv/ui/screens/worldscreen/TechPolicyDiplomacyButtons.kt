@@ -165,8 +165,11 @@ class TechPolicyDiplomacyButtons(val worldScreen: WorldScreen) : Table(BaseScree
     }
 
     private fun updatePolicyButton() {
-        // Don't show policies until they become relevant
-        if (viewingCiv.hasAdoptedPolicies() || viewingCiv.canAdoptPolicy()) {
+        val ruleset = worldScreen.gameInfo.ruleset
+        val isCivicsMode = ruleset.modOptions.hasUnique(com.unciv.models.ruleset.unique.UniqueType.CivicsMode) &&
+            ruleset.civicCategories.isNotEmpty()
+        // Don't show policies until they become relevant; in Civics mode, always show for active civs
+        if ((isCivicsMode && !viewingCiv.isDefeated()) || viewingCiv.hasAdoptedPolicies() || viewingCiv.canAdoptPolicy()) {
             policyButtonHolder.touchable = Touchable.enabled
             policyButtonHolder.actor = policyScreenButton
         } else {

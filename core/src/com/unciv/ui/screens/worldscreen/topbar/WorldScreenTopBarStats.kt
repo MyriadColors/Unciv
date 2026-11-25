@@ -17,6 +17,8 @@ import com.unciv.ui.images.ImageGetter
 import com.unciv.ui.screens.basescreen.BaseScreen
 import com.unciv.ui.screens.overviewscreen.EmpireOverviewCategories
 import com.unciv.ui.screens.overviewscreen.EmpireOverviewScreen
+import com.unciv.models.ruleset.unique.UniqueType
+import com.unciv.ui.screens.pickerscreens.CivicPickerScreen
 import com.unciv.ui.screens.pickerscreens.PolicyPickerScreen
 import com.unciv.ui.screens.pickerscreens.TechPickerScreen
 import com.unciv.utils.Concurrency
@@ -113,8 +115,13 @@ internal class WorldScreenTopBarStats(topbar: WorldScreenTopBar) : ScalingTableW
         add(happinessLabel).padRight(padRightBetweenStats)
 
         addStat("Culture", cultureLabel) {
-            if (worldScreen.gameInfo.ruleset.policyBranches.isEmpty()) null
-            else PolicyPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState)
+            val ruleset = worldScreen.gameInfo.ruleset
+            when {
+                ruleset.modOptions.hasUnique(UniqueType.CivicsMode) && ruleset.civicCategories.isNotEmpty() ->
+                    CivicPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState)
+                ruleset.policyBranches.isEmpty() -> null
+                else -> PolicyPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState)
+            }
         }
 
         if (worldScreen.gameInfo.isReligionEnabled()) {
@@ -158,6 +165,11 @@ internal class WorldScreenTopBarStats(topbar: WorldScreenTopBar) : ScalingTableW
 
     private fun getCultureText(civInfo: Civilization, nextTurnStats: Stats): String {
         var cultureString = rateLabel(nextTurnStats.culture)
+        if (civInfo.gameInfo.ruleset.modOptions.hasUnique(UniqueType.CivicsMode)) {
+            if (civInfo.isInAnarchy())
+                cultureString += "\u2004(Anarchy: ${civInfo.anarchyTurns})".tr()
+            return cultureString
+        }
         // kotlin Float division by Zero produces `Float.POSITIVE_INFINITY`, not an exception
         val turnsToNextPolicy = (civInfo.policies.getCultureNeededForNextPolicy() - civInfo.policies.storedCulture) / nextTurnStats.culture
         cultureString += when {

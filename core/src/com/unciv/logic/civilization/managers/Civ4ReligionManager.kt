@@ -104,7 +104,7 @@ class Civ4ReligionManager : IsPartOfGameInfoSerialization {
         stateReligion = religionName
 
         if (applyAnarchy && !civInfo.hasUnique(UniqueType.NoAnarchy) && !civInfo.goldenAges.isGoldenAge()) {
-            civInfo.anarchyTurns = maxOf(civInfo.anarchyTurns, 1)
+            civInfo.anarchyTurns += 1
         }
 
         for (city in civInfo.cities) {

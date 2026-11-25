@@ -102,7 +102,10 @@ class CivicManager : IsPartOfGameInfoSerialization {
         val anarchy = getAnarchyTurnsForChanges(changedCount)
         civInfo.anarchyTurns += anarchy
         civInfo.cache.updateCivResources()
-        for (city in civInfo.cities) city.cityStats.update()
+        for (city in civInfo.cities) {
+            city.population.unassignExtraPopulation()
+            city.cityStats.update()
+        }
         civInfo.updateStatsForNextTurn()
         return anarchy
     }
@@ -159,14 +162,22 @@ class CivicManager : IsPartOfGameInfoSerialization {
     private fun evaluateCivicUnique(unique: Unique, numCities: Int): Float {
         return when (unique.type) {
             UniqueType.Stats -> scoreStats(unique.stats) * numCities
+            UniqueType.StatsPerCity -> scoreStats(unique.stats) * numCities
             UniqueType.StatsFromObject -> evaluateStatsFromObject(unique, numCities)
+            UniqueType.StatsFromSpecialist -> scoreStats(unique.stats) * (civInfo.cities.sumOf { it.population.getNewSpecialists().values.sum() } + numCities * 0.5f)
             UniqueType.StatPercentBonusCities -> evaluateStatPercentBonusCities(unique)
             UniqueType.CanWhipProduction -> evaluateWhipUnique()
             UniqueType.CanHurryProductionWithGold -> 5f + (civInfo.gold / 200f).coerceIn(0f, 10f)
-            UniqueType.ImprovementGrowthRate -> 4f + countUpgradingTiles() * 2f
+            UniqueType.ImprovementTimeIncrease -> 4f + numCities * 1.5f
+            UniqueType.ImprovementGrowthRate -> 6f + countUpgradingTiles() * 2f
             UniqueType.CityHealth -> evaluateCityHealthUnique(unique)
             UniqueType.PercentProductionUnits -> evaluateMilitaryProductionUnique(unique)
             UniqueType.PercentProductionBuildings -> evaluateBuildingProductionUnique(unique)
+            UniqueType.UnitStartingExperience -> (if (civInfo.isAtWar()) 14f else 6f) * civInfo.getPersonality().modifierFocus(PersonalityValue.Military, 0.3f)
+            UniqueType.NoDistanceMaintenance -> numCities * 2.5f
+            UniqueType.NoForeignTradeRoutes -> -numCities * 1.5f
+            UniqueType.UnlimitedSpecialists -> numCities * 1.5f
+            UniqueType.EmancipationUnhappinessPressure -> numCities * 2f
             else -> evaluateOtherCivicUnique(unique, numCities)
         }
     }

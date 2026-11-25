@@ -138,10 +138,12 @@ class CityStats(val city: City) {
             return baseYield * multiplier
         }
 
+        val noForeignTradeRoutes = city.civ.hasUnique(UniqueType.NoForeignTradeRoutes)
         val partnerCities = city.civ.gameInfo.civilizations
             .filter { otherCiv ->
                 otherCiv.isAlive() && (otherCiv == city.civ ||
-                    (city.civ.knows(otherCiv) && city.civ.getDiplomacyManager(otherCiv)?.hasOpenBorders == true))
+                    (!noForeignTradeRoutes && !otherCiv.hasUnique(UniqueType.NoForeignTradeRoutes) &&
+                        city.civ.knows(otherCiv) && city.civ.getDiplomacyManager(otherCiv)?.hasOpenBorders == true))
             }
             .flatMap { it.cities }
             .filter { it != city && isConnectedForTradeRoute(it) }
@@ -407,7 +409,8 @@ class CityStats(val city: City) {
         else city.getCenterTile().aerialDistanceTo(capital.getCenterTile())
 
         val pop = city.population.population
-        val distanceMaintenance = kotlin.math.floor(distanceToCapital * (pop + 7) / 10f * 0.25f)
+        val distanceMaintenance = if (city.civ.hasUnique(UniqueType.NoDistanceMaintenance)) 0f
+        else kotlin.math.floor(distanceToCapital * (pop + 7) / 10f * 0.25f)
         val numCities = (city.civ.cities.size - 1).coerceAtLeast(0)
         val numCitiesMaintenance = kotlin.math.floor(numCities * (pop + 17) / 18f * 0.3f)
         return distanceMaintenance + numCitiesMaintenance
@@ -494,6 +497,20 @@ class CityStats(val city: City) {
                     val motherlandUnhappiness = kotlin.math.floor(foreignRatio * city.population.population * 0.5f)
                     if (motherlandUnhappiness > 0f)
                         newHappinessList["Yearn for Motherland"] = -motherlandUnhappiness
+                }
+            }
+
+            if (!civInfo.hasUnique(UniqueType.EmancipationUnhappinessPressure)) {
+                val otherMajorCivs = civInfo.gameInfo.civilizations.filter {
+                    it != civInfo && it.isMajorCiv && it.isAlive() && civInfo.knows(it)
+                }
+                if (otherMajorCivs.isNotEmpty()) {
+                    val emancipationCivs = otherMajorCivs.count { it.hasUnique(UniqueType.EmancipationUnhappinessPressure) }
+                    if (emancipationCivs > 0) {
+                        val ratio = emancipationCivs.toFloat() / otherMajorCivs.size
+                        val emancipationUnhappiness = kotlin.math.floor(ratio * city.population.population * 0.5f).coerceAtLeast(1f)
+                        newHappinessList["We demand Emancipation!"] = -emancipationUnhappiness
+                    }
                 }
             }
 

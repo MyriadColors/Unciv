@@ -52,6 +52,26 @@ class BuyButtonFactory(val cityScreen: CityScreen) {
         val cityView = cityScreen.cityView
         val button = "".toTextButton()
 
+        if (stat == Stat.Gold &&
+            cityView.constructions.hasGoldHurryUnique() &&
+            cityView.constructions.currentConstructionName() == construction.name
+        ) {
+            val hurryCost = cityView.constructions.getGoldHurryCost(construction)
+            if (hurryCost > 0) {
+                button.setText("Hurry".tr() + " " + hurryCost.tr() + stat.character)
+                button.onActivation(binding = KeyboardBinding.BuyConstruction) {
+                    button.disable()
+                    cityScreen.closeAllPopups()
+                    ConfirmHurryPopup(construction, hurryCost)
+                }
+                button.isEnabled = cityScreen.canCityBeChanged() &&
+                    cityView.constructions.canHurryConstructionWithGold(construction)
+                preferredBuyStat = stat
+                button.labelCell.pad(5f)
+                return button
+            }
+        }
+
         if (!isConstructionPurchaseShown(construction, stat)) {
             // This can't ever be bought with the given currency.
             // We want one disabled "buy" button without a price for "priceless" buildings such as wonders
@@ -147,6 +167,31 @@ class BuyButtonFactory(val cityScreen: CityScreen) {
             val confirmStyle = BaseScreen.skin.get("positive", TextButton.TextButtonStyle::class.java)
             addOKButton("Purchase", KeyboardBinding.Confirm, confirmStyle) {
                 purchaseConstruction(construction, stat, tile)
+            }
+            equalizeLastTwoButtonWidths()
+            open(true)
+        }
+    }
+
+    private inner class ConfirmHurryPopup(
+        construction: INonPerpetualConstruction,
+        hurryCost: Int
+    ) : Popup(cityScreen.stage) {
+        init {
+            val cityView = cityScreen.cityView
+            val balance = cityView.getStatReserve(Stat.Gold)
+            addGoodSizedLabel("Currently you have [$balance] [${Stat.Gold.name}].").padBottom(10f).row()
+            addGoodSizedLabel("Would you like to hurry [${construction.name}] for [$hurryCost] [${Stat.Gold.character}]?").row()
+            addCloseButton(Constants.cancel, KeyboardBinding.Cancel) { cityScreen.updateAsync() }
+            val confirmStyle = BaseScreen.skin.get("positive", TextButton.TextButtonStyle::class.java)
+            addOKButton("Hurry", KeyboardBinding.Confirm, confirmStyle) {
+                SoundPlayer.play(Stat.Gold.purchaseSound)
+                Concurrency.run {
+                    cityView.constructions.hurryConstructionWithGold(construction)
+                    Concurrency.runOnGLThread {
+                        cityScreen.updateAsync()
+                    }
+                }
             }
             equalizeLastTwoButtonWidths()
             open(true)

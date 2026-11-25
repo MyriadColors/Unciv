@@ -196,6 +196,26 @@ class CityConstructionsTable(private val cityScreen: CityScreen) {
         }
 
         val constructions = cityView.constructions
+        val currentConstruction = constructions.getConstruction(constructions.currentConstructionName())
+        if (cityScreen.canCityBeChanged() && currentConstruction is INonPerpetualConstruction &&
+            constructions.canWhipConstruction(currentConstruction)
+        ) {
+            val popCost = constructions.getWhipPopulationCost(currentConstruction)
+            val whipButton = "Whip (-$popCost Pop)".toTextButton()
+            whipButton.onClick {
+                Concurrency.run {
+                    val whipped = constructions.whipConstruction(currentConstruction)
+                    if (whipped) {
+                        launchOnGLThread {
+                            SoundPlayer.play(UncivSound.Chimes)
+                            cityScreen.updateAsync()
+                        }
+                    }
+                }
+            }
+            buttonsTable.add(whipButton).padLeft(5f)
+        }
+
         if (cityScreen.canCityBeChanged() && constructions.canDraftUnit()) {
             val draftUnit = constructions.getDraftableUnit()
             if (draftUnit != null) {

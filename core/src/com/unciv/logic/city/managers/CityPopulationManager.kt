@@ -216,10 +216,13 @@ class CityPopulationManager : IsPartOfGameInfoSerialization {
                 city.stopWorkingTile(tile)
         }
 
-        // unassign specialists that cannot be (e.g. the city was captured and one of the specialist buildings was destroyed)
-        for ((specialistName, maxAmount) in getMaxSpecialists())
+        // unassign specialists that cannot be (e.g. the city was captured and one of the specialist buildings was destroyed, or Caste System was dropped)
+        val maxSpecialists = getMaxSpecialists()
+        for (specialistName in specialistAllocations.keys.toList()) {
+            val maxAmount = maxSpecialists[specialistName]
             if (specialistAllocations[specialistName] > maxAmount)
                 specialistAllocations[specialistName] = maxAmount
+        }
 
         
 
@@ -271,6 +274,13 @@ class CityPopulationManager : IsPartOfGameInfoSerialization {
         val counter = Counter<String>()
         for (building in city.cityConstructions.getBuiltBuildings())
             counter.add(building.newSpecialists())
+        val rulesetSpecialists = city.getRuleset().specialists
+        val unlimitedCap = population.coerceAtLeast(1)
+        city.forEachMatchingUnique(UniqueType.UnlimitedSpecialists) { unique ->
+            val specialistName = unique.params[0]
+            if (specialistName in rulesetSpecialists && counter[specialistName] < unlimitedCap)
+                counter[specialistName] = unlimitedCap
+        }
         return counter
     }
 }

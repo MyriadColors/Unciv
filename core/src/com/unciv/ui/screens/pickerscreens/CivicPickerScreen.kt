@@ -62,12 +62,11 @@ class CivicPickerScreen(
         rowTable.defaults().pad(5f)
         rowTable.add("State Religion:".toLabel(fontSize = 18)).padRight(10f)
 
-        val noStateReligion = viewingCiv.hasUnique(com.unciv.models.ruleset.unique.UniqueType.NoStateReligion) ||
-            pendingSelections.values.any { civicName ->
-                viewingCiv.gameInfo.ruleset.civics[civicName]?.uniqueObjects?.any {
-                    it.type == com.unciv.models.ruleset.unique.UniqueType.NoStateReligion
-                } == true
-            }
+        val noStateReligion = pendingSelections.values.any { civicName ->
+            viewingCiv.gameInfo.ruleset.civics[civicName]?.uniqueObjects?.any {
+                it.type == com.unciv.models.ruleset.unique.UniqueType.NoStateReligion
+            } == true
+        }
         if (noStateReligion) pendingStateReligion = null
 
         val options = listOf<String?>(null) + viewingCiv.civ4Religion.getAvailableStateReligions()
@@ -141,7 +140,7 @@ class CivicPickerScreen(
             pendingStateReligion != viewingCiv.civ4Religion.stateReligion
         val civicAnarchy = viewingCiv.civics.getAnarchyTurnsForChanges(changedCount)
         val religionAnarchy = if (stateReligionChanged && !viewingCiv.hasUnique(com.unciv.models.ruleset.unique.UniqueType.NoAnarchy) && !viewingCiv.goldenAges.isGoldenAge()) 1 else 0
-        val anarchyTurns = maxOf(civicAnarchy, religionAnarchy)
+        val anarchyTurns = civicAnarchy + religionAnarchy
         val upkeep = viewingCiv.civics.getCivicUpkeep()
 
         val statusLine = if (viewingCiv.isInAnarchy()) {

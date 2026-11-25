@@ -750,7 +750,11 @@ class City : IsPartOfGameInfoSerialization, INamed {
             // religion a unique is active. However, since religion uniques only come from the city itself,
             // this will always be true when checked.
             "in cities following this religion" -> true
-            "in cities following our religion" -> religion.getMajorityReligion().let { it != null && it == viewingCiv?.religionManager?.religion }
+            "in cities following our religion" ->
+                if (civ.isCiv4ReligionEnabled())
+                    viewingCiv?.civ4Religion?.stateReligion?.let { it in presentReligions } == true
+                else
+                    religion.getMajorityReligion().let { it != null && it == viewingCiv?.religionManager?.religion }
             else -> civ.matchesFilter(filter, state, false)
         }
     }

@@ -21,8 +21,8 @@
                 "requiredTech": "Constitution",
                 "upkeep": "Medium",
                 "uniques": [
-                    "[+3 Science] from every [Scientist]",
-                    "[+3 Happiness] <in cities with at least [6] [Population]>"
+                    "[+3 Science] from every specialist [in all cities]",
+                    "[+3 Happiness] [in all cities] <in cities with at least [6] [Population]>"
                 ]
             },
             {
@@ -59,7 +59,7 @@
                 "requiredTech": "Feudalism",
                 "upkeep": "High",
                 "uniques": [
-                    "[+2] XP gained from combat"
+                    "New [Military] units start with [+2] XP [in all cities]"
                 ]
             },
             {
@@ -114,7 +114,7 @@
                 "requiredTech": "Feudalism",
                 "upkeep": "Low",
                 "uniques": [
-                    "[+50]% construction speed of tile improvements"
+                    "Can build [All] improvements at a [+50]% rate"
                 ]
             },
             {
@@ -122,7 +122,10 @@
                 "requiredTech": "Code of Laws",
                 "upkeep": "Medium",
                 "uniques": [
-                    "[+1 Production] from every [Workshop]"
+                    "[+1 Production] from every [Workshop]",
+                    "Unlimited [Artist] specialists",
+                    "Unlimited [Scientist] specialists",
+                    "Unlimited [Merchant] specialists"
                 ]
             },
             {
@@ -130,7 +133,8 @@
                 "requiredTech": "Democracy",
                 "upkeep": "None",
                 "uniques": [
-                    "[+100]% growth rate of upgrading improvements"
+                    "[All] improvements grow [+100]% faster",
+                    "Causes unhappiness in civilizations without this civic"
                 ]
             }
         ]
@@ -149,7 +153,8 @@
                 "requiredTech": "Banking",
                 "upkeep": "Medium",
                 "uniques": [
-                    "[+1 Science] [in all cities]"
+                    "[+1 Science] [in all cities]",
+                    "No foreign trade routes"
                 ]
             },
             {
@@ -168,7 +173,8 @@
                 "uniques": [
                     "[+1 Food] from every [Workshop]",
                     "[+1 Food] from every [Watermill]",
-                    "[+10]% [Production] [in all cities]"
+                    "[+10]% [Production] [in all cities]",
+                    "No distance maintenance in cities"
                 ]
             },
             {
@@ -206,7 +212,7 @@
                 "upkeep": "Medium",
                 "uniques": [
                     "Prevents spread of non-state religions",
-                    "[+2] XP gained from combat <in cities following our religion>"
+                    "New [Military] units start with [+2] XP [in cities following our religion]"
                 ]
             },
             {

@@ -381,6 +381,9 @@ open class RulesetValidator protected constructor(
         for (policy in ruleset.policies.values) {
             uniqueValidator.checkUniques(policy, lines, reportRulesetSpecificErrors)
         }
+        for (civic in ruleset.civics.values) {
+            uniqueValidator.checkUniques(civic, lines, reportRulesetSpecificErrors)
+        }
     }
 
     protected open fun addPromotionErrors(lines: RulesetErrorList) {

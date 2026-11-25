@@ -14,6 +14,8 @@ import com.unciv.ui.screens.diplomacyscreen.DiplomacyScreen
 import com.unciv.ui.screens.overviewscreen.EmpireOverviewCategories
 import com.unciv.ui.screens.overviewscreen.EmpireOverviewScreen
 import com.unciv.ui.screens.espionage.EspionageScreen
+import com.unciv.models.ruleset.unique.UniqueType
+import com.unciv.ui.screens.pickerscreens.CivicPickerScreen
 import com.unciv.ui.screens.pickerscreens.PolicyPickerScreen
 import com.unciv.ui.screens.pickerscreens.PromotionPickerScreen
 import com.unciv.ui.screens.pickerscreens.TechPickerScreen
@@ -210,7 +212,11 @@ class PolicyAction(
     private val select: String? = null
 ) : NotificationAction {
     override fun execute(worldScreen: WorldScreen) {
-        worldScreen.game.pushScreen { PolicyPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState, select) }
+        val ruleset = worldScreen.gameInfo.ruleset
+        if (ruleset.modOptions.hasUnique(UniqueType.CivicsMode) && ruleset.civicCategories.isNotEmpty())
+            worldScreen.game.pushScreen { CivicPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState) }
+        else
+            worldScreen.game.pushScreen { PolicyPickerScreen(worldScreen.selectedCiv, worldScreen.canChangeState, select) }
     }
 }
 
