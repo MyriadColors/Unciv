@@ -342,8 +342,8 @@
 				"row": 14,
 				"prerequisites": ["Mathematics"],
 				"uniques": [
-					"Enables conversion of city production to [Gold]" // It also enables you to build Wealth in cities
-					// TODO: +1 Trade Routes per city
+					"Enables conversion of city production to [Gold]", // It also enables you to build Wealth in cities
+					"[+1] Trade Routes [in all cities]"
 					// TODO: Enables Gold Trading via Diplomacy
 				],
 				"quote": "\"Everything is worth what its purchaser will pay for it.\" - Publilius Syrus"
@@ -483,6 +483,7 @@
 				"row": 4,
 				"uniques": [
 					"Unavailable <before discovering [Code of Laws]> <before discovering [Feudalism]> <hidden from users>",
+					"Farms spread irrigation",
 					"Comment [Enables Bureaucracy]"
 				],
 				"civilopediaText": [
@@ -845,6 +846,9 @@
 				"cost": 3600,
 				"row": 15,
 				"prerequisites": ["Chemistry", "Scientific Method"],
+				"uniques": [
+					"Farms can be built without fresh water"
+				],
 				"quote": "\"It is not the strongest of the species that survive but the one most responsive to change.\" - Charles Darwin"
 			},
 			{

@@ -338,6 +338,66 @@ class CityExpansionManager : IsPartOfGameInfoSerialization {
                 NotificationIcons.Culture
             )
         }
+
+        processCulturalRevoltCheck()
+    }
+
+    /** Checks Civ IV cultural pressure on this city center for revolts and peaceful city flipping. */
+    fun processCulturalRevoltCheck(forceRevoltRoll: Boolean = false) {
+        if (city.isCapital() || city.isInResistance()) return
+        val tileCulture = city.getCenterTile().tileCulture
+        val totalCulture = tileCulture.values.sum()
+        if (totalCulture <= 0f) return
+
+        val topEntry = tileCulture.maxByOrNull { it.value } ?: return
+        if (topEntry.key == city.civ.civName) return
+        val foreignCiv = city.civ.gameInfo.getCivilizationOrNull(topEntry.key) ?: return
+        if (!foreignCiv.isAlive() || foreignCiv.isBarbarian) return
+
+        val foreignRatio = topEntry.value / totalCulture
+        if (foreignRatio <= 0.5f) return
+
+        // Garrison suppression
+        val garrisonStrength = city.getCenterTile().militaryUnits.sumOf { it.baseUnit.strength }
+        val suppressionThreshold = (foreignRatio * 20f).toInt()
+        if (garrisonStrength >= suppressionThreshold) return
+
+        val revoltChance = ((foreignRatio - 0.5f) * 0.4f).coerceIn(0.05f, 0.25f)
+        val rng = city.state.stateBasedRandom("CulturalRevolt.${city.id}.${city.civ.gameInfo.turns}")
+        if (!forceRevoltRoll && rng.nextFloat() >= revoltChance) return
+
+        city.culturalRevoltCount++
+        if (city.culturalRevoltCount >= 2) {
+            city.culturalRevoltCount = 0
+            val oldCiv = city.civ
+            city.moveToCiv(foreignCiv)
+            oldCiv.addNotification(
+                "[${city.name}] has culturally flipped to [${foreignCiv.civName}]!",
+                LocationAction(city.location),
+                NotificationCategory.Cities,
+                NotificationIcons.Culture
+            )
+            foreignCiv.addNotification(
+                "[${city.name}] has joined our empire via cultural pressure!",
+                LocationAction(city.location),
+                NotificationCategory.Cities,
+                NotificationIcons.Culture
+            )
+        } else {
+            city.setFlag(com.unciv.logic.city.CityFlags.Resistance, 2)
+            city.civ.addNotification(
+                "A [${foreignCiv.civName}] cultural revolt has broken out in [${city.name}]!",
+                LocationAction(city.location),
+                NotificationCategory.Cities,
+                NotificationIcons.Culture
+            )
+            foreignCiv.addNotification(
+                "Citizens of [${city.name}] are revolting to join our empire!",
+                LocationAction(city.location),
+                NotificationCategory.Cities,
+                NotificationIcons.Culture
+            )
+        }
     }
 
     fun setTransients() {

@@ -124,4 +124,26 @@ class Civ4CityEconomyTests {
         val milestone = com.unciv.models.ruleset.Milestone("Have 3 cities with Legendary Culture", testGame.ruleset.victories.values.first())
         assertTrue(milestone.hasBeenCompletedBy(civ))
     }
+
+    @Test
+    fun `dynamic trade route slots scale with Currency, Free Market, and Great Lighthouse`() {
+        val civ = testGame.addCiv()
+        val coastTile = testGame.getTile(1, 0)
+        coastTile.baseTerrain = com.unciv.Constants.coast
+        coastTile.setTerrainTransients()
+        val city = testGame.addCity(civ, testGame.getTile(0, 0))
+
+        assertEquals(1, city.cityStats.getTradeRouteSlots())
+
+        civ.tech.addTechnology("Currency")
+        assertEquals(2, city.cityStats.getTradeRouteSlots())
+
+        civ.tech.addTechnology("Economics")
+        civ.civics.switchCivics(mapOf("Economy" to "Free Market"))
+        civ.anarchyTurns = 0
+        assertEquals(3, city.cityStats.getTradeRouteSlots())
+
+        city.cityConstructions.addBuilding("The Great Lighthouse")
+        assertEquals(5, city.cityStats.getTradeRouteSlots())
+    }
 }

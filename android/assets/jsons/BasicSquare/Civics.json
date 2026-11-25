@@ -157,7 +157,8 @@
                 "requiredTech": "Economics",
                 "upkeep": "Medium",
                 "uniques": [
-                    "[+1 Gold] [in all cities]"
+                    "[+1 Gold] [in all cities]",
+                    "[+1] Trade Routes [in all cities]"
                 ]
             },
             {

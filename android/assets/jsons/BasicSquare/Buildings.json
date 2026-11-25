@@ -115,7 +115,7 @@
 		"uniques": [
 			"Connects trade routes over water <after discovering [Astronomy]>",
 			"Only available <in [Coastal] cities>",
-            "[+25]% [Gold] from Trade Routes <in this city>",
+            "[+50]% [Gold] from Trade Routes <in this city>",
             "[+1] Health <with [Pearls]>",
             "[+1] Health <with [Crab]>",
             "[+1] Health <with [Fish]>"
@@ -667,7 +667,7 @@
 		"isWonder": true,
 		"greatPersonPoints": {"Great Merchant": 2},
 		"uniques": [
-			// TODO: +2 trade routes in all coastal cities
+			"[+2] Trade Routes [in all coastal cities]",
 			"Only available <in [Coastal] cities>",
 			"Only available <after discovering [Masonry]>",
 			"Obsolete with [Corporation]"
@@ -1567,5 +1567,15 @@
         ],
 		"requiredTech": "Computers",
 		"requiredBuilding": "Observatory"
+	},
+	{
+		"name": "Mount Rushmore",
+		"cost": 500,
+		"isNationalWonder": true,
+		"culture": 4,
+		"uniques": [
+			"[-25]% War Weariness"
+		],
+		"requiredTech": "Fascism"
 	}
 ]

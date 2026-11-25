@@ -97,7 +97,7 @@ class Milestone(val uniqueDescription: String, private val parentVictory: Victor
     val params = uniqueDescription.getPlaceholderParameters()
 
     @Readonly
-    private fun getIncompleteSpaceshipParts(civInfo: Civilization): Counter<String> {
+    internal fun getIncompleteSpaceshipParts(civInfo: Civilization): Counter<String> {
         @LocalState val incompleteSpaceshipParts = parentVictory.requiredSpaceshipPartsAsCounter.clone()
         incompleteSpaceshipParts.remove(civInfo.victoryManager.currentsSpaceshipParts)
         return incompleteSpaceshipParts
@@ -156,10 +156,28 @@ class Milestone(val uniqueDescription: String, private val parentVictory: Victor
     @Readonly
     fun hasBeenCompletedBy(civInfo: Civilization): Boolean {
         return when (type!!) {
-            MilestoneType.BuiltBuilding ->
-                civInfo.cities.any { it.cityConstructions.isBuilt(params[0])}
+            MilestoneType.BuiltBuilding -> {
+                val built = civInfo.cities.any { it.cityConstructions.isBuilt(params[0]) }
+                if (!built) false
+                else if (params[0] == "Spaceship") {
+                    val travelTurns = civInfo.victoryManager.getSpaceshipTravelTurns()
+                    if (travelTurns <= 0) true
+                    else {
+                        val launchedTurn = civInfo.victoryManager.spaceshipLaunchedTurn
+                        launchedTurn >= 0 && (civInfo.gameInfo.turns - launchedTurn) >= travelTurns
+                    }
+                } else true
+            }
             MilestoneType.AddedSSPartsInCapital -> {
-                getIncompleteSpaceshipParts(civInfo).isEmpty()
+                if (getIncompleteSpaceshipParts(civInfo).isNotEmpty()) false
+                else {
+                    val travelTurns = civInfo.victoryManager.getSpaceshipTravelTurns()
+                    if (travelTurns <= 0) true
+                    else {
+                        val launchedTurn = civInfo.victoryManager.spaceshipLaunchedTurn
+                        launchedTurn >= 0 && (civInfo.gameInfo.turns - launchedTurn) >= travelTurns
+                    }
+                }
             }
             MilestoneType.DestroyAllPlayers ->
                 civInfo.gameInfo.getAliveMajorCivs() == listOf(civInfo)

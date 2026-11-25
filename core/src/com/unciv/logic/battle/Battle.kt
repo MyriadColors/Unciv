@@ -420,10 +420,12 @@ object Battle {
                 }
             }
 
-            val attackerFirstStrikes = if (attacker is MapUnitCombatant)
+            val attackerImmuneToFirstStrikes = attacker is MapUnitCombatant && attacker.unit.hasUnique(UniqueType.ImmuneToFirstStrikes)
+            val defenderImmuneToFirstStrikes = defender is MapUnitCombatant && defender.unit.hasUnique(UniqueType.ImmuneToFirstStrikes)
+            val attackerFirstStrikes = if (attacker is MapUnitCombatant && !defenderImmuneToFirstStrikes)
                 attacker.unit.getMatchingUniques(UniqueType.FirstStrikes).sumOf { it.params[0].toInt() }
             else 0
-            val defenderFirstStrikes = if (defender is MapUnitCombatant)
+            val defenderFirstStrikes = if (defender is MapUnitCombatant && !attackerImmuneToFirstStrikes)
                 defender.unit.getMatchingUniques(UniqueType.FirstStrikes).sumOf { it.params[0].toInt() }
             else 0
             val netFirstStrikes = attackerFirstStrikes - defenderFirstStrikes

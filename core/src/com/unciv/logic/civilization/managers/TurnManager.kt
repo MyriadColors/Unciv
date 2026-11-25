@@ -128,6 +128,7 @@ class TurnManager(val civInfo: Civilization) {
     private fun startTurnFlags() {
         civInfo.draftsThisTurn = 0
         civInfo.decayWarWeariness()
+        civInfo.victoryManager.checkSpaceshipLaunch()
         for (flag in civInfo.flagsCountdown.keys.toList()) {
             // In case we remove flags while iterating
             if (!civInfo.flagsCountdown.containsKey(flag)) continue

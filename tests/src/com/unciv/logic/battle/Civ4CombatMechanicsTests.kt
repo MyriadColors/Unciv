@@ -72,4 +72,23 @@ class Civ4CombatMechanicsTests {
         assertTrue("Defender with 5 HP should be defeated in First Strike pre-rounds", defender.isDestroyed)
         assertEquals("Attacker should take 0 damage when First Strikes finish defender", 0, damage.defenderDealt)
     }
+
+    @Test
+    fun `unit immune to first strikes negates opponent first strikes`() {
+        val attackerCiv = testGame.addCiv()
+        val defenderCiv = testGame.addCiv()
+        attackerCiv.diplomacyFunctions.makeCivilizationsMeet(defenderCiv)
+        attackerCiv.getDiplomacyManager(defenderCiv)!!.declareWar()
+
+        val knight = testGame.addUnit("Knight", attackerCiv, testGame.getTile(0, 0))
+        val longbowman = testGame.addUnit("Longbowman", defenderCiv, testGame.getTile(1, 0))
+        assertTrue(knight.hasUnique(com.unciv.models.ruleset.unique.UniqueType.ImmuneToFirstStrikes))
+
+        // Longbowman has First Strikes, Knight is immune; Knight attacking low-HP Longbowman should not be blocked by defender First Strikes
+        longbowman.health = 5
+        val damage = Battle.attack(MapUnitCombatant(knight), MapUnitCombatant(longbowman))
+        assertTrue(longbowman.isDestroyed)
+        assertTrue("Knight should survive against 5 HP Longbowman", !knight.isDestroyed)
+        assertTrue(damage.attackerDealt >= 5)
+    }
 }

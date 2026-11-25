@@ -226,8 +226,11 @@ class TileImprovementFunctions(val tile: Tile) {
             tile.isLand && improvement.canBeBuiltOn("Land") -> true
             tile.isWater && improvement.canBeBuiltOn("Water") -> true
             // DO NOT reverse this &&. isAdjacentToFreshwater() is a lazy which calls a function, and reversing it breaks the tests.
-            improvement.hasUnique(UniqueType.ImprovementBuildableByFreshWater, gameContext)
-                    && tile.isAdjacentTo(Constants.freshWater) -> true
+            improvement.hasUnique(UniqueType.ImprovementBuildableByFreshWater, gameContext) && (
+                tile.isAdjacentTo(Constants.freshWater) ||
+                (gameContext.civInfo?.hasUnique(UniqueType.FarmsWithoutFreshWater) == true && tile.isLand && !tile.isHill()) ||
+                (gameContext.civInfo?.hasUnique(UniqueType.SpreadsIrrigation) == true && tile.isLand && !tile.isHill() && isIrrigatedByChain())
+            ) -> true
 
             // I don't particularly like this check, but it is required to build mines on non-hill resources
             resourceIsVisible && tile.tileResource!!.isImprovedBy(improvement.name)
@@ -235,6 +238,33 @@ class TileImprovementFunctions(val tile: Tile) {
             // No reason this improvement should be built here, so can't build it
             else -> false
         }
+    }
+
+    /** Bounded BFS checking whether [tile] is connected to fresh water via adjacent irrigated Farms or flat city centers. */
+    @Readonly
+    fun isIrrigatedByChain(maxVisited: Int = 64): Boolean {
+        if (tile.isAdjacentTo(Constants.freshWater)) return true
+        val visited = HashSet<Tile>()
+        val queue = ArrayDeque<Tile>()
+        visited.add(tile)
+        for (neighbor in tile.neighbors) {
+            if (neighbor.improvement == "Farm" || (neighbor.isCityCenter() && !neighbor.isHill())) {
+                visited.add(neighbor)
+                queue.add(neighbor)
+            }
+        }
+        while (queue.isNotEmpty() && visited.size <= maxVisited) {
+            val current = queue.removeFirst()
+            if (current.isAdjacentTo(Constants.freshWater)) return true
+            for (neighbor in current.neighbors) {
+                if (neighbor in visited) continue
+                if (neighbor.improvement == "Farm" || (neighbor.isCityCenter() && !neighbor.isHill())) {
+                    visited.add(neighbor)
+                    queue.add(neighbor)
+                }
+            }
+        }
+        return false
     }
 
     /** Helper for the "build mines on non-hill resources" branch above:

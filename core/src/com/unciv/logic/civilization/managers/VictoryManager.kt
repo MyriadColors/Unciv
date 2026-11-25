@@ -18,13 +18,64 @@ class VictoryManager : IsPartOfGameInfoSerialization {
     // There is very likely a typo in this name (currents), but as its saved in save files,
     // fixing it is non-trivial
     var currentsSpaceshipParts = Counter<String>()
+    var spaceshipLaunchedTurn: Int = -1
     var hasEverWonDiplomaticVote = false
 
     fun clone(): VictoryManager {
         val toReturn = VictoryManager()
         toReturn.currentsSpaceshipParts.putAll(currentsSpaceshipParts)
+        toReturn.spaceshipLaunchedTurn = spaceshipLaunchedTurn
         toReturn.hasEverWonDiplomaticVote = hasEverWonDiplomaticVote
         return toReturn
+    }
+
+    @Readonly
+    fun getSpaceshipTravelTurns(): Int {
+        var turns = 0
+        for (unique in civInfo.gameInfo.ruleset.modOptions.getMatchingUniques(UniqueType.SpaceshipTravelTurns)) {
+            turns = maxOf(turns, unique.params[0].toInt())
+        }
+        return turns
+    }
+
+    fun checkSpaceshipLaunch() {
+        val travelTurns = getSpaceshipTravelTurns()
+        if (travelTurns <= 0 || spaceshipLaunchedTurn >= 0) return
+
+        val hasBuiltSpaceshipBuilding = civInfo.cities.any { it.cityConstructions.isBuilt("Spaceship") }
+        val ssVictory = civInfo.gameInfo.ruleset.victories.values.firstOrNull { victory ->
+            victory.milestoneObjects.any { it.type == com.unciv.models.ruleset.MilestoneType.AddedSSPartsInCapital }
+        }
+        val hasAddedAllParts = ssVictory != null && ssVictory.milestoneObjects
+            .first { it.type == com.unciv.models.ruleset.MilestoneType.AddedSSPartsInCapital }
+            .getIncompleteSpaceshipParts(civInfo).isEmpty()
+
+        if (hasBuiltSpaceshipBuilding || hasAddedAllParts) {
+            spaceshipLaunchedTurn = civInfo.gameInfo.turns
+            for (civ in civInfo.gameInfo.civilizations.filter { it.isAlive() }) {
+                civ.addNotification(
+                    "[${civInfo.civName}] has launched their Spaceship! Arrival in [$travelTurns] turns.",
+                    com.unciv.logic.civilization.NotificationCategory.General,
+                    com.unciv.logic.civilization.NotificationIcons.Science
+                )
+            }
+        }
+    }
+
+    fun abortSpaceshipLaunch() {
+        if (spaceshipLaunchedTurn < 0) return
+        spaceshipLaunchedTurn = -1
+        currentsSpaceshipParts.clear()
+        for (city in civInfo.cities) {
+            city.cityConstructions.removeBuilding("Spaceship")
+        }
+        for (civ in civInfo.gameInfo.civilizations.filter { it.isAlive() }) {
+            civ.addNotification(
+                "[${civInfo.civName}]'s Spaceship mission was aborted when their capital fell!",
+                com.unciv.logic.civilization.NotificationCategory.General,
+                com.unciv.logic.civilization.NotificationIcons.Science
+            )
+        }
     }
 
     @Readonly

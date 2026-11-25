@@ -97,23 +97,59 @@ class CityStats(val city: City) {
     //region Pure Functions
 
     @Readonly
+    private fun isConnectedForTradeRoute(partner: City): Boolean {
+        val ownContinent = city.getCenterTile().getContinent()
+        val partnerContinent = partner.getCenterTile().getContinent()
+        val sameContinent = ownContinent >= 0 && ownContinent == partnerContinent
+        val bothCoastal = city.isCoastal() && partner.isCoastal()
+        if (sameContinent) {
+            val ownConnected = city.isCapital() || city.isConnectedToCapital()
+            val partnerConnected = partner.isCapital() || partner.isConnectedToCapital()
+            if (ownConnected && partnerConnected) return true
+            if (bothCoastal) return true
+            return false
+        }
+        // Overseas / intercontinental trade route requires both cities coastal and ocean-going trade capability
+        if (!bothCoastal) return false
+        return city.civ.tech.isResearched("Astronomy")
+    }
+
+    @Readonly
+    fun getTradeRouteSlots(): Int {
+        var slots = 1
+        city.forEachMatchingUnique(UniqueType.AdditionalTradeRoutes) { unique ->
+            if (city.matchesFilter(unique.params[1]))
+                slots += unique.params[0].toInt()
+        }
+        return slots.coerceAtLeast(1)
+    }
+
     private fun getStatsFromTradeRoute(): Stats {
         val stats = Stats()
-        // Civ IV per-city trade routes: base 1 slot, filled by connected domestic or Open Borders foreign cities
-        val tradeSlots = 1
+        val tradeSlots = getTradeRouteSlots()
+        val ownContinent = city.getCenterTile().getContinent()
+
+        fun routeYieldFor(partner: City): Float {
+            val baseYield = 1f + partner.population.population * 0.1f
+            var multiplier = 1f
+            if (partner.civ != city.civ) multiplier *= 2f
+            val partnerContinent = partner.getCenterTile().getContinent()
+            if (ownContinent >= 0 && partnerContinent >= 0 && ownContinent != partnerContinent) multiplier *= 2f
+            return baseYield * multiplier
+        }
+
         val partnerCities = city.civ.gameInfo.civilizations
             .filter { otherCiv ->
                 otherCiv.isAlive() && (otherCiv == city.civ ||
                     (city.civ.knows(otherCiv) && city.civ.getDiplomacyManager(otherCiv)?.hasOpenBorders == true))
             }
             .flatMap { it.cities }
-            .filter { it != city }
-            .sortedByDescending { it.population.population + if (it.civ != city.civ) 5 else 0 }
+            .filter { it != city && isConnectedForTradeRoute(it) }
+            .sortedByDescending { routeYieldFor(it) }
             .take(tradeSlots)
 
         for (partner in partnerCities) {
-            val baseYield = 1f + partner.population.population * 0.1f
-            stats.gold += if (partner.civ != city.civ) baseYield * 2f else baseYield
+            stats.gold += routeYieldFor(partner)
         }
 
         city.forEachMatchingUnique(UniqueType.StatsFromTradeRoute) { unique ->

@@ -313,7 +313,10 @@ class CityConquestFunctions(val city: City) {
 
         // Remove/relocate palace for old Civ - need to do this BEFORE we move the cities between
         //  civs so the capitalCityIndicator recognizes the unique buildings of the conquered civ
-        if (city.isCapital()) oldCiv.moveCapitalToNextLargest(city)
+        if (city.isCapital()) {
+            oldCiv.victoryManager.abortSpaceshipLaunch()
+            oldCiv.moveCapitalToNextLargest(city)
+        }
 
         oldCiv.cities = oldCiv.cities.withoutItem(city)
         newCiv.cities = newCiv.cities.withItem(city)
