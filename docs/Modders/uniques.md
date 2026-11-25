@@ -1286,6 +1286,32 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 ??? example  "Can spend Gold to finish production"
 	Applicable to: Global
 
+??? example  "Can draft up to [amount] units per turn"
+	Example: "Can draft up to [3] units per turn"
+
+	Applicable to: Global, Civic
+
+??? example  "[amount] Happiness per garrisoned military unit"
+	Example: "[3] Happiness per garrisoned military unit"
+
+	Applicable to: Global, Civic, Building
+
+??? example  "[relativeAmount]% War Weariness"
+	Example: "[+20]% War Weariness"
+
+	Applicable to: Global, Civic, Building
+
+??? example  "[amount] Trade Routes [cityFilter]"
+	Example: "[3] Trade Routes [in all cities]"
+
+	Applicable to: Global, Tech, Civic, Building
+
+??? example  "Farms spread irrigation"
+	Applicable to: Global, Tech
+
+??? example  "Farms can be built without fresh water"
+	Applicable to: Global, Tech
+
 ??? example  "[relativeAmount]% Civic upkeep"
 	Example: "[+20]% Civic upkeep"
 
@@ -1441,6 +1467,17 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
 
+??? example  "[amount] Trade Routes [cityFilter]"
+	Example: "[3] Trade Routes [in all cities]"
+
+	Applicable to: Global, Tech, Civic, Building
+
+??? example  "Farms spread irrigation"
+	Applicable to: Global, Tech
+
+??? example  "Farms can be built without fresh water"
+	Applicable to: Global, Tech
+
 ??? example  "Founds [religionFilter] if not yet founded"
 	Example: "Founds [major] if not yet founded"
 
@@ -1500,6 +1537,26 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 	Example: "Comment [comment]"
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
+
+??? example  "Can draft up to [amount] units per turn"
+	Example: "Can draft up to [3] units per turn"
+
+	Applicable to: Global, Civic
+
+??? example  "[amount] Happiness per garrisoned military unit"
+	Example: "[3] Happiness per garrisoned military unit"
+
+	Applicable to: Global, Civic, Building
+
+??? example  "[relativeAmount]% War Weariness"
+	Example: "[+20]% War Weariness"
+
+	Applicable to: Global, Civic, Building
+
+??? example  "[amount] Trade Routes [cityFilter]"
+	Example: "[3] Trade Routes [in all cities]"
+
+	Applicable to: Global, Tech, Civic, Building
 
 ??? example  "Prevents spread of non-state religions"
 	Applicable to: Global, Civic
@@ -2076,6 +2133,21 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 	Example: "Comment [comment]"
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
+
+??? example  "[amount] Happiness per garrisoned military unit"
+	Example: "[3] Happiness per garrisoned military unit"
+
+	Applicable to: Global, Civic, Building
+
+??? example  "[relativeAmount]% War Weariness"
+	Example: "[+20]% War Weariness"
+
+	Applicable to: Global, Civic, Building
+
+??? example  "[amount] Trade Routes [cityFilter]"
+	Example: "[3] Trade Routes [in all cities]"
+
+	Applicable to: Global, Tech, Civic, Building
 
 ??? example  "[amount] Health"
 	Example: "[3] Health"
@@ -2792,6 +2864,9 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
 
+??? example  "Immune to First Strikes"
+	Applicable to: Unit, Promotion
+
 ??? example  "[amount] First Strikes"
 	Example: "[3] First Strikes"
 
@@ -2880,6 +2955,9 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 	Example: "Comment [comment]"
 
 	Applicable to: Nation, Tech, Policy, Civic, FounderBelief, FollowerBelief, Building, Unit, UnitType, Promotion, Terrain, Improvement, Resource, Ruins, Speed, Difficulty, EventChoice
+
+??? example  "Immune to First Strikes"
+	Applicable to: Unit, Promotion
 
 ??? example  "[amount] First Strikes"
 	Example: "[3] First Strikes"
@@ -3672,6 +3750,13 @@ Simple unique parameters are explained by mouseover. Complex parameters are expl
 	Applicable to: ModOptions
 
 ??? example  "Uses Civ IV City Health"
+	This unique does not support conditionals.
+
+	Applicable to: ModOptions
+
+??? example  "Spaceship requires [amount] turns to reach destination"
+	Example: "Spaceship requires [3] turns to reach destination"
+
 	This unique does not support conditionals.
 
 	Applicable to: ModOptions
