@@ -495,6 +495,10 @@ open class RulesetValidator protected constructor(
             if (upgradesTo == unit.name || upgradesTo == unit.replaces)
                 lines.add("${unit.name} upgrades to itself!", sourceObject = unit)
         }
+        for (techName in unit.lightbulbPreferences) {
+            if (techName !in ruleset.technologies)
+                lines.add("${unit.name} has lightbulb preference '$techName' which does not exist in Technologies!", sourceObject = unit)
+        }
 
         if (unit.replaces != null && unit.uniqueTo == null)
             lines.add("${unit.name} should replace ${unit.replaces} but does not have uniqueTo assigned!")

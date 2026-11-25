@@ -220,6 +220,8 @@ class City : IsPartOfGameInfoSerialization, INamed {
         toReturn.connectedToCapitalStatus = connectedToCapitalStatus
         toReturn.unitShouldUseSavedPromotion = unitShouldUseSavedPromotion
         toReturn.unitToPromotions = unitToPromotions
+        toReturn.cityGreatPersonPoints = cityGreatPersonPoints.clone()
+        toReturn.settledGreatPeople = settledGreatPeople.clone()
         return toReturn
     }
 
@@ -387,6 +389,9 @@ class City : IsPartOfGameInfoSerialization, INamed {
 
     /** Per-city Great Person Points pool (Civ IV-style: each city has its own independent GPP pool). */
     var cityGreatPersonPoints: com.unciv.models.Counter<String> = com.unciv.models.Counter()
+
+    /** Great People permanently settled in this city as Super Specialists (Civ IV). */
+    var settledGreatPeople: com.unciv.models.Counter<String> = com.unciv.models.Counter()
 
     /** Returns the number of angry citizens in this city (when local unhappiness exceeds local happiness). */
     var whipAngerTurns: Int = 0

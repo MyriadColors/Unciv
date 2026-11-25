@@ -135,6 +135,10 @@ class UnitUpgradeManager(val unit: MapUnit) {
         unit.civ.forEachMatchingUnique(UniqueType.UnitUpgradeCost, stateForConditionals) { unique ->
             civModifier *= unique.params[0].toPercent()
         }
+        unit.forEachMatchingUnique(UniqueType.UnitUpgradeCost, stateForConditionals) { unique ->
+            civModifier *= unique.params[0].toPercent()
+        }
+        civModifier = civModifier.coerceAtLeast(0f)
 
         var cost = constants.base
         cost += (constants.perProduction * (unitToUpgradeTo.cost - unit.baseUnit.cost)).coerceAtLeast(0f)

@@ -236,16 +236,25 @@ class CityTurnManager(val city: City) {
     }
 
     private fun processCiv4GreatPeople() {
+        if (!city.civ.isCiv4GreatPeopleEnabled() || !city.civ.isMajorCiv) return
         val gppThisTurn = city.getGreatPersonPoints()
         if (gppThisTurn.isEmpty()) return
         city.cityGreatPersonPoints.add(gppThisTurn)
         val totalGpp = city.cityGreatPersonPoints.values.sum()
-        val threshold = 100
+        val threshold = city.civ.greatPeople.getCiv4PointsRequiredForNextGreatPerson()
         if (totalGpp >= threshold) {
-            val topGp = city.cityGreatPersonPoints.maxByOrNull { it.value }?.key ?: return
+            val seed = city.civ.gameInfo.turns * 31 + city.location.hashCode() + city.civ.greatPeople.civ4GreatPeopleBorn * 17
+            val rolledGp = city.civ.greatPeople.rollCiv4GreatPerson(city.cityGreatPersonPoints, seed) ?: return
             city.cityGreatPersonPoints.clear()
-            val gpUnit = city.getRuleset().units[topGp] ?: return
+            city.civ.greatPeople.civ4GreatPeopleBorn++
+            val gpUnit = city.getRuleset().units[rolledGp] ?: return
             city.civ.units.placeUnitNearTile(city.location, gpUnit)
+            city.civ.addNotification(
+                "A [$rolledGp] has been born in [${city.name}]!",
+                city.location,
+                com.unciv.logic.civilization.NotificationCategory.General,
+                rolledGp
+            )
         }
     }
 

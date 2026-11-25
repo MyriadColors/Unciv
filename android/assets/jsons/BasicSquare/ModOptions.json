@@ -8,6 +8,7 @@
         "Uses Civ IV Civics",
         "Uses Civ IV City Health",
         "Uses Civ IV Religion",
+        "Uses Civ IV Great People",
         "Spaceship requires [10] turns to reach destination"
     ],
     "constants": {

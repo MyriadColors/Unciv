@@ -343,7 +343,7 @@ class TurnManager(val civInfo: Civilization) {
 
             civInfo.espionageManager.endTurn()
 
-            if (civInfo.isMajorCiv) // City-states don't get great people!
+            if (civInfo.isMajorCiv && !civInfo.isCiv4GreatPeopleEnabled()) // City-states don't get great people!
                 civInfo.greatPeople.addGreatPersonPoints()
         } else {
             civInfo.espionageManager.endTurn()

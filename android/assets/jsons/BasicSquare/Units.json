@@ -1119,9 +1119,16 @@
         "name": "Great Artist",
         "unitType": "Civilian",
         "movement": 2,
+        "lightbulbPreferences": [
+            "Literature", "Drama", "Music", "Polytheism", "Monarchy", "Mass Media", "Radio",
+            "Mysticism", "Monotheism", "Divine Right", "Nationalism", "Alphabet", "Theology",
+            "Philosophy", "Printing Press", "Liberalism", "Pottery", "Horseback Riding",
+            "Archery", "Masonry", "Writing", "Calendar", "Democracy", "Communism", "Fascism"
+        ],
         "uniques": [
-			"Can instantly construct a [Great Artist Specialist] improvement <by consuming this unit>",
-			"Gain [4000] [Culture] <by consuming this unit>", // Instantly ends resistance in a city
+			"Settling in a city provides [+3 Gold, +12 Culture]",
+			"Can create a Great Work for [4000] Culture in a city",
+			"Can hurry technology research",
 			"Unbuildable",
 			"Uncapturable",
 			"Cannot be purchased",
@@ -1134,9 +1141,17 @@
         "name": "Great Engineer",
         "unitType": "Civilian",
         "movement": 2,
+        "lightbulbPreferences": [
+            "Machinery", "Assembly Line", "Industrialism", "Combustion", "Metal Casting",
+            "Mining", "Iron Working", "Engineering", "Replaceable Parts", "Steam Power",
+            "Steel", "Robotics", "Railroad", "Feudalism", "Plastics", "Masonry", "Construction",
+            "Guilds", "Chemistry", "Gunpowder", "Rifling", "Rocketry", "Composites",
+            "The Wheel", "Mathematics", "Bronze Working", "Electricity", "Fission", "Fusion"
+        ],
         "uniques": [
-			"Can instantly construct a [Great Engineer Specialist] improvement <by consuming this unit>",
+			"Settling in a city provides [+3 Production, +3 Science]",
 			"Can speed up the construction of a wonder",
+			"Can hurry technology research",
 			"Unbuildable",
 			"Uncapturable",
 			"Cannot be purchased",
@@ -1149,9 +1164,19 @@
         "name": "Great Merchant",
         "unitType": "Civilian",
         "movement": 2,
+        "lightbulbPreferences": [
+            "Currency", "Banking", "Economics", "Corporation", "Metal Casting", "Code of Laws",
+            "Mining", "Constitution", "The Wheel", "Pottery", "Sailing", "Paper", "Railroad",
+            "Industrialism", "Monarchy", "Civil Service", "Guilds", "Fascism", "Mass Media",
+            "Agriculture", "Writing", "Mathematics", "Printing Press", "Flight", "Machinery",
+            "Replaceable Parts", "Satellites", "Mysticism", "Priesthood", "Divine Right",
+            "Nationalism", "Calendar", "Scientific Method", "Medicine", "Horseback Riding",
+            "Compass", "Steam Power", "Future Tech"
+        ],
         "uniques": [
-			"Can instantly construct a [Great Merchant Specialist] improvement <by consuming this unit>",
+			"Settling in a city provides [+1 Food, +6 Gold]",
             "Can undertake a trade mission with City-State, giving a large sum of gold and [30] Influence",
+			"Can hurry technology research",
 			"Unbuildable",
 			"Uncapturable",
 			"Cannot be purchased",
@@ -1165,16 +1190,21 @@
         "name": "Great Prophet",
         "unitType": "Civilian",
         "movement": 2,
+        "lightbulbPreferences": [
+            "Meditation", "Polytheism", "Priesthood", "Monotheism", "Theology", "Divine Right",
+            "Mysticism", "Masonry", "Code of Laws", "Civil Service", "Monarchy", "Literature",
+            "Music", "Writing", "Philosophy", "Printing Press", "Drama", "Alphabet", "Paper",
+            "Education", "Liberalism", "Calendar", "Animal Husbandry", "Construction", "Future Tech"
+        ],
         "uniques": [
 			"Can instantly construct a [Religious Shrine] improvement <by consuming this unit> <if [Religious Shrine] is not constructed>",
-			"Can instantly construct a [Great Prophet Specialist] improvement <by consuming this unit>",
+			"Settling in a city provides [+2 Production, +5 Gold]",
+			"Can hurry technology research",
 			"Unbuildable",
 			"Uncapturable",
 			"Cannot be purchased",
 			"Cannot attack",
 			"Great Person - [Faith]",
-			// TODO: In Civ 4 can you purchase Great Prophets?
-			//"Can be purchased for [200] [Faith] [in your cities] <after founding a Pantheon> <in cities following our religion>",
 			"Only available <when religion is enabled>",
 			"Never appears as a Barbarian unit"
 		]
@@ -1183,9 +1213,16 @@
         "name": "Great Scientist",
         "unitType": "Civilian",
         "movement": 2,
+        "lightbulbPreferences": [
+            "Writing", "Mathematics", "Scientific Method", "Physics", "Education",
+            "Printing Press", "Fiber Optics", "Computers", "Alphabet", "Philosophy",
+            "Chemistry", "Fission", "Fusion", "Optics", "Paper", "Astronomy", "Biology",
+            "Electricity", "Flight", "Genetics", "Compass", "Satellites", "Sailing",
+            "Calendar", "Medicine", "Ecology", "Liberalism"
+        ],
         "uniques": [
             "Can instantly construct a [Academy] improvement <by consuming this unit>", // TODO: Make Great Scientist build the Academy building directly
-			"Can instantly construct a [Great Scientist Specialist] improvement <by consuming this unit>",
+			"Settling in a city provides [+1 Production, +6 Science]",
 			"Can hurry technology research",
 			"Unbuildable",
 			"Uncapturable",
@@ -1202,18 +1239,14 @@
         "movement": 2,
         "uniques": [
 			"Can instantly construct a [Military Academy] improvement <by consuming this unit>",
-			"Can instantly construct a [Great General Specialist] improvement <by consuming this unit>",
+			"Settling in a city provides [2] XP to trained military units",
+			"Can attach to a military unit as a Warlord",
 			"Unbuildable",
 			"Uncapturable",
 			"Cannot be purchased",
 			"Cannot attack",
 			"Great Person - [War]",
 			"Never appears as a Barbarian unit"
-			// TODO: Implement Great General Promotion action
-			// Can be attached to a unit, which...
-			// - enables unique promotions for that unit
-			// - allows that unit free upgrades
-			// - gives 20 experience points to all units on the tile (The experience points are split evenly between all the units in the stack.)
 		]
     },
 
@@ -1221,9 +1254,14 @@
         "name": "Great Spy", // While Great Spy is BTS, we add it here for integrations.
         "unitType": "Civilian",
         "movement": 2,
+        "lightbulbPreferences": [
+            "Alphabet", "Communism", "Democracy", "Constitution", "Nationalism", "Fascism",
+            "Code of Laws", "Writing", "Paper", "Printing Press", "Computers", "Satellites"
+        ],
         "uniques": [
-			"Can instantly construct a [Great Spy Specialist] improvement <by consuming this unit>",
+			"Settling in a city provides [+3 Science]",
 			"Can instantly construct a [Scotland Yard] improvement <by consuming this unit> <if [Scotland Yard] is not constructed> <in this city>",
+			"Can hurry technology research",
 			"Unbuildable",
 			"Uncapturable",
 			"Only available <when espionage is enabled>",

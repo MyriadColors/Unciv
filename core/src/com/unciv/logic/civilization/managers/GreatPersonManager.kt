@@ -29,6 +29,7 @@ class GreatPersonManager : IsPartOfGameInfoSerialization {
     var greatPersonPointsCounter = Counter<String>()
     var greatGeneralPointsCounter = Counter<String>()
     var greatGeneralPoints = 0
+    var civ4GreatPeopleBorn = 0
     var freeGreatPeople = 0
     /** Marks subset of [freeGreatPeople] as subject to maya ability restrictions (each only once until all used) */
     var mayaLimitedFreeGP = 0
@@ -44,6 +45,7 @@ class GreatPersonManager : IsPartOfGameInfoSerialization {
         toReturn.greatGeneralPointsCounter = greatGeneralPointsCounter.clone()
         toReturn.pointsForNextGreatGeneral = pointsForNextGreatGeneral
         toReturn.greatGeneralPoints = greatGeneralPoints
+        toReturn.civ4GreatPeopleBorn = civ4GreatPeopleBorn
         toReturn.mayaLimitedFreeGP = mayaLimitedFreeGP
         toReturn.longCountGPPool = longCountGPPool.toHashSet()
         return toReturn
@@ -64,6 +66,43 @@ class GreatPersonManager : IsPartOfGameInfoSerialization {
         return (pointsForNextGreatPersonCounter[key] * civInfo.gameInfo.speed.modifier).toInt()
     }
 
+    @Readonly
+    fun getCiv4PointsRequiredForNextGreatPerson(): Int {
+        val base = if (civ4GreatPeopleBorn < 10) (civ4GreatPeopleBorn + 1) * 100
+        else 1000 + (civ4GreatPeopleBorn - 9) * 200
+        return (base * civInfo.gameInfo.speed.modifier).toInt().coerceAtLeast(1)
+    }
+
+    @Readonly
+    fun rollCiv4GreatPerson(cityPoints: Counter<String>, seed: Int): String? {
+        val validEntries = cityPoints.entries
+            .filter { it.value > 0 && it.key in civInfo.gameInfo.ruleset.units }
+            .sortedBy { it.key }
+        val total = validEntries.sumOf { it.value }
+        if (total <= 0) return null
+        val roll = kotlin.random.Random(seed).nextInt(total)
+        var cumulative = 0
+        for ((gpName, weight) in validEntries) {
+            cumulative += weight
+            if (roll < cumulative) return gpName
+        }
+        return validEntries.last().key
+    }
+
+    @Readonly
+    fun getCiv4GreatPersonOdds(cityPoints: Counter<String>): Map<String, Float> {
+        val validEntries = cityPoints.entries
+            .filter { it.value > 0 && it.key in civInfo.gameInfo.ruleset.units }
+            .sortedByDescending { it.value }
+        val total = validEntries.sumOf { it.value }
+        if (total <= 0) return emptyMap()
+        val result = LinkedHashMap<String, Float>()
+        for ((gpName, weight) in validEntries) {
+            result[gpName] = (weight.toFloat() / total.toFloat()) * 100f
+        }
+        return result
+    }
+
     fun getNewGreatPerson(): String? {
         for ((unit, value) in greatGeneralPointsCounter) {
             if (pointsForNextGreatGeneralCounter[unit] == 0) {
@@ -76,6 +115,8 @@ class GreatPersonManager : IsPartOfGameInfoSerialization {
                 return unit
             }
         }
+
+        if (civInfo.isCiv4GreatPeopleEnabled()) return null
 
         for ((greatPerson, value) in greatPersonPointsCounter) {
             val requiredPoints = getPointsRequiredForGreatPerson(greatPerson)

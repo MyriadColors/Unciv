@@ -420,6 +420,58 @@
 		"innerColor": [219, 152, 13]
 	},
 
+	// Great General Warlord & Warlord-only promotions
+	{
+		"name": "Warlord",
+		"uniques": [
+			"Unavailable",
+			"[-100]% Gold cost of upgrading"
+		],
+		"outerColor": [146, 12, 12],
+		"innerColor": [255, 215, 0]
+	},
+	{
+		"name": "Leadership",
+		"uniques": [
+			"[+100]% XP gained from combat",
+			"Only available <for units with [Warlord]>"
+		],
+		"unitTypes": ["Sword", "Gunpowder", "Archery", "Ranged Gunpowder", "Scout", "Mounted", "Armored", "Siege", "Melee Water", "Ranged Water", "Submarine", "Fighter", "Helicopter", "Bomber"],
+		"outerColor": [146, 12, 12],
+		"innerColor": [255, 215, 0]
+	},
+	{
+		"name": "Medic III",
+		"prerequisites": ["Medic II"],
+		"uniques": [
+			"All adjacent units heal [+15] HP when healing",
+			"Only available <for units with [Warlord]>"
+		],
+		"unitTypes": ["Scout", "Mounted", "Sword", "Archery", "Gunpowder"],
+		"outerColor": [146, 12, 12],
+		"innerColor": [255, 215, 0]
+	},
+	{
+		"name": "Morale",
+		"uniques": [
+			"[+1] Movement",
+			"Only available <for units with [Warlord]>"
+		],
+		"unitTypes": ["Sword", "Gunpowder", "Archery", "Ranged Gunpowder", "Scout", "Mounted", "Armored", "Siege", "Melee Water", "Ranged Water", "Submarine", "Fighter", "Helicopter", "Bomber"],
+		"outerColor": [146, 12, 12],
+		"innerColor": [255, 215, 0]
+	},
+	{
+		"name": "Tactics",
+		"uniques": [
+			"Withdraws before melee combat <with [30]% chance>",
+			"Only available <for units with [Warlord]>"
+		],
+		"unitTypes": ["Sword", "Gunpowder", "Archery", "Ranged Gunpowder", "Scout", "Mounted", "Armored", "Siege", "Melee Water", "Ranged Water", "Submarine", "Fighter", "Helicopter", "Bomber"],
+		"outerColor": [146, 12, 12],
+		"innerColor": [255, 215, 0]
+	},
+
 	// For barbarian water units
 	{
 		"name": "Unable to pillage tiles",

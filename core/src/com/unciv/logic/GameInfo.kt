@@ -342,6 +342,10 @@ class GameInfo : IsPartOfGameInfoSerialization, HasGameInfoSerializationVersion 
     fun isCiv4ReligionEnabled(): Boolean =
         isReligionEnabled() && ruleset.modOptions.hasUnique(UniqueType.Civ4ReligionMode)
 
+    @Readonly
+    fun isCiv4GreatPeopleEnabled(): Boolean =
+        ruleset.modOptions.hasUnique(UniqueType.Civ4GreatPeopleMode)
+
     @Readonly fun isEspionageEnabled(): Boolean = gameParameters.espionageEnabled
 
     @Readonly

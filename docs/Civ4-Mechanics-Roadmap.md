@@ -23,32 +23,13 @@ The following Civ IV systems are implemented and verified in `core/` and `androi
 | **Cultural Revolts & Peaceful City Flipping** | `CityExpansionManager.kt`, `City.kt` |
 | **Auto-Upgrading Improvements (`Cottage -> Town`), Forest Chopping, Chain Irrigation** | `CityTurnManager.kt`, `TileImprovementFunctions.kt`, `Techs.json` |
 | **Civ IV Victory Milestones & Spaceship 10-Turn Launch/Travel + Capital-Capture Abort** | `Victory.kt`, `VictoryManager.kt`, `CityConquestFunctions.kt` |
+| **Civ IV Great People Overhaul (Mixed Per-City GP Pool, Escalating Threshold, Lightbulbing, Super Specialists, Great Works, Warlord Attachment + Promotions, Escalating Distinct-GP Golden Ages, GP Odds UI)** | `GreatPersonManager.kt`, `GoldenAgeManager.kt`, `CityTurnManager.kt`, `CityStats.kt`, `UnitActionsGreatPerson.kt`, `GreatPersonPointsBreakdownPopup.kt`, `Units.json`, `UnitPromotions.json` |
 
 ---
 
 ## 2. Base Civ IV Strategic Epics
 
-### 2.1 Civ IV Great People Overhaul
-**Current State**: `GreatPersonManager.kt` uses Civ V per-GP-type pools, and `GoldenAgeManager.kt` uses Civ V stored-happiness thresholds.
-
-**Design Specification**:
-- **Mixed-Probability Per-City GP Pool**:
-  - Replace/gate separate per-GP pools with a single empire-wide escalating threshold (`100, 200, 300, ...` scaled by game speed) and per-city `cityGreatPersonPoints: Counter<String>` (already partially tracked on `City`).
-  - When a city's total `cityGreatPersonPoints.values.sum() >= threshold`, roll the spawned GP type weighted by each GP's share of points in that city (`stateBasedRandom`), reset that city's pool, and increment the empire threshold.
-- **Great Person Actions** (`UnitActionsGreatPerson.kt`):
-  - **Lightbulb Tech**: Consumes the GP to grant `baseBeakers + (popMultiplier * totalEmpirePop)` research toward the top unresearched tech matching the GP's flavor/preference list (e.g., Great Scientist: *Writing → Mathematics → Philosophy → Education → Printing Press → Liberalism*).
-  - **Settle as Super Specialist**: Consumes the GP inside a city, adding a permanent counter on `City` (e.g., `settledGreatPeople: Counter<String>`) that yields fixed stats per turn (e.g., Great Scientist: `+1 Production, +6 Science`; Great Merchant: `+1 Food, +6 Gold`; Great Engineer: `+3 Production, +3 Science`; Great Prophet: `+2 Production, +5 Gold`; Great Artist: `+3 Gold, +12 Culture`; Great General / Military Instructor: `+2 XP` to trained units).
-  - **Great Work (Culture Bomb)**: Consumes a Great Artist in a city to add `+4000` instant culture to `city.expansion.cultureStored` and immediately clear city resistance.
-  - **Great General Warlord Attachment**: Attaches a Great General to a military unit on the same tile, distributing `+20 XP` evenly across all friendly military units on the tile, granting free upgrades for that unit, and unlocking Warlord-only promotions (`Leadership`, `Medic III`, `Morale`, `Tactics`).
-- **Escalating GP-Cost Golden Ages** (`GoldenAgeManager.kt`):
-  - 1st Golden Age requires `1` Great Person; 2nd requires `2` **distinct** Great Person types; 3rd requires `3` distinct types, etc.
-  - Track `goldenAgesTriggeredByGreatPeople: Int` on `GoldenAgeManager`.
-
-**Primary Files**: `GreatPersonManager.kt`, `GoldenAgeManager.kt`, `City.kt`, `CityStats.kt`, `UnitActionsGreatPerson.kt`, `BasicSquare/Units.json`, `BasicSquare/UnitPromotions.json`.
-
----
-
-### 2.2 Naval Transports Carrying Land Units
+### 2.1 Naval Transports Carrying Land Units
 **Current State**: Land units use Civ V embarkation (`MapUnit.isEmbarked()`); `MapUnit.isTransportTypeOf()` only carries air units/missiles (`UniqueType.CarryAirUnits`).
 
 **Design Specification**:
@@ -179,9 +160,8 @@ The following Civ IV systems are implemented and verified in `core/` and `androi
 
 ## 4. Recommended Implementation Order
 
-1. **Civ IV Great People Overhaul** (highest strategic replayability impact; self-contained in `GreatPersonManager` / `GoldenAgeManager` / `UnitActions`).
-2. **Unified Commerce & Multi-Sliders** (unlocks authentic Civ IV economy, Colosseum culture-rate happiness, and feeds directly into Espionage).
-3. **Barbarian Cities & Wild Animals** (medium effort, transforms early-game exploration).
-4. **Naval Transports Carrying Land Units** (high AI complexity; best tackled as a dedicated movement/AI epic).
-5. **Vassal States & Capitulation** (clean diplomacy/war expansion).
-6. **Civ IV Espionage → Corporations → Apostolic Palace & UN** (*Beyond the Sword* endgame suite).
+1. **Unified Commerce & Multi-Sliders** (unlocks authentic Civ IV economy, Colosseum culture-rate happiness, and feeds directly into Espionage).
+2. **Barbarian Cities & Wild Animals** (medium effort, transforms early-game exploration).
+3. **Naval Transports Carrying Land Units** (high AI complexity; best tackled as a dedicated movement/AI epic).
+4. **Vassal States & Capitulation** (clean diplomacy/war expansion).
+5. **Civ IV Espionage → Corporations → Apostolic Palace & UN** (*Beyond the Sword* endgame suite).

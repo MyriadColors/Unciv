@@ -288,6 +288,17 @@ class TechManager : IsPartOfGameInfoSerialization {
         addTechnology(currentTechnology)
     }
 
+    /** Adds [scienceGet] directly toward a specific [techName] (e.g., Civ IV Great Person lightbulbing),
+     *  completing it and preserving capped overflow science if enough science was applied. */
+    fun addScienceToTech(techName: String, scienceGet: Int) {
+        techsInProgress[techName] = researchOfTech(techName) + scienceGet
+        val techCost = costOfTech(techName)
+        if (techsInProgress[techName]!! < techCost) return
+        val extraScienceLeftOver = techsInProgress[techName]!! - techCost
+        overflowScience += extraScienceLeftOver
+        addTechnology(techName)
+    }
+
     /**
      * Checks whether the research on the current technology can be completed
      * and, if so, completes the research.

@@ -57,6 +57,7 @@ class BaseUnit : RulesetObject(), INonPerpetualConstruction {
 
     var replacementTextForUniques = ""
     var promotions = HashSet<String>()
+    var lightbulbPreferences = ArrayList<String>()
     var obsoleteTech: String? = null
     
     @Readonly fun techsThatObsoleteThis(): Sequence<String> = if (obsoleteTech == null) emptySequence() else sequenceOf(obsoleteTech!!)
@@ -408,6 +409,15 @@ class BaseUnit : RulesetObject(), INonPerpetualConstruction {
         cityConstructions.city.forEachMatchingUnique(UniqueType.UnitStartingExperience) { unique ->
             if (unit.matchesFilter(unique.params[0]) && cityConstructions.city.matchesFilter(unique.params[2]))
                 XP += unique.params[1].toInt()
+        }
+        if (!unit.isCivilian()) {
+            for ((gpName, count) in cityConstructions.city.settledGreatPeople) {
+                if (count <= 0) continue
+                val gpUnit = civInfo.gameInfo.ruleset.units[gpName] ?: continue
+                for (unique in gpUnit.getMatchingUniques(UniqueType.SettleGreatPersonUnitXP, cityConstructions.city.state)) {
+                    XP += unique.params[0].toInt() * count
+                }
+            }
         }
         unit.promotions.XP = XP
 

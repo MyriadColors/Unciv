@@ -561,6 +561,21 @@ class CityStats(val city: City) {
         happinessList = newHappinessList
     }
 
+    @Readonly
+    private fun getStatsFromSettledGreatPeople(): Stats {
+        @LocalState val stats = Stats()
+        if (city.settledGreatPeople.isEmpty()) return stats
+        val ruleset = city.getRuleset()
+        for ((gpName, count) in city.settledGreatPeople) {
+            if (count <= 0) continue
+            val gpUnit = ruleset.units[gpName] ?: continue
+            for (unique in gpUnit.getMatchingUniques(UniqueType.SettleGreatPersonStats, city.state)) {
+                stats.add(unique.stats * count.toFloat())
+            }
+        }
+        return stats
+    }
+
     private fun updateBaseStatList(statsFromBuildings: StatTreeNode, statsFromSpecialists: Stats,
                                    statsFromUniquesBySource: StatTreeNode) {
         val newBaseStatTree = StatTreeNode()
@@ -574,6 +589,9 @@ class CityStats(val city: City) {
         ), "Population")
         newBaseStatList["Tile yields"] = statsFromTiles
         newBaseStatList["Specialists"] = statsFromSpecialists
+        val statsFromSettledGreatPeople = getStatsFromSettledGreatPeople()
+        if (!statsFromSettledGreatPeople.isEmpty())
+            newBaseStatList["Settled Great People"] = statsFromSettledGreatPeople
         newBaseStatList["Trade routes"] = getStatsFromTradeRoute()
         newBaseStatTree.children["Buildings"] = statsFromBuildings
 

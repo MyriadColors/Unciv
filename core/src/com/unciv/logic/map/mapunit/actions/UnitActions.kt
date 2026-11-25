@@ -87,6 +87,9 @@ object UnitActions {
         UnitActionType.HurryWonder to UnitActionsGreatPerson::getHurryWonderAction,
         UnitActionType.HurryBuilding to UnitActionsGreatPerson::getHurryBuildingAction,
         UnitActionType.ConductTradeMission to UnitActionsGreatPerson::getConductTradeMissionAction,
+        UnitActionType.SettleGreatPerson to UnitActionsGreatPerson::getSettleGreatPersonAction,
+        UnitActionType.CreateGreatWork to UnitActionsGreatPerson::getCreateGreatWorkAction,
+        UnitActionType.StartGoldenAge to UnitActionsGreatPerson::getStartGoldenAgeAction,
         UnitActionType.FoundReligion to UnitActionsReligion::getFoundReligionAction,
         UnitActionType.EnhanceReligion to UnitActionsReligion::getEnhanceReligionAction,
         UnitActionType.SpreadReligion to UnitActionsReligion::getSpreadReligionAction,
@@ -101,7 +104,8 @@ object UnitActions {
         UnitActionType.Transform to UnitActionsFromUniques::getTransformActions,
         UnitActionType.CreateImprovement to UnitActionsFromUniques::getImprovementCreationActions,
         UnitActionType.TriggerUnique to UnitActionsFromUniques::getTriggerUniqueActions,
-        UnitActionType.Bombard to UnitActionsSiege::getBombardActions
+        UnitActionType.Bombard to UnitActionsSiege::getBombardActions,
+        UnitActionType.AttachWarlord to UnitActionsGreatPerson::getAttachWarlordActions
     )
 
     private suspend fun SequenceScope<UnitAction>.addUnmappedUnitActions(unit: MapUnit, tile: Tile) {

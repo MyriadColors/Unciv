@@ -13,6 +13,19 @@ class GreatPersonPointsBreakdownPopup(cityScreen: CityScreen, gppBreakdown: Grea
         lines += FormattedLine(headerText, header = 2, centered = true)
         lines += FormattedLine(separator = true)
 
+        if (cityScreen.cityView.isCiv4GreatPeopleEnabled()) {
+            val cityPoints = cityScreen.cityView.getCityGreatPersonPoints()
+            val stored = cityPoints.values.sum()
+            val threshold = cityScreen.cityView.getCiv4PointsRequiredForNextGreatPerson()
+            lines += FormattedLine("{Great person points}: $stored / $threshold")
+            val odds = cityScreen.cityView.getCiv4GreatPersonOdds()
+            for ((gpName, pct) in odds) {
+                val pts = cityPoints[gpName]
+                lines += FormattedLine("{$gpName}: $pts (${pct.toInt()}%)", "Unit/$gpName")
+            }
+            lines += FormattedLine(separator = true)
+        }
+
         fun addFormattedEntry(entry: GreatPersonPointsBreakdown.Entry, isPercentage: Boolean) {
             val text = if (greatPerson == null) {
                 // Popup shows all GP for a city - this will resolve the counters if necessary and dhow GP names from the keys

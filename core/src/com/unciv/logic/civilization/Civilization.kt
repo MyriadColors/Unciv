@@ -212,6 +212,7 @@ class Civilization : IsPartOfGameInfoSerialization {
     var civ4Religion = Civ4ReligionManager()
 
     @Readonly fun isCiv4ReligionEnabled(): Boolean = gameInfo.isCiv4ReligionEnabled()
+    @Readonly fun isCiv4GreatPeopleEnabled(): Boolean = gameInfo.isCiv4GreatPeopleEnabled()
     var goldenAges = GoldenAgeManager()
     var greatPeople = GreatPersonManager()
     var espionageManager = EspionageManager()

@@ -1149,6 +1149,11 @@ enum class UniqueType(
     AllowRazeHolyCity("Allow raze holy city", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
     AllowUnitStacking("Allows unlimited military units per tile", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
     Civ4StackCombat("Uses Civ IV stack combat", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
+    Civ4GreatPeopleMode("Uses Civ IV Great People", UniqueTarget.ModOptions, flags = UniqueFlag.setOfNoConditionals),
+    SettleGreatPersonStats("Settling in a city provides [stats]", UniqueTarget.Unit),
+    SettleGreatPersonUnitXP("Settling in a city provides [amount] XP to trained military units", UniqueTarget.Unit),
+    CanCreateGreatWork("Can create a Great Work for [amount] Culture in a city", UniqueTarget.Unit),
+    CanAttachAsWarlord("Can attach to a military unit as a Warlord", UniqueTarget.Unit),
     CityStatesSearchForFirstCitySite(
         "City-states search for first city location",
         UniqueTarget.ModOptions,
